@@ -1,0 +1,21 @@
+{
+  "expected_map12": 0.024457,
+  "measured_map12_recency_only": 0.024456547382965592,
+  "match": true,
+  "delta_recency_only": -4.526170344076874e-07,
+  "production_ordering_map12": 0.024654367365486304,
+  "difference_prod_minus_recency": 0.00019781998252071248,
+  "before_merge_k12": {
+    "n_customers": 63412,
+    "n_lists_differ": 23639,
+    "pct_lists_differ": 37.28,
+    "n_sets_differ": 6085,
+    "pct_sets_differ": 9.6,
+    "n_gt_affected": 51
+  },
+  "after_merge_n12": {
+    "n_customers": 68984,
+    "n_predictions_differ": 23639
+  },
+  "method": "src pipeline: repurchase(recency_only,k=12) + popularity_last_week(k=12), merge n=12"
+}

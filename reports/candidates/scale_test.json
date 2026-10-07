@@ -1,0 +1,19 @@
+{
+  "fold_week": 103,
+  "n_customers": 1351314,
+  "n_rows": 204742638,
+  "file_size_mb": 164.98459339141846,
+  "candidate_counts": {
+    "mean": 151.5137399597725,
+    "median": 140.0,
+    "p10": 124.0,
+    "p90": 200.0,
+    "pct_at_budget": 14.96,
+    "budget": 200
+  },
+  "peak_rss_mb": 6939.5,
+  "note_memory": "peak_rss_mb is process RSS (resource.getrusage); captures Polars/DuckDB native memory unlike tracemalloc",
+  "chunk_size": 200000,
+  "n_chunks": 7,
+  "runtime_s": 158.64319515228271
+}

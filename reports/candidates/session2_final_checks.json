@@ -1,0 +1,52 @@
+{
+  "ordering_check": {
+    "before_merge_k12": {
+      "n_customers": 63412,
+      "n_lists_differ": 23639,
+      "pct_lists_differ": 37.28,
+      "n_sets_differ": 6085,
+      "pct_sets_differ": 9.6,
+      "n_gt_affected": 51
+    },
+    "after_merge_n12": {
+      "n_customers": 68984,
+      "n_predictions_differ": 0,
+      "pct_predictions_differ": 0.0,
+      "n_gt_affected": 0
+    },
+    "map12_recency_only": 0.024456547382965627,
+    "map12_production": 0.024456547382965627,
+    "root_cause": "Merge re-sorts all candidates by score (= last_date) DESC, article_idx ASC, implementing recency_only ordering for the final output. The production ordering in repurchase.py affects source_rank (which k articles enter the pool), but the merge re-sorting makes the final top-12 identical to what recency_only ordering would produce.",
+    "mismatch_explanation": "The +0.000196 mismatch reported in earlier sessions was NOT due to the purchase_count tie-break. The true cause was a bug in the old inline EDA reimplementation of Baseline B inside regression_check(), likely in the popularity fill path (different time window or k). Switching to the actual src pipeline (recency_only + generate_global_last_week) fixed the mismatch by correctly replicating EDA Baseline B."
+  },
+  "oracle_evaluation": {
+    "oracle_map12": {
+      "per_fold": [
+        0.17161896158182713,
+        0.18488261123116204,
+        0.19301289469149982,
+        0.18643291622158437
+      ],
+      "mean": 0.18398684593151834,
+      "std": 0.00896697226568867
+    },
+    "candidate_precision_mean": {
+      "per_fold": [
+        0.0026541023603544756,
+        0.002892084774804466,
+        0.002979876641793154,
+        0.0028860015077893314
+      ],
+      "mean": 0.002853016321185357
+    },
+    "candidate_precision_micro": {
+      "per_fold": [
+        0.002680063878174982,
+        0.002913584152207338,
+        0.003008171859837692,
+        0.0029170759429671227
+      ],
+      "mean": 0.0028797239582967838
+    }
+  }
+}

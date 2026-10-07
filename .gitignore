@@ -10,3 +10,8 @@ CLAUDE.md
 work_done_so_far.md
 PROJECT_LOG.md
 scripts/build_eda_notebook.py
+scripts/build_candidates_notebook.py
+scripts/patch_notebook_02.py
+scripts/session2_final_checks.py
+scripts/check_notebook_numbers.py
+.pytest_cache/

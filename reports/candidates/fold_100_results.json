@@ -1,0 +1,285 @@
+{
+  "fold_week": 100,
+  "n_eval_customers": 72035,
+  "source_recalls": {
+    "repurchase": {
+      "source": "repurchase",
+      "coverage": 0.9313250503227598,
+      "recall@20": 0.03136575327629156,
+      "recall@50": 0.03601862883136575,
+      "recall@100": 0.03601862883136575,
+      "recall@200": 0.03601862883136575
+    },
+    "product_code": {
+      "source": "product_code",
+      "coverage": 0.7356562781980982,
+      "recall@20": 0.01917469944763349,
+      "recall@50": 0.023688941839055563,
+      "recall@100": 0.023688941839055563,
+      "recall@200": 0.023688941839055563
+    },
+    "popularity_last_week": {
+      "source": "popularity_last_week",
+      "coverage": 1.0,
+      "recall@20": 0.02650059568937507,
+      "recall@50": 0.052048088378641826,
+      "recall@100": 0.08397703888227012,
+      "recall@200": 0.08397703888227012
+    },
+    "popularity_decayed": {
+      "source": "popularity_decayed",
+      "coverage": 1.0,
+      "recall@20": 0.024871656016462688,
+      "recall@50": 0.04901115563738763,
+      "recall@100": 0.07963608794541319,
+      "recall@200": 0.07963608794541319
+    },
+    "segment_popular": {
+      "source": "segment_popular",
+      "coverage": 1.0,
+      "recall@20": 0.023550308675403444,
+      "recall@50": 0.04615617892342684,
+      "recall@100": 0.04615617892342684,
+      "recall@200": 0.04615617892342684
+    },
+    "copurchase": {
+      "source": "copurchase",
+      "coverage": 0.45186367737905186,
+      "recall@20": 0.016449691324596557,
+      "recall@50": 0.024975630889201777,
+      "recall@100": 0.024975630889201777,
+      "recall@200": 0.024975630889201777
+    }
+  },
+  "merged": {
+    "coverage": 1.0,
+    "mean_cands_per_customer": 186.11466648157145,
+    "n_eval_customers": 72035,
+    "recall@20": 0.03805480342250623,
+    "recall@50": 0.05985486840680169,
+    "recall@100": 0.10039207191595365,
+    "recall@200": 0.1556633813495072
+  },
+  "candidate_counts": {
+    "mean": 186.11466648157145,
+    "median": 200.0,
+    "p10": 152.0,
+    "p90": 200.0,
+    "pct_at_budget": 59.02,
+    "budget": 200
+  },
+  "incremental": [
+    {
+      "source_added": "repurchase",
+      "recall@20": 0.03136575327629156,
+      "gain@20": 0.03136575327629156,
+      "recall@50": 0.03601862883136575,
+      "gain@50": 0.03601862883136575,
+      "recall@100": 0.03601862883136575,
+      "gain@100": 0.03601862883136575,
+      "recall@200": 0.03601862883136575,
+      "gain@200": 0.03601862883136575
+    },
+    {
+      "source_added": "product_code",
+      "recall@20": 0.03424672370843713,
+      "gain@20": 0.002880970432145566,
+      "recall@50": 0.04505144590057403,
+      "gain@50": 0.009032817069208277,
+      "recall@100": 0.05970757067042132,
+      "gain@100": 0.023688941839055566,
+      "recall@200": 0.05970757067042132,
+      "gain@200": 0.023688941839055566
+    },
+    {
+      "source_added": "copurchase",
+      "recall@20": 0.034519657749377236,
+      "gain@20": 0.0002729340409401079,
+      "recall@50": 0.04692299360987761,
+      "gain@50": 0.0018715477093035823,
+      "recall@100": 0.0667172100075815,
+      "gain@100": 0.007009639337160187,
+      "recall@200": 0.07383948879020903,
+      "gain@200": 0.014131918119787715
+    },
+    {
+      "source_added": "popularity_last_week",
+      "recall@20": 0.03805480342250623,
+      "gain@20": 0.0035351456731289935,
+      "recall@50": 0.05985486840680169,
+      "gain@50": 0.012931874796924078,
+      "recall@100": 0.10039207191595365,
+      "gain@100": 0.03367486190837214,
+      "recall@200": 0.14421314848911512,
+      "gain@200": 0.07037365969890609
+    },
+    {
+      "source_added": "popularity_decayed",
+      "recall@20": 0.03805480342250623,
+      "gain@20": 0.0,
+      "recall@50": 0.05985486840680169,
+      "gain@50": 0.0,
+      "recall@100": 0.10039207191595365,
+      "gain@100": 0.0,
+      "recall@200": 0.15236217914004116,
+      "gain@200": 0.008149030650926037
+    },
+    {
+      "source_added": "segment_popular",
+      "recall@20": 0.03805480342250623,
+      "gain@20": 0.0,
+      "recall@50": 0.05985486840680169,
+      "gain@50": 0.0,
+      "recall@100": 0.10039207191595365,
+      "gain@100": 0.0,
+      "recall@200": 0.1556633813495072,
+      "gain@200": 0.003301202209466031
+    }
+  ],
+  "segment_recall": [
+    {
+      "segment": "0",
+      "n_customers": 4947,
+      "recall@20": 0.021677963934006905,
+      "recall@50": 0.0513492774012022,
+      "recall@100": 0.08389819670034532,
+      "recall@200": 0.10685509655966235
+    },
+    {
+      "segment": "1-4",
+      "n_customers": 4219,
+      "recall@20": 0.05029013539651837,
+      "recall@50": 0.08210831721470019,
+      "recall@100": 0.1172147001934236,
+      "recall@200": 0.1488394584139265
+    },
+    {
+      "segment": "5-19",
+      "n_customers": 14764,
+      "recall@20": 0.046717619071721415,
+      "recall@50": 0.07857974388824214,
+      "recall@100": 0.11484537126081895,
+      "recall@200": 0.1556663461051779
+    },
+    {
+      "segment": "20+",
+      "n_customers": 48105,
+      "recall@20": 0.0367682192907647,
+      "recall@50": 0.05479244917832496,
+      "recall@100": 0.09744576097935681,
+      "recall@200": 0.16070596916526042
+    }
+  ],
+  "jaccard": [
+    {
+      "source_a": "repurchase",
+      "source_b": "product_code",
+      "jaccard": 0.0,
+      "intersection": 0,
+      "union": 3848367
+    },
+    {
+      "source_a": "repurchase",
+      "source_b": "popularity_last_week",
+      "jaccard": 0.004121870813219899,
+      "intersection": 23591,
+      "union": 5723372
+    },
+    {
+      "source_a": "repurchase",
+      "source_b": "popularity_decayed",
+      "jaccard": 0.005280423791311746,
+      "intersection": 30187,
+      "union": 5716776
+    },
+    {
+      "source_a": "repurchase",
+      "source_b": "segment_popular",
+      "jaccard": 0.003737799014315101,
+      "intersection": 21401,
+      "union": 5725562
+    },
+    {
+      "source_a": "repurchase",
+      "source_b": "copurchase",
+      "jaccard": 0.0,
+      "intersection": 0,
+      "union": 3640542
+    },
+    {
+      "source_a": "product_code",
+      "source_b": "popularity_last_week",
+      "jaccard": 0.002680541521554147,
+      "intersection": 14182,
+      "union": 5290722
+    },
+    {
+      "source_a": "product_code",
+      "source_b": "popularity_decayed",
+      "jaccard": 0.004451856631736481,
+      "intersection": 23512,
+      "union": 5281392
+    },
+    {
+      "source_a": "product_code",
+      "source_b": "segment_popular",
+      "jaccard": 0.00340957366521414,
+      "intersection": 18026,
+      "union": 5286878
+    },
+    {
+      "source_a": "product_code",
+      "source_b": "copurchase",
+      "jaccard": 0.08813738534692835,
+      "intersection": 259072,
+      "union": 2939411
+    },
+    {
+      "source_a": "popularity_last_week",
+      "source_b": "popularity_decayed",
+      "jaccard": 0.5625,
+      "intersection": 2593260,
+      "union": 4610240
+    },
+    {
+      "source_a": "popularity_last_week",
+      "source_b": "segment_popular",
+      "jaccard": 0.2510578894105465,
+      "intersection": 1445573,
+      "union": 5757927
+    },
+    {
+      "source_a": "popularity_last_week",
+      "source_b": "copurchase",
+      "jaccard": 0.010029795119909703,
+      "intersection": 50615,
+      "union": 5046464
+    },
+    {
+      "source_a": "popularity_decayed",
+      "source_b": "segment_popular",
+      "jaccard": 0.19873687896077408,
+      "intersection": 1194258,
+      "union": 6009242
+    },
+    {
+      "source_a": "popularity_decayed",
+      "source_b": "copurchase",
+      "jaccard": 0.011593551702108278,
+      "intersection": 58416,
+      "union": 5038663
+    },
+    {
+      "source_a": "segment_popular",
+      "source_b": "copurchase",
+      "jaccard": 0.009778474241835918,
+      "intersection": 49359,
+      "union": 5047720
+    }
+  ],
+  "heuristic_map12": 0.021079623979369723,
+  "oracle_map12": 0.17161896158182696,
+  "candidate_precision_mean": 0.002654102360354474,
+  "rss_delta_mb": 5672.5,
+  "runtime_s": 34.08142900466919
+}
