@@ -1,0 +1,12 @@
+data/
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+*.zip
+.env
+kaggle.json
+.DS_Store
+CLAUDE.md
+work_done_so_far.md
+PROJECT_LOG.md
+scripts/build_eda_notebook.py
