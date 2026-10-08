@@ -1,0 +1,238 @@
+{
+  "neg_sample_rate": 0.2,
+  "seed": 42,
+  "n_features": 65,
+  "feature_groups": {
+    "candidate": 20,
+    "customer": 16,
+    "article": 20,
+    "interaction": 9
+  },
+  "per_fold": [
+    {
+      "fold_week": 103,
+      "n_rows": 14403800,
+      "n_positives": 40581,
+      "label_rate": 0.002817,
+      "n_columns": 68,
+      "file_size_mb": 294.86,
+      "runtime_s": 27.0,
+      "peak_rss_mb": 7468.9,
+      "rss_delta_mb": 7400.7,
+      "downsampling": "none",
+      "null_rates": {
+        "final_rank": {
+          "null_rate": 0.0
+        },
+        "n_sources": {
+          "null_rate": 0.0
+        },
+        "in_repurchase": {
+          "null_rate": 0.0
+        },
+        "repurchase_rank": {
+          "null_rate": 0.8508
+        },
+        "repurchase_score": {
+          "null_rate": 0.8508
+        },
+        "in_product_code": {
+          "null_rate": 0.0
+        },
+        "product_code_rank": {
+          "null_rate": 0.8862
+        },
+        "product_code_score": {
+          "null_rate": 0.8862
+        },
+        "in_copurchase": {
+          "null_rate": 0.0
+        },
+        "copurchase_rank": {
+          "null_rate": 0.8995
+        },
+        "copurchase_score": {
+          "null_rate": 0.8995
+        },
+        "in_popularity_last_week": {
+          "null_rate": 0.0
+        },
+        "popularity_last_week_rank": {
+          "null_rate": 0.3239
+        },
+        "popularity_last_week_score": {
+          "null_rate": 0.3239
+        },
+        "in_popularity_decayed": {
+          "null_rate": 0.0
+        },
+        "popularity_decayed_rank": {
+          "null_rate": 0.5639
+        },
+        "popularity_decayed_score": {
+          "null_rate": 0.5639
+        },
+        "in_segment_popular": {
+          "null_rate": 0.0
+        },
+        "segment_popular_rank": {
+          "null_rate": 0.8201
+        },
+        "segment_popular_score": {
+          "null_rate": 0.8201
+        },
+        "c_n_purchases": {
+          "null_rate": 0.0749
+        },
+        "c_n_purchases_1w": {
+          "null_rate": 0.0749
+        },
+        "c_n_purchases_4w": {
+          "null_rate": 0.0749
+        },
+        "c_n_purchases_12w": {
+          "null_rate": 0.0749
+        },
+        "c_n_unique_articles": {
+          "null_rate": 0.0749
+        },
+        "c_days_since_last_purchase": {
+          "null_rate": 0.0749
+        },
+        "c_n_active_weeks": {
+          "null_rate": 0.0749
+        },
+        "c_avg_basket_size": {
+          "null_rate": 0.0749
+        },
+        "c_mean_price": {
+          "null_rate": 0.0749
+        },
+        "c_std_price": {
+          "null_rate": 0.0878
+        },
+        "c_online_share": {
+          "null_rate": 0.0749
+        },
+        "c_age": {
+          "null_rate": 0.0788
+        },
+        "c_club_member_status": {
+          "null_rate": 0.0749
+        },
+        "c_fashion_news_frequency": {
+          "null_rate": 0.0749
+        },
+        "c_FN": {
+          "null_rate": 0.0749
+        },
+        "c_Active": {
+          "null_rate": 0.0749
+        },
+        "a_sales_1w": {
+          "null_rate": 0.0
+        },
+        "a_sales_2w": {
+          "null_rate": 0.0
+        },
+        "a_sales_4w": {
+          "null_rate": 0.0
+        },
+        "a_unique_buyers_1w": {
+          "null_rate": 0.0
+        },
+        "a_trend_ratio": {
+          "null_rate": 0.0646
+        },
+        "a_days_since_first_sale": {
+          "null_rate": 0.0012
+        },
+        "a_censored_flag": {
+          "null_rate": 0.0012
+        },
+        "a_days_since_last_sale": {
+          "null_rate": 0.0012
+        },
+        "a_mean_price_4w": {
+          "null_rate": 0.0646
+        },
+        "a_price_vs_own_history": {
+          "null_rate": 0.096
+        },
+        "a_repurchase_rate": {
+          "null_rate": 0.0012
+        },
+        "a_mean_buyer_age_12w": {
+          "null_rate": 0.0384
+        },
+        "a_std_buyer_age_12w": {
+          "null_rate": 0.0489
+        },
+        "a_product_type_no": {
+          "null_rate": 0.0
+        },
+        "a_product_group_name": {
+          "null_rate": 0.0
+        },
+        "a_index_group_name": {
+          "null_rate": 0.0
+        },
+        "a_garment_group_name": {
+          "null_rate": 0.0
+        },
+        "a_colour_group_name": {
+          "null_rate": 0.0
+        },
+        "a_section_name": {
+          "null_rate": 0.0
+        },
+        "a_department_no": {
+          "null_rate": 0.0
+        },
+        "i_times_bought": {
+          "null_rate": 0.0
+        },
+        "i_days_since_bought_article": {
+          "null_rate": 0.8503
+        },
+        "i_bought_same_product_code": {
+          "null_rate": 0.0
+        },
+        "i_days_since_bought_product_code": {
+          "null_rate": 0.727
+        },
+        "i_customer_share_product_group": {
+          "null_rate": 0.1667
+        },
+        "i_customer_share_garment_group": {
+          "null_rate": 0.2942
+        },
+        "i_age_gap": {
+          "null_rate": 0.1171
+        },
+        "i_price_ratio": {
+          "null_rate": 0.1395
+        },
+        "i_channel_gap": {
+          "null_rate": 0.1395
+        }
+      }
+    }
+  ],
+  "label_consistency": [
+    {
+      "fold_week": 103,
+      "n_positives_in_candidates": 40581,
+      "total_gt_items": 227910,
+      "expected_recall_200": 0.1781,
+      "measured_recall_200": 0.178057,
+      "diff": 4.3e-05,
+      "match_4_decimals": true
+    }
+  ],
+  "determinism": {
+    "hash1": "a21ca4b8b0fe80c37cf5ccbd80f8dfa38c44012a412c00a3efc24d876690137d",
+    "hash2": "a21ca4b8b0fe80c37cf5ccbd80f8dfa38c44012a412c00a3efc24d876690137d",
+    "match": true
+  }
+}

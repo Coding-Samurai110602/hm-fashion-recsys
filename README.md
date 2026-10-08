@@ -117,7 +117,7 @@ Six candidate sources are evaluated on validation folds 100-103 (holdout week 10
 | repurchase | 0.0352 ± 0.0018 | 50 | All history; +38% vs 12wk window |
 | product_code | 0.0212 ± 0.0018 | 50 | 12wk lookback; variant-swapping |
 | copurchase | 0.0248 ± 0.0019 | 50 | min_count=3 (best of {3,5,10}); ~44% customer coverage |
-| popularity_last_week | 0.0969 ± 0.0101 | 100 | Recall@100; dominant single source |
+| popularity_last_week | 0.0969 ± 0.0101 | 200 | Recall@100; dominant single source |
 | popularity_decayed | 0.0952 ± 0.0107 | 100 | Recall@100; inverse-time decay 1/(1+days) |
 | segment_popular | 0.0558 ± 0.0066 | 50 | Per age-bucket; cold-start fallback |
 
@@ -128,15 +128,15 @@ Six candidate sources are evaluated on validation folds 100-103 (holdout week 10
 | 20 | 0.0377 | 0.0021 | — |
 | 50 | 0.0595 | 0.0016 | — |
 | 100 | 0.1018 | 0.0021 | — |
-| 200 | 0.1627 | 0.0052 | ~177 (eval); 151 (all 1.35M) |
+| 200 | 0.1750 | 0.0090 | 200 (eval, 100% at budget; k=200 final config) |
 
-Coverage: 100% on all folds (popularity fills all customers). Mean actual list is ~177 per eval customer (45-59% reach the full 200-item budget); at scale (1.35M customers including sparse-history users) the mean drops to 151.
+Coverage: 100% on all folds (popularity fills all customers). With `popularity_last_week k=200` (final config), all eval customers reach the full 200-candidate budget (mean=200, 100% at budget).
 
 **Heuristic MAP@12 (priority ranking, production ordering):** 0.021849 ± 0.002307 across folds 100-103 (per fold: 0.021080, 0.019198, 0.022445, 0.024675).  
 **Baseline B MAP@12 (EDA baseline):** 0.021411 ± 0.002208 — heuristic beats Baseline B on all 4 folds.  
-**Oracle MAP@12:** 0.184 ± 0.009 (folds 100-103) — upper bound for a perfect ranker within the 200-candidate pool. 8.4× the heuristic; candidate precision is ~0.29% (~0.5 GT items per pool of ~177 candidates; 0.29% × 177 ≈ 0.51).  
+**Oracle MAP@12:** 0.197 ± 0.012 (folds 100-103) — upper bound for a perfect ranker within the 200-candidate pool. 9.0× the heuristic; candidate precision is ~0.28% (~0.55 GT items per pool of 200 candidates; 0.28% × 200 ≈ 0.56).  
 **Regression check (week 104):** recency-only ordering reproduces EDA Baseline B MAP@12 = 0.024457 exactly. Production ordering (last_date DESC, purchase_count DESC, article_idx ASC) gives MAP@12 = 0.024654 (+0.000198); 23,639 of 68,984 top-12 lists differ between the two orderings.  
-**Scale test:** 204.7M rows for 1.35M customers; 165 MB parquet; 159s runtime; peak RSS 6,940 MB (measured via resource.getrusage).
+**Scale test (k=200 final config):** 270.3M rows for 1.35M customers (all at budget=200); 166.2 MB parquet; 135s runtime; peak RSS 9,323 MB (measured via resource.getrusage).
 
 Run the pipeline:
 ```bash

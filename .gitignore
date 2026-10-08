@@ -14,4 +14,6 @@ scripts/build_candidates_notebook.py
 scripts/patch_notebook_02.py
 scripts/session2_final_checks.py
 scripts/check_notebook_numbers.py
+scripts/part_a_budget_experiment.py
+scripts/build_features_notebook.py
 .pytest_cache/

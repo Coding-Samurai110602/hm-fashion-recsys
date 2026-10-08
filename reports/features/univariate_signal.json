@@ -1,0 +1,524 @@
+{
+  "feature_signal": [
+    {
+      "feature": "final_rank",
+      "group": "candidate",
+      "auc": 0.5789,
+      "map12": 0.024675,
+      "null_rate": 0.0,
+      "direction": "ascending"
+    },
+    {
+      "feature": "repurchase_rank",
+      "group": "candidate",
+      "auc": 0.801,
+      "map12": 0.023942,
+      "null_rate": 0.8508,
+      "direction": "ascending"
+    },
+    {
+      "feature": "repurchase_score",
+      "group": "candidate",
+      "auc": 0.8324,
+      "map12": 0.023789,
+      "null_rate": 0.8508,
+      "direction": "descending"
+    },
+    {
+      "feature": "i_days_since_bought_article",
+      "group": "interaction",
+      "auc": 0.8258,
+      "map12": 0.023789,
+      "null_rate": 0.8503,
+      "direction": "ascending"
+    },
+    {
+      "feature": "i_days_since_bought_product_code",
+      "group": "interaction",
+      "auc": 0.7411,
+      "map12": 0.01725,
+      "null_rate": 0.727,
+      "direction": "ascending"
+    },
+    {
+      "feature": "product_code_rank",
+      "group": "candidate",
+      "auc": 0.7469,
+      "map12": 0.009709,
+      "null_rate": 0.8862,
+      "direction": "ascending"
+    },
+    {
+      "feature": "product_code_score",
+      "group": "candidate",
+      "auc": 0.7949,
+      "map12": 0.009709,
+      "null_rate": 0.8862,
+      "direction": "descending"
+    },
+    {
+      "feature": "n_sources",
+      "group": "candidate",
+      "auc": 0.5838,
+      "map12": 0.00955,
+      "null_rate": 0.0,
+      "direction": "descending"
+    },
+    {
+      "feature": "i_times_bought",
+      "group": "interaction",
+      "auc": 0.5311,
+      "map12": 0.009479,
+      "null_rate": 0.0,
+      "direction": "descending"
+    },
+    {
+      "feature": "i_bought_same_product_code",
+      "group": "interaction",
+      "auc": 0.5494,
+      "map12": 0.008672,
+      "null_rate": 0.0,
+      "direction": "descending"
+    },
+    {
+      "feature": "copurchase_rank",
+      "group": "candidate",
+      "auc": 0.6515,
+      "map12": 0.008638,
+      "null_rate": 0.8995,
+      "direction": "ascending"
+    },
+    {
+      "feature": "copurchase_score",
+      "group": "candidate",
+      "auc": 0.6762,
+      "map12": 0.008638,
+      "null_rate": 0.8995,
+      "direction": "descending"
+    },
+    {
+      "feature": "segment_popular_rank",
+      "group": "candidate",
+      "auc": 0.5521,
+      "map12": 0.008338,
+      "null_rate": 0.8201,
+      "direction": "ascending"
+    },
+    {
+      "feature": "segment_popular_score",
+      "group": "candidate",
+      "auc": 0.5393,
+      "map12": 0.008338,
+      "null_rate": 0.8201,
+      "direction": "descending"
+    },
+    {
+      "feature": "in_repurchase",
+      "group": "candidate",
+      "auc": 0.5283,
+      "map12": 0.007538,
+      "null_rate": 0.0,
+      "direction": "descending"
+    },
+    {
+      "feature": "a_sales_2w",
+      "group": "article",
+      "auc": 0.5665,
+      "map12": 0.007037,
+      "null_rate": 0.0,
+      "direction": "descending"
+    },
+    {
+      "feature": "a_unique_buyers_1w",
+      "group": "article",
+      "auc": 0.5639,
+      "map12": 0.006884,
+      "null_rate": 0.0,
+      "direction": "descending"
+    },
+    {
+      "feature": "popularity_last_week_rank",
+      "group": "candidate",
+      "auc": 0.556,
+      "map12": 0.006604,
+      "null_rate": 0.3239,
+      "direction": "ascending"
+    },
+    {
+      "feature": "popularity_last_week_score",
+      "group": "candidate",
+      "auc": 0.556,
+      "map12": 0.006604,
+      "null_rate": 0.3239,
+      "direction": "descending"
+    },
+    {
+      "feature": "a_sales_1w",
+      "group": "article",
+      "auc": 0.5615,
+      "map12": 0.006604,
+      "null_rate": 0.0,
+      "direction": "descending"
+    },
+    {
+      "feature": "popularity_decayed_rank",
+      "group": "candidate",
+      "auc": 0.565,
+      "map12": 0.006456,
+      "null_rate": 0.5639,
+      "direction": "ascending"
+    },
+    {
+      "feature": "popularity_decayed_score",
+      "group": "candidate",
+      "auc": 0.565,
+      "map12": 0.006456,
+      "null_rate": 0.5639,
+      "direction": "descending"
+    },
+    {
+      "feature": "a_sales_4w",
+      "group": "article",
+      "auc": 0.5719,
+      "map12": 0.005958,
+      "null_rate": 0.0,
+      "direction": "descending"
+    },
+    {
+      "feature": "in_segment_popular",
+      "group": "candidate",
+      "auc": 0.5493,
+      "map12": 0.005557,
+      "null_rate": 0.0,
+      "direction": "descending"
+    },
+    {
+      "feature": "a_days_since_first_sale",
+      "group": "article",
+      "auc": 0.5303,
+      "map12": 0.00438,
+      "null_rate": 0.0012,
+      "direction": "ascending"
+    },
+    {
+      "feature": "a_repurchase_rate",
+      "group": "article",
+      "auc": 0.534,
+      "map12": 0.004239,
+      "null_rate": 0.0012,
+      "direction": "descending"
+    },
+    {
+      "feature": "in_copurchase",
+      "group": "candidate",
+      "auc": 0.5246,
+      "map12": 0.004053,
+      "null_rate": 0.0,
+      "direction": "descending"
+    },
+    {
+      "feature": "in_product_code",
+      "group": "candidate",
+      "auc": 0.5036,
+      "map12": 0.003899,
+      "null_rate": 0.0,
+      "direction": "descending"
+    },
+    {
+      "feature": "i_price_ratio",
+      "group": "interaction",
+      "auc": 0.5202,
+      "map12": 0.003868,
+      "null_rate": 0.1395,
+      "direction": "descending"
+    },
+    {
+      "feature": "i_channel_gap",
+      "group": "interaction",
+      "auc": 0.5817,
+      "map12": 0.003833,
+      "null_rate": 0.1395,
+      "direction": "ascending"
+    },
+    {
+      "feature": "a_mean_price_4w",
+      "group": "article",
+      "auc": 0.5352,
+      "map12": 0.003831,
+      "null_rate": 0.0646,
+      "direction": "descending"
+    },
+    {
+      "feature": "a_days_since_last_sale",
+      "group": "article",
+      "auc": 0.5689,
+      "map12": 0.003713,
+      "null_rate": 0.0012,
+      "direction": "ascending"
+    },
+    {
+      "feature": "a_department_no",
+      "group": "article",
+      "auc": 0.515,
+      "map12": 0.003621,
+      "null_rate": 0.0,
+      "direction": "ascending"
+    },
+    {
+      "feature": "i_customer_share_garment_group",
+      "group": "interaction",
+      "auc": 0.5467,
+      "map12": 0.003547,
+      "null_rate": 0.2942,
+      "direction": "descending"
+    },
+    {
+      "feature": "a_price_vs_own_history",
+      "group": "article",
+      "auc": 0.5206,
+      "map12": 0.00353,
+      "null_rate": 0.096,
+      "direction": "descending"
+    },
+    {
+      "feature": "in_popularity_decayed",
+      "group": "candidate",
+      "auc": 0.5332,
+      "map12": 0.00352,
+      "null_rate": 0.0,
+      "direction": "descending"
+    },
+    {
+      "feature": "i_customer_share_product_group",
+      "group": "interaction",
+      "auc": 0.5376,
+      "map12": 0.00346,
+      "null_rate": 0.1667,
+      "direction": "descending"
+    },
+    {
+      "feature": "in_popularity_last_week",
+      "group": "candidate",
+      "auc": 0.5075,
+      "map12": 0.003365,
+      "null_rate": 0.0,
+      "direction": "descending"
+    },
+    {
+      "feature": "i_age_gap",
+      "group": "interaction",
+      "auc": 0.5351,
+      "map12": 0.003287,
+      "null_rate": 0.1171,
+      "direction": "ascending"
+    },
+    {
+      "feature": "c_n_purchases",
+      "group": "customer",
+      "auc": 0.5415,
+      "map12": 0.00327,
+      "null_rate": 0.0749,
+      "direction": "descending"
+    },
+    {
+      "feature": "c_n_purchases_1w",
+      "group": "customer",
+      "auc": 0.5422,
+      "map12": 0.00327,
+      "null_rate": 0.0749,
+      "direction": "descending"
+    },
+    {
+      "feature": "c_n_purchases_4w",
+      "group": "customer",
+      "auc": 0.5463,
+      "map12": 0.00327,
+      "null_rate": 0.0749,
+      "direction": "descending"
+    },
+    {
+      "feature": "c_n_purchases_12w",
+      "group": "customer",
+      "auc": 0.539,
+      "map12": 0.00327,
+      "null_rate": 0.0749,
+      "direction": "descending"
+    },
+    {
+      "feature": "c_n_unique_articles",
+      "group": "customer",
+      "auc": 0.5378,
+      "map12": 0.00327,
+      "null_rate": 0.0749,
+      "direction": "descending"
+    },
+    {
+      "feature": "c_days_since_last_purchase",
+      "group": "customer",
+      "auc": 0.5418,
+      "map12": 0.00327,
+      "null_rate": 0.0749,
+      "direction": "ascending"
+    },
+    {
+      "feature": "c_n_active_weeks",
+      "group": "customer",
+      "auc": 0.506,
+      "map12": 0.00327,
+      "null_rate": 0.0749,
+      "direction": "descending"
+    },
+    {
+      "feature": "c_avg_basket_size",
+      "group": "customer",
+      "auc": 0.5797,
+      "map12": 0.00327,
+      "null_rate": 0.0749,
+      "direction": "descending"
+    },
+    {
+      "feature": "c_mean_price",
+      "group": "customer",
+      "auc": 0.5424,
+      "map12": 0.00327,
+      "null_rate": 0.0749,
+      "direction": "descending"
+    },
+    {
+      "feature": "c_std_price",
+      "group": "customer",
+      "auc": 0.5184,
+      "map12": 0.00327,
+      "null_rate": 0.0878,
+      "direction": "descending"
+    },
+    {
+      "feature": "c_online_share",
+      "group": "customer",
+      "auc": 0.5609,
+      "map12": 0.00327,
+      "null_rate": 0.0749,
+      "direction": "descending"
+    },
+    {
+      "feature": "c_age",
+      "group": "customer",
+      "auc": 0.5009,
+      "map12": 0.00327,
+      "null_rate": 0.0788,
+      "direction": "ascending"
+    },
+    {
+      "feature": "c_club_member_status",
+      "group": "customer",
+      "auc": 0.5002,
+      "map12": 0.00327,
+      "null_rate": 0.0749,
+      "direction": "ascending"
+    },
+    {
+      "feature": "c_fashion_news_frequency",
+      "group": "customer",
+      "auc": 0.5042,
+      "map12": 0.00327,
+      "null_rate": 0.0749,
+      "direction": "ascending"
+    },
+    {
+      "feature": "c_FN",
+      "group": "customer",
+      "auc": 0.5047,
+      "map12": 0.00327,
+      "null_rate": 0.0749,
+      "direction": "ascending"
+    },
+    {
+      "feature": "c_Active",
+      "group": "customer",
+      "auc": 0.5043,
+      "map12": 0.00327,
+      "null_rate": 0.0749,
+      "direction": "ascending"
+    },
+    {
+      "feature": "a_colour_group_name",
+      "group": "article",
+      "auc": 0.525,
+      "map12": 0.003086,
+      "null_rate": 0.0,
+      "direction": "ascending"
+    },
+    {
+      "feature": "a_trend_ratio",
+      "group": "article",
+      "auc": 0.5129,
+      "map12": 0.003025,
+      "null_rate": 0.0646,
+      "direction": "descending"
+    },
+    {
+      "feature": "a_std_buyer_age_12w",
+      "group": "article",
+      "auc": 0.515,
+      "map12": 0.002884,
+      "null_rate": 0.0489,
+      "direction": "descending"
+    },
+    {
+      "feature": "a_product_type_no",
+      "group": "article",
+      "auc": 0.4972,
+      "map12": 0.002745,
+      "null_rate": 0.0,
+      "direction": "ascending"
+    },
+    {
+      "feature": "a_censored_flag",
+      "group": "article",
+      "auc": 0.501,
+      "map12": 0.002739,
+      "null_rate": 0.0012,
+      "direction": "ascending"
+    },
+    {
+      "feature": "a_mean_buyer_age_12w",
+      "group": "article",
+      "auc": 0.5052,
+      "map12": 0.002361,
+      "null_rate": 0.0384,
+      "direction": "descending"
+    },
+    {
+      "feature": "a_product_group_name",
+      "group": "article",
+      "auc": 0.5025,
+      "map12": 0.002209,
+      "null_rate": 0.0,
+      "direction": "ascending"
+    },
+    {
+      "feature": "a_section_name",
+      "group": "article",
+      "auc": 0.4872,
+      "map12": 0.002173,
+      "null_rate": 0.0,
+      "direction": "ascending"
+    },
+    {
+      "feature": "a_garment_group_name",
+      "group": "article",
+      "auc": 0.5071,
+      "map12": 0.002075,
+      "null_rate": 0.0,
+      "direction": "descending"
+    },
+    {
+      "feature": "a_index_group_name",
+      "group": "article",
+      "auc": 0.5159,
+      "map12": 0.001717,
+      "null_rate": 0.0,
+      "direction": "descending"
+    }
+  ]
+}

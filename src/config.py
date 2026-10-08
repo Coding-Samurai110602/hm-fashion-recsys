@@ -43,7 +43,7 @@ REPURCHASE_WINDOWS: list[int | None] = [None, 12, 4]
 PRODUCT_CODE_LOOKBACK: int = 12
 
 # Popularity time windows
-POPULARITY_LAST_WEEK: int = 1       # global_last_week
+POPULARITY_LAST_WEEK: int = 1       # global_last_week  (k=200; see reports/candidates/part_a_budget_experiment.json)
 POPULARITY_DECAY_WEEKS: int = 4     # global_decayed window
 POPULARITY_DECAY_HALFLIFE: float = 7.0  # exponential decay half-life (days; unused — inverse-time decay selected
 SEGMENT_POPULAR_WEEKS: int = 2      # segment_popular window
@@ -65,7 +65,7 @@ SOURCE_K: dict[str, int] = {
     "repurchase": 50,
     "product_code": 50,
     "copurchase": 50,
-    "popularity_last_week": 100,
+    "popularity_last_week": 200,
     "popularity_decayed": 100,
     "segment_popular": 50,
 }
