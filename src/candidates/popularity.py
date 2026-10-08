@@ -132,21 +132,14 @@ def generate_segment_popular(
     if customers_df is None:
         customers_df = get_customer_age_buckets()
 
-    # Filter to requested customers
-    if len(customers) > 50000:
-        customer_series = pl.Series("customer_idx", customers, dtype=pl.Int32)
-        cust_buckets = customers_df.filter(
-            pl.col("customer_idx").is_in(customer_series.to_list())
-        )
-    else:
-        cust_buckets = customers_df.filter(
-            pl.col("customer_idx").is_in(customers)
-        )
+    # Age bucket for ASSIGNMENT: which eval_customers to give recommendations to
+    cust_buckets = customers_df.filter(
+        pl.col("customer_idx").is_in(customers)
+    )
 
-    # Build age-bucket -> top-k articles from transactions in last 2 weeks
-    # Join transactions with customer age_bucket, then aggregate
-    cust_buckets_lazy = cust_buckets.lazy()
-
+    # Build age-bucket -> top-k articles from transactions in last 2 weeks.
+    # Popularity is computed using ALL customers (not filtered to eval_customers)
+    # so that scores are globally consistent across batch and single-customer calls.
     bucket_top_k = (
         history
         .filter(
@@ -154,7 +147,7 @@ def generate_segment_popular(
             & (pl.col("week_idx") < cutoff_week)
         )
         .join(
-            cust_buckets_lazy.select(["customer_idx", "age_bucket"]),
+            customers_df.lazy().select(["customer_idx", "age_bucket"]),
             on="customer_idx",
             how="inner",
         )

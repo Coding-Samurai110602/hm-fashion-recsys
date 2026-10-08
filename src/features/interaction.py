@@ -142,17 +142,21 @@ def compute_interaction_features(
     )
 
     # Total purchases per customer (all history)
+    # Use Float64 accumulation: Polars' scalar Float32 path can give 1-ULP different
+    # results from the vectorised SIMD path for small datasets (≤ a few hundred rows).
+    # Computing in Float64 then casting to Float32 gives a correctly-rounded result
+    # independent of dataset size, ensuring batch == single-customer parity.
     cust_total = (
         hist_groups
         .group_by("customer_idx")
-        .agg(pl.len().cast(pl.Float32).alias("_total_purchases"))
+        .agg(pl.len().cast(pl.Float64).alias("_total_purchases"))
     )
 
     # Purchases per (customer_idx, product_group_name)
     pg_counts = (
         hist_groups
         .group_by(["customer_idx", "product_group_name"])
-        .agg(pl.len().cast(pl.Float32).alias("_pg_count"))
+        .agg(pl.len().cast(pl.Float64).alias("_pg_count"))
         .join(cust_total, on="customer_idx", how="left")
         .with_columns(
             (pl.col("_pg_count") / pl.col("_total_purchases"))
@@ -166,7 +170,7 @@ def compute_interaction_features(
     gg_counts = (
         hist_groups
         .group_by(["customer_idx", "garment_group_name"])
-        .agg(pl.len().cast(pl.Float32).alias("_gg_count"))
+        .agg(pl.len().cast(pl.Float64).alias("_gg_count"))
         .join(cust_total, on="customer_idx", how="left")
         .with_columns(
             (pl.col("_gg_count") / pl.col("_total_purchases"))
@@ -212,6 +216,7 @@ def compute_interaction_features(
     )
 
     # i_price_ratio = a_mean_price_4w / c_mean_price (null if denominator 0 or null)
+    # Use Float64 intermediate: Polars scalar vs SIMD Float32 paths can differ by 1 ULP.
     result = result.with_columns(
         pl.when(
             pl.col("c_mean_price").is_null()
@@ -220,7 +225,8 @@ def compute_interaction_features(
         )
         .then(pl.lit(None, dtype=pl.Float32))
         .otherwise(
-            (pl.col("a_mean_price_4w") / pl.col("c_mean_price")).cast(pl.Float32)
+            (pl.col("a_mean_price_4w").cast(pl.Float64) / pl.col("c_mean_price").cast(pl.Float64))
+            .cast(pl.Float32)
         )
         .alias("i_price_ratio")
     )

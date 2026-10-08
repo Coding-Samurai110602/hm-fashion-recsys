@@ -1,4 +1,6 @@
 duckdb==1.5.6
+lightgbm==4.7.0
+optuna==5.0.0
 ipykernel==7.4.0
 jupyter==1.1.1
 jupyter_client==8.10.0

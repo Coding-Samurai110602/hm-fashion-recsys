@@ -29,12 +29,15 @@ FEATURE_LIST: list[FeatureSpec] = [
     FeatureSpec("in_popularity_last_week", pl.Int8, "candidate", "1 if produced by popularity_last_week source, else 0"),
     FeatureSpec("popularity_last_week_rank", pl.Int16, "candidate", "Rank within popularity_last_week (null if not in source)"),
     FeatureSpec("popularity_last_week_score", pl.Float32, "candidate", "Score from popularity_last_week source (null if not in source)"),
+    FeatureSpec("popularity_last_week_share", pl.Float32, "candidate", "popularity_last_week_score / total transactions in scoring week (scale-invariant)"),
     FeatureSpec("in_popularity_decayed", pl.Int8, "candidate", "1 if produced by popularity_decayed source, else 0"),
     FeatureSpec("popularity_decayed_rank", pl.Int16, "candidate", "Rank within popularity_decayed (null if not in source)"),
     FeatureSpec("popularity_decayed_score", pl.Float32, "candidate", "Score from popularity_decayed source (null if not in source)"),
+    FeatureSpec("popularity_decayed_share", pl.Float32, "candidate", "popularity_decayed_score / total decay-weighted transactions in scoring window (scale-invariant)"),
     FeatureSpec("in_segment_popular", pl.Int8, "candidate", "1 if produced by segment_popular source, else 0"),
     FeatureSpec("segment_popular_rank", pl.Int16, "candidate", "Rank within segment_popular (null if not in source)"),
     FeatureSpec("segment_popular_score", pl.Float32, "candidate", "Score from segment_popular source (null if not in source)"),
+    FeatureSpec("segment_popular_share", pl.Float32, "candidate", "segment_popular_score / total eval-customer transactions in age bucket and scoring window (scale-invariant)"),
     # ------------------------------------------------------------------
     # Customer group
     # ------------------------------------------------------------------

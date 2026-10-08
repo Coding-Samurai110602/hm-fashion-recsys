@@ -112,6 +112,86 @@ def micro_recall_at_k(
     return total_hit / total_gt if total_gt > 0 else 0.0
 
 
+def ndcg_at_k(
+    recommended: list[int],
+    relevant: set[int],
+    k: int,
+) -> float:
+    """Normalized Discounted Cumulative Gain at k for a single user.
+
+    Binary relevance (1 if hit, 0 otherwise). Ideal DCG = sum of 1/log2(i+2)
+    for i in range(min(|relevant|, k)).
+    """
+    import math
+    if not relevant or not recommended:
+        return 0.0
+    dcg = sum(
+        1.0 / math.log2(i + 2)
+        for i, item in enumerate(recommended[:k])
+        if item in relevant
+    )
+    ideal_hits = min(len(relevant), k)
+    idcg = sum(1.0 / math.log2(i + 2) for i in range(ideal_hits))
+    return dcg / idcg if idcg > 0 else 0.0
+
+
+def mean_ndcg_at_k(
+    predictions: dict[int, list[int]],
+    ground_truth: dict[int, set[int]],
+    k: int = 12,
+) -> float:
+    """Mean NDCG@k over all users in ground_truth."""
+    if not ground_truth:
+        return 0.0
+    total = sum(
+        ndcg_at_k(predictions.get(c, []), gt, k)
+        for c, gt in ground_truth.items()
+    )
+    return total / len(ground_truth)
+
+
+def mean_precision_at_k(
+    predictions: dict[int, list[int]],
+    ground_truth: dict[int, set[int]],
+    k: int = 12,
+) -> float:
+    """Mean precision@k over all users in ground_truth."""
+    if not ground_truth:
+        return 0.0
+    total = sum(
+        precision_at_k(predictions.get(c, []), gt, k)
+        for c, gt in ground_truth.items()
+    )
+    return total / len(ground_truth)
+
+
+def mean_recall_user_at_k(
+    predictions: dict[int, list[int]],
+    ground_truth: dict[int, set[int]],
+    k: int = 12,
+) -> float:
+    """Mean per-user recall@k over all users in ground_truth."""
+    if not ground_truth:
+        return 0.0
+    total = sum(
+        recall_at_k(predictions.get(c, []), gt, k)
+        for c, gt in ground_truth.items()
+    )
+    return total / len(ground_truth)
+
+
+def per_customer_ap(
+    predictions: dict[int, list[int]],
+    ground_truth: dict[int, set[int]],
+    k: int = 12,
+) -> dict[int, float]:
+    """Per-customer AP@k. Includes all ground_truth customers (AP=0 if no prediction)."""
+    return {
+        c: average_precision_at_k(predictions.get(c, []), gt, k)
+        for c, gt in ground_truth.items()
+    }
+
+
 def precision_at_k(
     recommended: list[int],
     relevant: set[int],

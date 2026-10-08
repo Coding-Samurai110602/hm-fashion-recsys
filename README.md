@@ -144,3 +144,66 @@ python scripts/run_candidates.py --folds 100 101 102 103 --n 20 50 100 200
 python scripts/run_candidates.py --folds 103 --scale
 python scripts/run_candidates.py --regression
 ```
+
+## Feature Engineering
+
+68 point-in-time features across 4 groups. Built for folds 100–103 and holdout 104.
+
+| Group | Count | Key features |
+|-------|-------|-------------|
+| candidate | 23 | final_rank, n_sources, per-source rank/score/share |
+| customer | 16 | windowed purchase counts, price, online_share, demographics |
+| article | 20 | sales windows, trend_ratio, repurchase_rate, buyer_age, categoricals |
+| interaction | 9 | times_bought, days_since_bought, product_group_share, price_ratio |
+
+Popularity share features (Session 4): `popularity_last_week_share`, `popularity_decayed_share`, `segment_popular_share` — scale-invariant normalizations that divide raw counts by total transactions in the scoring window. Segment popularity uses all 1.37M customers globally (not just the eval cohort) for batch/inference consistency.
+
+Run: `python scripts/build_features.py --folds 100 101 102 103 104`
+
+## Ranking Model
+
+LightGBM LambdaRank trained on folds 100–102, evaluated once on fold 103. 200 candidates per customer re-ranked to top-12. All results in `reports/ranker/eval_fold103.json` and `models/model_card.json`.
+
+| Model | MAP@12 (fold 103) | NDCG@12 | recall@12 | precision@12 |
+|-------|-------------------|---------|-----------|--------------|
+| Ranker (LightGBM LambdaRank) | **0.035832** | 0.052879 | 0.074099 | 0.015032 |
+| Heuristic (priority ordering) | 0.024675 | — | — | — |
+| Baseline B (recency + pop fill) | 0.024201 | — | — | — |
+| Oracle (k=200 perfect ranking) | 0.200527 | — | — | — |
+
+Bootstrap (1,000 resamples, seed 42):
+- Ranker vs heuristic: mean diff = +0.011156, 95% CI = [+0.010563, +0.011758], CI **excludes zero**, relative lift **+45.21%**
+- Ranker vs Baseline B: mean diff = +0.011630, 95% CI = [+0.011007, +0.012263], CI **excludes zero**, relative lift **+48.06%**
+
+Segment breakdown (ranker MAP@12 / heuristic MAP@12, paired-bootstrap 95% CI):
+
+| Segment | n | Ranker | Heuristic | 95% CI (ranker−heuristic) |
+|---------|---|--------|-----------|---------------------------|
+| 0 (cold-start) | 5,395 | 0.009730 | 0.006393 | [+0.002273, +0.004406] |
+| 1–4 purchases | 4,271 | 0.043280 | 0.034912 | [+0.005904, +0.010703] |
+| 5–19 purchases | 14,465 | 0.038825 | 0.024878 | [+0.012594, +0.015421] |
+| 20+ purchases | 47,888 | 0.037204 | 0.025761 | [+0.010598, +0.012298] |
+
+All segment CIs exclude zero — ranker beats heuristic in every segment.
+
+Feature group ablations (drop one group, retrain on folds 100–102, evaluate fold 103; all CIs exclude zero):
+
+| Group removed | Features | Delta MAP@12 | 95% CI |
+|---------------|----------|-------------|--------|
+| candidate | 23 | −0.000466 | [−0.000756, −0.000139] |
+| customer | 16 | −0.000688 | [−0.000977, −0.000380] |
+| article | 20 | −0.002372 | [−0.002815, −0.001945] |
+| interaction | 9 | −0.001886 | [−0.002258, −0.001474] |
+
+Training:
+- Optuna: 30 trials, seed 42, val = `fold_102_full.parquet` (no downsampling, 75,822 customers). Default MAP@12 = 0.035136; tuned = 0.035270 (+0.000134 gain, within noise). Tuned params kept (non-negative gain from unbiased procedure).
+- Final model: folds 100+101+102, 421 rounds (scale rule: `round(256 × 1.643)`, ratio = rows(100-102) / rows(100-101) after zero-pos removal)
+- Zero-positive training groups removed: 141,614 customers, 5,665,005 rows
+- `segment_popular` adds 0 unique candidates at k=200 (all items already in `popularity_last_week`); its rank/score features are retained for ranking.
+- Reproducibility: `deterministic=True, force_row_wise=True, n_jobs=4, seed=42`. Without `force_row_wise`, LightGBM auto-selects row-wise vs col-wise histogram construction via a runtime timing test (visible in its log: "Auto-choosing row-wise/col-wise multi-threading…"), and the timing test outcome can vary with system load, giving different floating-point accumulation paths and a different MAP@12. `force_row_wise=True` pins the choice; two back-to-back runs then give identical MAP@12 (0.035832) and identical model file (SHA-256 verified).
+
+Inference:
+- Single-customer: precomputed `RecommenderState` (article features, copurchase matrix, popularity lists) built once per cutoff week (~2.5s). Latency: p50=55ms, p95=58ms (100 customers, seed 42, 5 warm-up calls). Inference process RSS (fresh Python process, model loaded, state built): ~4,680 MB.
+- Batch and single-customer inference use the same state builder and per-customer assembly code; results are guaranteed identical.
+
+Run: `python scripts/train_ranker.py --skip-tuning`

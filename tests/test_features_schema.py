@@ -113,3 +113,22 @@ class TestFoldSchema:
         n_pos = int((df["label"] == 1).sum())
         assert n_pos > 0, f"Fold {fold_week}: no positives found"
 
+    def test_sorted_by_customer_then_article(self, fold_week):
+        """Every fold parquet must be sorted by [customer_idx, article_idx]."""
+        import numpy as np
+        df = self._load(fold_week)
+        cidx = df["customer_idx"].to_numpy()
+        aidx = df["article_idx"].to_numpy()
+        n = len(cidx)
+        if n <= 1:
+            return
+        cust_lt = cidx[:-1] < cidx[1:]
+        same_cust = cidx[:-1] == cidx[1:]
+        art_le = aidx[:-1] <= aidx[1:]
+        all_ok = cust_lt | (same_cust & art_le)
+        violations = int((~all_ok).sum())
+        assert violations == 0, (
+            f"Fold {fold_week}: {violations} sort violations in [customer_idx, article_idx]. "
+            "Rebuild fold with build.py fix applied."
+        )
+

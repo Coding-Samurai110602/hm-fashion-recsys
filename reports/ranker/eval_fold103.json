@@ -1,0 +1,103 @@
+{
+  "fold": 103,
+  "n_eval_customers": 72019,
+  "ranker": {
+    "map@12": 0.03583175611855738,
+    "ndcg@12": 0.0528785898904213,
+    "recall@12": 0.07409905696045614,
+    "precision@12": 0.015031912874843211,
+    "n_customers": 72019
+  },
+  "heuristic": {
+    "map@12": 0.024675292792042742,
+    "note": "final_rank <= 12 from fold_103.parquet"
+  },
+  "baseline_b": {
+    "map@12": 0.024201280174608028,
+    "note": "recency-ordered repurchase + popularity fill from fold_103 feature columns"
+  },
+  "oracle": {
+    "map@12": 0.20052663772168577,
+    "note": "from reports/candidates/summary.json k=200, fold 103 per_fold[3]"
+  },
+  "bootstrap_ranker_vs_heuristic": {
+    "mean_diff": 0.01115646332651451,
+    "ci_lo": 0.010563387970538645,
+    "ci_hi": 0.011758328858016065,
+    "ci_excludes_zero": true,
+    "relative_lift": 0.4521309400677988,
+    "n_customers": 72019,
+    "n_resamples": 1000
+  },
+  "bootstrap_ranker_vs_baseline_b": {
+    "mean_diff": 0.011630475943949259,
+    "ci_lo": 0.011006556936627542,
+    "ci_hi": 0.012262777543327582,
+    "ci_excludes_zero": true,
+    "relative_lift": 0.48057275731024834,
+    "n_customers": 72019,
+    "n_resamples": 1000
+  },
+  "segment_breakdown": [
+    {
+      "segment": "0",
+      "n_customers": 5395,
+      "map@12_ranker": 0.009730287179512666,
+      "map@12_heuristic": 0.006392930463641886,
+      "bootstrap_ranker_vs_heuristic": {
+        "mean_diff": 0.003337356715870772,
+        "ci_lo": 0.0022734916036981443,
+        "ci_hi": 0.004406052828596574,
+        "ci_excludes_zero": true,
+        "relative_lift": 0.5220386385947908,
+        "n_customers": 5395,
+        "n_resamples": 1000
+      }
+    },
+    {
+      "segment": "1-4",
+      "n_customers": 4271,
+      "map@12_ranker": 0.04327985387181681,
+      "map@12_heuristic": 0.03491154183234493,
+      "bootstrap_ranker_vs_heuristic": {
+        "mean_diff": 0.00836831203947191,
+        "ci_lo": 0.005904157398987043,
+        "ci_hi": 0.010703182175904841,
+        "ci_excludes_zero": true,
+        "relative_lift": 0.2397004428981941,
+        "n_customers": 4271,
+        "n_resamples": 1000
+      }
+    },
+    {
+      "segment": "5-19",
+      "n_customers": 14465,
+      "map@12_ranker": 0.03882531928629795,
+      "map@12_heuristic": 0.024877696185410837,
+      "bootstrap_ranker_vs_heuristic": {
+        "mean_diff": 0.013947623100887136,
+        "ci_lo": 0.01259355760458273,
+        "ci_hi": 0.015420593516768505,
+        "ci_excludes_zero": true,
+        "relative_lift": 0.5606476981203145,
+        "n_customers": 14465,
+        "n_resamples": 1000
+      }
+    },
+    {
+      "segment": "20+",
+      "n_customers": 47888,
+      "map@12_ranker": 0.037203805654988036,
+      "map@12_heuristic": 0.025760879160768226,
+      "bootstrap_ranker_vs_heuristic": {
+        "mean_diff": 0.011442926494220027,
+        "ci_lo": 0.010597623433432173,
+        "ci_hi": 0.012297522634063826,
+        "ci_excludes_zero": true,
+        "relative_lift": 0.4441978250356714,
+        "n_customers": 47888,
+        "n_resamples": 1000
+      }
+    }
+  ]
+}

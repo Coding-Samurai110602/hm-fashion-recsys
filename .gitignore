@@ -17,3 +17,12 @@ scripts/check_notebook_numbers.py
 scripts/part_a_budget_experiment.py
 scripts/build_features_notebook.py
 .pytest_cache/
+models/
+scripts/compute_univariate_signal.py
+scripts/build_ranker_notebook.py
+scripts/fix_tuning_fold102_map.py
+scripts/verify_cleanstate.py
+scripts/check_nb04_numbers.py
+scripts/update_readme_ranker_section.py
+scripts/measure_inference_rss.py
+scripts/check_lgbm_autoselect.py

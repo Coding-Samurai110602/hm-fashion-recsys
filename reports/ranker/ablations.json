@@ -1,0 +1,169 @@
+{
+  "full_model_map@12": 0.03583175611855735,
+  "ablations": [
+    {
+      "group_dropped": "candidate",
+      "n_features_dropped": 23,
+      "map@12": 0.03536578662929209,
+      "delta_map@12": -0.0004659694892652638,
+      "bootstrap": {
+        "mean_diff": -0.00046596948926512456,
+        "ci_lo": -0.0007562586325296838,
+        "ci_hi": -0.00013915377335508655,
+        "ci_excludes_zero": true,
+        "relative_lift": -0.013004372091709952,
+        "n_customers": 72019,
+        "n_resamples": 1000
+      }
+    },
+    {
+      "group_dropped": "customer",
+      "n_features_dropped": 16,
+      "map@12": 0.03514412704887416,
+      "delta_map@12": -0.0006876290696831919,
+      "bootstrap": {
+        "mean_diff": -0.0006876290696831622,
+        "ci_lo": -0.0009767359488984063,
+        "ci_hi": -0.0003803020684454529,
+        "ci_excludes_zero": true,
+        "relative_lift": -0.01919049313151128,
+        "n_customers": 72019,
+        "n_resamples": 1000
+      }
+    },
+    {
+      "group_dropped": "article",
+      "n_features_dropped": 20,
+      "map@12": 0.03345944827884619,
+      "delta_map@12": -0.002372307839711159,
+      "bootstrap": {
+        "mean_diff": -0.0023723078397110274,
+        "ci_lo": -0.0028150334188962157,
+        "ci_hi": -0.0019454782929419765,
+        "ci_excludes_zero": true,
+        "relative_lift": -0.0662068538271392,
+        "n_customers": 72019,
+        "n_resamples": 1000
+      }
+    },
+    {
+      "group_dropped": "interaction",
+      "n_features_dropped": 9,
+      "map@12": 0.03394576990012442,
+      "delta_map@12": -0.0018859862184329307,
+      "bootstrap": {
+        "mean_diff": -0.0018859862184328134,
+        "ci_lo": -0.002258176571198101,
+        "ci_hi": -0.0014735195550779475,
+        "ci_excludes_zero": true,
+        "relative_lift": -0.052634490260332414,
+        "n_customers": 72019,
+        "n_resamples": 1000
+      }
+    }
+  ],
+  "peak_rss_mb": 9214.8125,
+  "rss_mb_before_ablations": 7752.609375,
+  "gain_importance_top25": [
+    {
+      "feature": "i_days_since_bought_product_code",
+      "importance": 211799.83495378494
+    },
+    {
+      "feature": "i_days_since_bought_article",
+      "importance": 132163.88438987732
+    },
+    {
+      "feature": "a_section_name",
+      "importance": 123561.61246299744
+    },
+    {
+      "feature": "a_sales_1w",
+      "importance": 120591.3245754242
+    },
+    {
+      "feature": "repurchase_rank",
+      "importance": 105947.75407409668
+    },
+    {
+      "feature": "a_colour_group_name",
+      "importance": 103774.58844327927
+    },
+    {
+      "feature": "final_rank",
+      "importance": 86493.90187978745
+    },
+    {
+      "feature": "a_garment_group_name",
+      "importance": 63017.15749835968
+    },
+    {
+      "feature": "i_channel_gap",
+      "importance": 60866.525851249695
+    },
+    {
+      "feature": "i_bought_same_product_code",
+      "importance": 52877.06850528717
+    },
+    {
+      "feature": "i_customer_share_garment_group",
+      "importance": 52778.117664813995
+    },
+    {
+      "feature": "a_repurchase_rate",
+      "importance": 51923.040212631226
+    },
+    {
+      "feature": "a_days_since_last_sale",
+      "importance": 48404.169872283936
+    },
+    {
+      "feature": "a_trend_ratio",
+      "importance": 48139.68109893799
+    },
+    {
+      "feature": "segment_popular_share",
+      "importance": 46656.11005306244
+    },
+    {
+      "feature": "i_price_ratio",
+      "importance": 42684.08590507507
+    },
+    {
+      "feature": "a_days_since_first_sale",
+      "importance": 40131.981006622314
+    },
+    {
+      "feature": "copurchase_rank",
+      "importance": 38219.98245048523
+    },
+    {
+      "feature": "i_age_gap",
+      "importance": 35912.49858236313
+    },
+    {
+      "feature": "c_n_purchases_1w",
+      "importance": 32063.472445487976
+    },
+    {
+      "feature": "a_price_vs_own_history",
+      "importance": 29133.055950641632
+    },
+    {
+      "feature": "a_std_buyer_age_12w",
+      "importance": 27699.884469032288
+    },
+    {
+      "feature": "c_mean_price",
+      "importance": 27275.935861110687
+    },
+    {
+      "feature": "c_days_since_last_purchase",
+      "importance": 27073.94228363037
+    },
+    {
+      "feature": "a_sales_2w",
+      "importance": 25601.31505203247
+    }
+  ]
+}

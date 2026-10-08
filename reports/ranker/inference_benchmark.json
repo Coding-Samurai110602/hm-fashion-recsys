@@ -1,0 +1,14 @@
+{
+  "state_build_time_s": 2.518,
+  "rss_before_mb": 1020.1,
+  "rss_after_mb": 4680.1,
+  "rss_delta_mb": 3660.0,
+  "inference_rss_mb": 4680.1,
+  "p50_ms": 55.219,
+  "p95_ms": 58.463,
+  "n_calls": 100,
+  "n_warmup": 5,
+  "seed": 42,
+  "as_of_week": 103,
+  "note": "rss_after_mb is the inference process RSS after state build in a fresh Python process; not the peak RSS of training/ablations"
+}

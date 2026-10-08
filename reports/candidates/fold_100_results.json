@@ -37,10 +37,10 @@
     "segment_popular": {
       "source": "segment_popular",
       "coverage": 1.0,
-      "recall@20": 0.023550308675403444,
-      "recall@50": 0.04615617892342684,
-      "recall@100": 0.04615617892342684,
-      "recall@200": 0.04615617892342684
+      "recall@20": 0.022085995884327955,
+      "recall@50": 0.04421964691866132,
+      "recall@100": 0.04421964691866132,
+      "recall@200": 0.04421964691866132
     },
     "copurchase": {
       "source": "copurchase",
@@ -195,9 +195,9 @@
     {
       "source_a": "repurchase",
       "source_b": "segment_popular",
-      "jaccard": 0.003737799014315101,
-      "intersection": 21401,
-      "union": 5725562
+      "jaccard": 0.005156466632770621,
+      "intersection": 29482,
+      "union": 5717481
     },
     {
       "source_a": "repurchase",
@@ -223,9 +223,9 @@
     {
       "source_a": "product_code",
       "source_b": "segment_popular",
-      "jaccard": 0.00340957366521414,
-      "intersection": 18026,
-      "union": 5286878
+      "jaccard": 0.0055128881411587475,
+      "intersection": 29085,
+      "union": 5275819
     },
     {
       "source_a": "product_code",
@@ -244,9 +244,9 @@
     {
       "source_a": "popularity_last_week",
       "source_b": "segment_popular",
-      "jaccard": 0.2510578894105465,
-      "intersection": 1445573,
-      "union": 5757927
+      "jaccard": 0.29837873438219,
+      "intersection": 1655427,
+      "union": 5548073
     },
     {
       "source_a": "popularity_last_week",
@@ -258,9 +258,9 @@
     {
       "source_a": "popularity_decayed",
       "source_b": "segment_popular",
-      "jaccard": 0.19873687896077408,
-      "intersection": 1194258,
-      "union": 6009242
+      "jaccard": 0.37619761766026344,
+      "intersection": 1969150,
+      "union": 5234350
     },
     {
       "source_a": "popularity_decayed",
@@ -272,14 +272,14 @@
     {
       "source_a": "segment_popular",
       "source_b": "copurchase",
-      "jaccard": 0.009778474241835918,
-      "intersection": 49359,
-      "union": 5047720
+      "jaccard": 0.011315366179971663,
+      "intersection": 57030,
+      "union": 5040049
     }
   ],
-  "heuristic_map12": 0.021079623979369754,
-  "oracle_map12": 0.17967604532468837,
-  "candidate_precision_mean": 0.002599083778717807,
-  "rss_delta_mb": 5820.0,
-  "runtime_s": 42.42105174064636
+  "heuristic_map12": 0.021079623979369726,
+  "oracle_map12": 0.1796760453246891,
+  "candidate_precision_mean": 0.0025990837787178097,
+  "rss_delta_mb": 7139.4,
+  "runtime_s": 37.54678821563721
 }
