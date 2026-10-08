@@ -1,0 +1,101 @@
+{
+  "folds": [
+    {
+      "fold": 101,
+      "n_eval_customers": 80253,
+      "ranker_map@12": 0.029124509043130437,
+      "heuristic_map@12": 0.019197552083039703,
+      "baseline_b_map@12": 0.01901883598975907,
+      "boot_vs_heuristic": {
+        "mean_diff": 0.009926956960090858,
+        "ci_lo": 0.00941379973449745,
+        "ci_hi": 0.010500214063848769,
+        "ci_excludes_zero": true,
+        "relative_lift": 0.5170949357059381,
+        "n_customers": 80253,
+        "n_resamples": 1000
+      },
+      "boot_vs_baseline_b": {
+        "mean_diff": 0.010105673053371487,
+        "ci_lo": 0.009592802763742022,
+        "ci_hi": 0.010664141977167946,
+        "ci_excludes_zero": true,
+        "relative_lift": 0.5313507650422437,
+        "n_customers": 80253,
+        "n_resamples": 1000
+      },
+      "train_folds": [
+        100
+      ],
+      "final_rounds": 105,
+      "note": "unbiased"
+    },
+    {
+      "fold": 102,
+      "n_eval_customers": 75822,
+      "ranker_map@12": 0.03526954804566773,
+      "heuristic_map@12": 0.022444878484300625,
+      "baseline_b_map@12": 0.021933932648792537,
+      "boot_vs_heuristic": {
+        "mean_diff": 0.012824669561367139,
+        "ci_lo": 0.012207704987163729,
+        "ci_hi": 0.013400745132181773,
+        "ci_excludes_zero": true,
+        "relative_lift": 0.5713851188963871,
+        "n_customers": 75822,
+        "n_resamples": 1000
+      },
+      "boot_vs_baseline_b": {
+        "mean_diff": 0.01333561539687525,
+        "ci_lo": 0.01271283038526606,
+        "ci_hi": 0.01395169810062086,
+        "ci_excludes_zero": true,
+        "relative_lift": 0.6079901680380752,
+        "n_customers": 75822,
+        "n_resamples": 1000
+      },
+      "train_folds": [
+        100,
+        101
+      ],
+      "final_rounds": 256,
+      "note": "optimistic: fold 102 was the tuning fold; hyperparameters saw this fold's distribution"
+    },
+    {
+      "fold": 103,
+      "n_eval_customers": 72019,
+      "train_folds": [
+        100,
+        101,
+        102
+      ],
+      "final_rounds": 421,
+      "note": "final model; eval fold is cleanly held out from tuning",
+      "ranker_map@12": 0.035831756118557344,
+      "heuristic_map@12": 0.02467529279204269,
+      "baseline_b_map@12": 0.02420128017460798,
+      "boot_vs_heuristic": {
+        "mean_diff": 0.01115646332651451,
+        "ci_lo": 0.010563387970538645,
+        "ci_hi": 0.011758328858016065,
+        "ci_excludes_zero": true,
+        "relative_lift": 0.4521309400677988,
+        "n_customers": 72019,
+        "n_resamples": 1000
+      },
+      "boot_vs_baseline_b": {
+        "mean_diff": 0.011630475943949259,
+        "ci_lo": 0.011006556936627542,
+        "ci_hi": 0.012262777543327582,
+        "ci_excludes_zero": true,
+        "relative_lift": 0.48057275731024834,
+        "n_customers": 72019,
+        "n_resamples": 1000
+      }
+    }
+  ],
+  "mean_lift_vs_heuristic": 0.011302696615990836,
+  "lift_holds_every_week": true,
+  "inner_rounds": 256,
+  "scale_rule": "final_rounds = round(inner_rounds * n_rows_final / n_rows_inner)"
+}

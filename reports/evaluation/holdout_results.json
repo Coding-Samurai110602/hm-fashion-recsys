@@ -1,0 +1,115 @@
+{
+  "holdout_week": 104,
+  "protocol_timestamp_utc": "2026-10-08T20:53:25.076540Z",
+  "labels_read_timestamp_utc": "2026-10-08T21:23:46.171529+00:00",
+  "labels_sha256": "6a5dc83e229b3e305cb6a2043f6e81ab379478b82be2e65f95287d5104889884",
+  "n_eval_customers": 68984,
+  "models": {
+    "primary": {
+      "map@12": 0.03690353800369098,
+      "map@12_ci_lo": 0.03586677377325769,
+      "map@12_ci_hi": 0.03796299313810415,
+      "ndcg@12": 0.05462853310198078,
+      "hit_rate@12": 0.1521802157021918,
+      "n_eval_customers": 68984,
+      "train_folds": [
+        100,
+        101,
+        102,
+        103
+      ],
+      "final_rounds": null,
+      "boot_vs_heuristic": {
+        "mean_diff": 0.011904301916718844,
+        "ci_lo": 0.011272543007433978,
+        "ci_hi": 0.0125815438122665,
+        "ci_excludes_zero": true,
+        "relative_lift": 0.4761866272754834,
+        "n_customers": 68984,
+        "n_resamples": 1000
+      },
+      "boot_vs_baseline_b": {
+        "mean_diff": 0.012446990620725336,
+        "ci_lo": 0.01177771703014604,
+        "ci_hi": 0.013104675509222573,
+        "ci_excludes_zero": true,
+        "relative_lift": 0.5089430828406638,
+        "n_customers": 68984,
+        "n_resamples": 1000
+      }
+    },
+    "secondary": {
+      "map@12": 0.036787675666382615,
+      "map@12_ci_lo": 0.03581105769424274,
+      "map@12_ci_hi": 0.03790586362509678,
+      "ndcg@12": 0.05425362381618199,
+      "hit_rate@12": 0.15029572074683983,
+      "n_eval_customers": 68984,
+      "train_folds": [
+        100,
+        101,
+        102
+      ],
+      "final_rounds": 421,
+      "boot_vs_heuristic": {
+        "mean_diff": 0.011788439579410457,
+        "ci_lo": 0.011176624084517273,
+        "ci_hi": 0.01243500840634629,
+        "ci_excludes_zero": true,
+        "relative_lift": 0.4715519921648223,
+        "n_customers": 68984,
+        "n_resamples": 1000
+      }
+    },
+    "heuristic": {
+      "map@12": 0.02499923608697207,
+      "map@12_ci_lo": 0.024153774551104495,
+      "map@12_ci_hi": 0.025978209796059117,
+      "ndcg@12": 0.03473164051576747,
+      "hit_rate@12": 0.08586048938884379,
+      "n_eval_customers": 68984
+    },
+    "baseline_b": {
+      "map@12": 0.024456547382965547,
+      "map@12_ci_lo": 0.02362623016018528,
+      "map@12_ci_hi": 0.025447000774184648,
+      "ndcg@12": 0.03391153555046453,
+      "hit_rate@12": 0.08432390119447988,
+      "n_eval_customers": 68984,
+      "eda_expected_map12": 0.024457,
+      "eda_match": true
+    }
+  },
+  "primary_lift_vs_heuristic_pct": 47.62,
+  "primary_lift_vs_baseline_b_pct": 50.89,
+  "deviations": {
+    "(a)_invalid_first_read": {
+      "description": "labels_104.parquet was first read in an earlier run at approximately 2026-10-08T21:11:35 UTC (recorded in PROJECT_LOG.md during that session). In that run the ground truth was built by reading labels_104.parquet directly without filtering label==1, treating all 13,796,800 candidate rows as purchases. This produced Baseline B MAP@12=1.0 — an invalid result. That run's output was discarded. Ground truth was switched to build_holdout_fold(), which reads week-104 ground truth from the full transaction history. No model, parameters, features, or candidates were changed between the invalid run and the valid run.",
+      "first_read_timestamp_approx_utc": "2026-10-08T21:11:35Z",
+      "first_read_source": "PROJECT_LOG.md (recorded during session)",
+      "valid_run_labels_read_timestamp_utc": "2026-10-08T21:23:46.171529+00:00",
+      "ground_truth_source_valid_run": "build_holdout_fold() (full transaction history, not labels_104.parquet)"
+    },
+    "(b)_fold103_downsampling": {
+      "description": "Fold-103 training negatives for the primary model (folds 100-103) were downsampled using .sample(fraction=0.2, seed=42) applied to the already-built fold_103.parquet. This is a random sample, not the hash-based rule used to build fold_103.parquet from scratch. The secondary model (folds 100-102) used the existing fold_103.parquet for validation only and is unaffected.",
+      "primary_map12": 0.03690353800369098,
+      "secondary_map12": 0.036787675666382615,
+      "difference": 0.0001158623373083648,
+      "primary_ci": [0.03586677377325769, 0.03796299313810415],
+      "secondary_ci": [0.03581105769424274, 0.03790586362509678],
+      "ci_overlap": true,
+      "difference_within_primary_ci_width": true,
+      "note": "CIs overlap substantially; the 0.000116 primary-secondary difference is well within the uncertainty of both estimates."
+    },
+    "(c)_git_commit": {
+      "description": "The protocol's git_commit_hash (13ec5dc) identifies the last committed state at the time of the holdout run. Uncommitted changes present at that time include scripts/run_holdout.py, scripts/run_experiment.py, src/evaluation/ modules, and supporting files. The held-out fold_104.parquet, feature tables (folds 100-104), and model files are covered by their SHA-256 hashes recorded in the protocol and are unaffected by uncommitted code changes."
+    },
+    "(d)_protocol_modification": {
+      "description": "holdout_protocol.json was modified after the label-read timestamp (mtime ≈ 2026-10-08T21:27 UTC, which is after labels_read_timestamp_utc = 2026-10-08T21:23:46Z). The script run_holdout.py added two new fields: labels_read_timestamp_utc and labels_sha256. No pre-registered field value changed. However, the field no_changes_after_label_read: true was violated because the script modified the file. The protocol has been restored to its pre-label-read state (the two added fields are now recorded only in holdout_results.json). Future runs use a version of run_holdout.py that writes all results to holdout_results.json and does not modify holdout_protocol.json.",
+      "original_protocol_fields": ["description", "git_commit_hash", "protocol_timestamp_utc", "model_sha256", "feature_table_sha256", "preregistered_models", "metrics_to_report", "baseline_b_expected_map12", "no_changes_after_label_read"],
+      "fields_added_by_run_holdout": ["labels_read_timestamp_utc", "labels_sha256"],
+      "pre_registered_fields_changed": "none",
+      "violation": "no_changes_after_label_read: true was violated by run_holdout.py writing to holdout_protocol.json"
+    }
+  }
+}

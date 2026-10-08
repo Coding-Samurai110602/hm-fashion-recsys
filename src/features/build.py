@@ -590,6 +590,29 @@ def _downsample_negatives(
     return pl.concat([positives, sampled_negatives], how="vertical")
 
 
+def build_fold_101_full(seed: int = 42) -> pl.DataFrame:
+    """Build fold 101 without negative downsampling for unbiased rolling-origin evaluation."""
+    history, ground_truth, eval_customers = build_fold(101)
+    hist_df = history.collect()
+    history_lf = hist_df.lazy()
+    articles_df = load_articles()
+    customers_df = load_customers()
+
+    result = _compute_features_inner(
+        history_lf, ground_truth, eval_customers,
+        articles_df, customers_df, fold_week=101,
+        neg_sample_rate=1.0, seed=seed,
+    )
+
+    features_dir = PROCESSED_DIR / "features"
+    features_dir.mkdir(parents=True, exist_ok=True)
+    out_path = features_dir / "fold_101_full.parquet"
+    result.write_parquet(out_path, compression="zstd")
+    print(f"  fold_101_full: {len(result):,} rows, positives={int((result['label']==1).sum()):,}, "
+          f"{out_path.stat().st_size/1e6:.1f}MB")
+    return result
+
+
 def build_fold_102_full(seed: int = 42) -> pl.DataFrame:
     """Build fold 102 without negative downsampling for unbiased tuning validation."""
     history, ground_truth, eval_customers = build_fold(102)

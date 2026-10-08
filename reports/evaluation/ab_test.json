@@ -1,0 +1,280 @@
+{
+  "assumption": "Offline replay assumes customers purchase the same items regardless of which list was shown (no feedback effect); online lift may differ.",
+  "fold": 103,
+  "runtime_seconds": 169.4,
+  "power_analysis": {
+    "p_control": 0.08569960704814007,
+    "p_treat": 0.14712784126411085,
+    "alpha": 0.05,
+    "power": 0.8,
+    "n_per_arm_formula": 427,
+    "n_per_arm_statsmodels": 421,
+    "effect_size_h": 0.1931305305775659,
+    "weekly_buying_customers_fold103": 72019,
+    "weekly_customers_per_arm": 36009.5,
+    "weeks_needed": 0.011857981921437399,
+    "mde_curve": [
+      {
+        "n_per_arm": 500,
+        "mde_absolute": 0.04959840396294346
+      },
+      {
+        "n_per_arm": 1000,
+        "mde_absolute": 0.03507136777822705
+      },
+      {
+        "n_per_arm": 2000,
+        "mde_absolute": 0.02479920198147173
+      },
+      {
+        "n_per_arm": 5000,
+        "mde_absolute": 0.015684392483202293
+      },
+      {
+        "n_per_arm": 10000,
+        "mde_absolute": 0.011090540283663653
+      },
+      {
+        "n_per_arm": 20000,
+        "mde_absolute": 0.007842196241601146
+      },
+      {
+        "n_per_arm": 36000,
+        "mde_absolute": 0.005845227963037842
+      },
+      {
+        "n_per_arm": 72000,
+        "mde_absolute": 0.004133200330245289
+      }
+    ],
+    "population_caveat": "The offline metric is computed over customers who purchased in the target week. An online test would randomize all active visitors, lowering the baseline hit rate and increasing the required sample size."
+  },
+  "simulation": {
+    "assumption": "Offline replay assumes customers purchase the same items regardless of which list was shown (no feedback effect); online lift may differ.",
+    "seed": 42,
+    "n_a": 36009,
+    "n_b": 36010,
+    "hit_rate_z_test": {
+      "z": 24.673552909508324,
+      "p_value": 0.0,
+      "effect": 0.05892566708364565,
+      "ci_lo": 0.054264698263042026,
+      "ci_hi": 0.06358663590424926,
+      "p_a": 0.08672831792051987,
+      "p_b": 0.14565398500416551,
+      "n_a": 36009,
+      "n_b": 36010
+    },
+    "ap_welch_t_test": {
+      "t": 11.005508673815429,
+      "p_value": 3.7895895395657857e-28,
+      "effect": 0.01058122497032609,
+      "ci_lo": 0.008696821398549591,
+      "ci_hi": 0.01246562854210259,
+      "mean_a": 0.024619936789903332,
+      "mean_b": 0.03520116176022942,
+      "n_a": 36009,
+      "n_b": 36010
+    },
+    "guardrail_arm_a": {
+      "catalog_coverage": 0.4155797488515738,
+      "popularity_bias_mean_rank": 12032.589870980628
+    },
+    "guardrail_arm_b": {
+      "catalog_coverage": 0.11111326929987278,
+      "popularity_bias_mean_rank": 9332.577429417755
+    }
+  },
+  "aa_test": {
+    "n_sims": 10000,
+    "alpha": 0.05,
+    "false_positive_rate": 0.0532,
+    "rejections": 532,
+    "expected_fpr": 0.05,
+    "within_expected": true,
+    "fpr_ci_lo": 0.048936743174732074,
+    "fpr_ci_hi": 0.057824616242947616,
+    "alpha_in_ci": true
+  },
+  "peeking": {
+    "n_sims": 1000,
+    "n_days": 14,
+    "alpha": 0.05,
+    "peeking_false_positive_rate": 0.224,
+    "fixed_horizon_false_positive_rate": 0.052,
+    "inflation_factor": 4.307692307692308
+  },
+  "empirical_power_curve": [
+    {
+      "n_per_arm": 500,
+      "empirical_power": 0.876,
+      "analytical_power": 0.8584444997777934,
+      "abs_diff": 0.017555500222206644
+    },
+    {
+      "n_per_arm": 1000,
+      "empirical_power": 0.993,
+      "analytical_power": 0.9901903031282888,
+      "abs_diff": 0.002809696871711176
+    },
+    {
+      "n_per_arm": 2000,
+      "empirical_power": 1.0,
+      "analytical_power": 0.9999807020112541,
+      "abs_diff": 1.929798874589217e-05
+    },
+    {
+      "n_per_arm": 5000,
+      "empirical_power": 1.0,
+      "analytical_power": 0.9999999999999901,
+      "abs_diff": 9.880984919163893e-15
+    },
+    {
+      "n_per_arm": 10000,
+      "empirical_power": 1.0,
+      "analytical_power": 1.0,
+      "abs_diff": 0.0
+    },
+    {
+      "n_per_arm": 20000,
+      "empirical_power": 1.0,
+      "analytical_power": 1.0,
+      "abs_diff": 0.0
+    },
+    {
+      "n_per_arm": 36000,
+      "empirical_power": 1.0,
+      "analytical_power": 1.0,
+      "abs_diff": 0.0
+    }
+  ],
+  "cuped": {
+    "primary_metric": "hit_rate@12",
+    "covariate_a": {
+      "name": "c_n_purchases_4w",
+      "description": "4-week purchase count before week-103 cutoff",
+      "theta": 0.009536021724624848,
+      "x_mean": 2.7226287507463307,
+      "corr_with_hit_rate": 0.161862158858015,
+      "r_squared": 0.02619935847017728,
+      "variance_reduction_pct": 2.619935847017729,
+      "adj_factor_for_n": 0.9738006415298227,
+      "n_required": 416
+    },
+    "covariate_b": {
+      "name": "heuristic_hit12_week102",
+      "description": "Heuristic hit@12 in week 102 (pre-period, same metric)",
+      "no_pre_period_handling": "Customers not in week-102 GT have no pre-period prediction; covariate set to 0.0. See n_no_pre_period_data.",
+      "n_no_pre_period_data": 58061,
+      "n_with_pre_period_data": 13958,
+      "theta": 0.23250888038547946,
+      "x_mean": 0.019036643108068706,
+      "corr_with_hit_rate": 0.09915046534684795,
+      "r_squared": 0.009830814778496495,
+      "variance_reduction_pct": 0.983081477849701,
+      "adj_factor_for_n": 0.9901691852215035,
+      "n_required": 423
+    },
+    "best_covariate": "a",
+    "best_covariate_name": "c_n_purchases_4w",
+    "n_required_unadjusted": 427,
+    "n_required_cuped": 416,
+    "secondary_ap12_covariate_a": {
+      "theta": 0.002035770641256698,
+      "x_mean": 2.7226287507463307,
+      "covariate_correlation_with_metric": 0.08576186178188999,
+      "r_squared": 0.007355096936296004,
+      "variance_reduction_pct": 0.735509693629588,
+      "var_unadjusted": 0.01667109958750046,
+      "var_adjusted": 0.01654848203399975,
+      "adj_factor_for_n": 0.992644903063704,
+      "t_test_unadjusted": {
+        "t": 11.005508673815429,
+        "p_value": 3.7895895395657857e-28,
+        "effect": 0.01058122497032609,
+        "ci_lo": 0.008696821398549591,
+        "ci_hi": 0.01246562854210259,
+        "mean_a": 0.024619936789903332,
+        "mean_b": 0.03520116176022942,
+        "n_a": 36009,
+        "n_b": 36010
+      },
+      "t_test_adjusted": {
+        "t": 11.054181301027759,
+        "p_value": 2.2078627402288365e-28,
+        "effect": 0.010588784880953418,
+        "ci_lo": 0.008711338108411215,
+        "ci_hi": 0.012466231653495622,
+        "mean_a": 0.02461615678210414,
+        "mean_b": 0.03520494166305756,
+        "n_a": 36009,
+        "n_b": 36010
+      },
+      "n_required_cuped": 424,
+      "n_required_unadjusted": 427
+    }
+  },
+  "realistic_power_table": [
+    {
+      "relative_lift": "1%",
+      "p_control": 0.08569960704814007,
+      "p_treat": 0.08655660311862147,
+      "n_per_arm_no_cuped": 1682326,
+      "n_per_arm_cuped": 1638250,
+      "weeks_no_cuped": 46.72,
+      "weeks_cuped": 45.49,
+      "cuped_covariate": "a"
+    },
+    {
+      "relative_lift": "2%",
+      "p_control": 0.08569960704814007,
+      "p_treat": 0.08741359918910288,
+      "n_per_arm_no_cuped": 422475,
+      "n_per_arm_cuped": 411406,
+      "weeks_no_cuped": 11.73,
+      "weeks_cuped": 11.42,
+      "cuped_covariate": "a"
+    },
+    {
+      "relative_lift": "5%",
+      "p_control": 0.08569960704814007,
+      "p_treat": 0.08998458740054709,
+      "n_per_arm_no_cuped": 68503,
+      "n_per_arm_cuped": 66708,
+      "weeks_no_cuped": 1.9,
+      "weeks_cuped": 1.85,
+      "cuped_covariate": "a"
+    },
+    {
+      "relative_lift": "10%",
+      "p_control": 0.08569960704814007,
+      "p_treat": 0.09426956775295409,
+      "n_per_arm_no_cuped": 17502,
+      "n_per_arm_cuped": 17043,
+      "weeks_no_cuped": 0.49,
+      "weeks_cuped": 0.47,
+      "cuped_covariate": "a"
+    },
+    {
+      "relative_lift": "observed",
+      "p_control": 0.08569960704814007,
+      "p_treat": 0.14712784126411085,
+      "n_per_arm_no_cuped": 427,
+      "n_per_arm_cuped": 416,
+      "weeks_no_cuped": 0.01,
+      "weeks_cuped": 0.01,
+      "cuped_covariate": "a"
+    }
+  ],
+  "hand_example_z_test": {
+    "z": 3.3806170189140654,
+    "p_value": 0.0007232327164301555,
+    "effect": 0.04999999999999999,
+    "ci_lo": 0.021094683992369623,
+    "ci_hi": 0.07890531600763036,
+    "p_a": 0.1,
+    "p_b": 0.15,
+    "n_a": 1000,
+    "n_b": 1000
+  }
+}

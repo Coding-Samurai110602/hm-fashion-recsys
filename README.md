@@ -207,3 +207,77 @@ Inference:
 - Batch and single-customer inference use the same state builder and per-customer assembly code; results are guaranteed identical.
 
 Run: `python scripts/train_ranker.py --skip-tuning`
+
+## Evaluation and Experimentation
+
+### Week-104 One-Shot Holdout
+
+Pre-registered protocol written at **2026-10-08T20:53:25Z** (before any week-104 labels were read). Labels read at **2026-10-08T21:23:46Z**. Protocol file (`holdout_protocol.json`) is preserved in its pre-label-read state. See `holdout_results.json["deviations"]` for documented deviations: (a) an earlier run with an invalid ground-truth construction was discarded; (b) fold-103 negatives for the primary model were random-sampled rather than hash-sampled; (c) uncommitted script changes existed at the time of the holdout run; (d) the protocol file was originally modified post-label-read (now restored to pre-read state).
+
+| Model | MAP@12 | 95% CI | NDCG@12 | Hit Rate@12 | Lift vs heuristic |
+|-------|--------|--------|---------|-------------|-------------------|
+| **Primary (folds 100-103)** | **0.036904** | [0.035867, 0.037963] | 0.054629 | 0.1522 | **+47.62%** |
+| Secondary (folds 100-102) | 0.036788 | [0.035811, 0.037906] | 0.054254 | 0.1503 | +47.15% |
+| Heuristic | 0.024999 | [0.024154, 0.025978] | 0.034732 | 0.0859 | — |
+| Baseline B | 0.024457 | [0.023626, 0.025447] | 0.033912 | 0.0843 | — |
+
+Bootstrap (1,000 resamples, seed 42):
+- Primary vs heuristic: mean diff = +0.011904, 95% CI = [+0.011273, +0.012582], **CI excludes zero**
+- Primary vs Baseline B: mean diff = +0.012447, 95% CI = [+0.011778, +0.013105], **CI excludes zero**
+- Baseline B MAP@12 = 0.024457 matches EDA-computed value exactly (diff = 4.5 × 10⁻⁷).
+
+### Per-Week Lift (Rolling Origin)
+
+| Fold | Train folds | Ranker MAP@12 | Heuristic MAP@12 | 95% CI (lift) | Note |
+|------|-------------|---------------|-----------------|---------------|------|
+| 101 | [100] | 0.029125 | 0.019198 | [+0.009414, +0.010500] | unbiased |
+| 102 | [100,101] | 0.035270 | 0.022445 | [+0.012208, +0.013401] | OPTIMISTIC (tuning fold) |
+| 103 | [100-102] | 0.035832 | 0.024675 | [+0.010563, +0.011758] | final model |
+| **104** | **[100-103]** | **0.036904** | **0.024999** | **[+0.011273, +0.012582]** | **one-shot holdout** |
+
+Lift holds on all 4 evaluation weeks; mean lift ≈ +0.011 MAP@12. Fold 102 is OPTIMISTIC because hyperparameters were tuned using fold-102 performance.
+
+### A/B Test Design (offline power analysis, fold-103 simulation)
+
+- **Assumption:** offline replay assumes customers purchase the same items regardless of list shown (no feedback effect); online lift may differ.
+- Primary metric: hit rate@12 per customer (binary). Secondary: AP@12.
+- Control hit rate@12: 0.0857 (heuristic, fold 103). Treatment: 0.1471 (ranker). Lift: +5.89pp absolute (z=24.7, p≈0).
+- Required n/arm: 427 customers (formula); 421 (statsmodels). Cohen h = 0.193. Both confirm the current 36k-per-arm weekly pool vastly exceeds the minimum; weeks needed < 0.01.
+- Weekly buying customers (fold 103): 72,019. With 50/50 split: 36,010 per arm per week.
+- **A/A false-positive rate (10,000 splits): 5.32%** (95% binomial CI: [4.89%, 5.78%]; nominal α=5% within CI — well-calibrated).
+- **Peeking (14-day, 1,000 sims): fixed-horizon FPR = 5.2%; peeking FPR = 22.4% — inflation factor = 4.3×.** Stop at the pre-specified sample size.
+- **CUPED on hit rate@12 (primary metric) — two covariates compared:**
+  - (a) 4-week purchase count: corr=0.162, var-reduction=2.62%, n_req=416
+  - (b) Heuristic hit@12 in week 102 (pre-period): corr=0.099, var-reduction=0.98%, n_req=423; 58,061/72,019 customers have no week-102 purchase (set to 0).
+  - **Best covariate: (a) 4-week purchase count.** AP@12 (secondary): corr=0.086, var-reduction=0.7%.
+- **Empirical vs analytical power** (p_ctrl=0.0857, p_treat=0.1471, α=0.05):
+
+| n/arm | Empirical | Analytical | \|diff\| |
+|---|---|---|---|
+| 500 | 0.876 | 0.858 | 0.018 |
+| 1,000 | 0.993 | 0.990 | 0.003 |
+| ≥2,000 | 1.000 | 1.000 | 0.000 |
+
+- Realistic power table (α=0.05, power=0.8, weekly buyers=72,019, CUPED covariate=(a) 4-week purchase count, var-reduction=2.62%):
+
+| Relative lift | p_treat | n/arm (no CUPED) | weeks | n/arm (CUPED) | weeks |
+|---|---|---|---|---|---|
+| 1% | 0.0865 | 1,682,326 | 46.7 | 1,638,250 | 45.5 |
+| 2% | 0.0874 | 422,475 | 11.7 | 411,406 | 11.4 |
+| 5% | 0.0900 | 68,503 | 1.90 | 66,708 | 1.85 |
+| 10% | 0.0943 | 17,502 | 0.49 | 17,043 | 0.47 |
+| Observed (71.7%) | 0.1471 | 427 | <0.01 | 416 | <0.01 |
+
+- **Population caveat:** offline metric computed over customers who purchased in target week; an online test randomises all active visitors, lowering baseline rate and increasing required n.
+
+Vectorized experiment runtime: 169s (2.8 min). Source: `reports/evaluation/ab_test.json`.
+
+Run evaluation: `python scripts/run_evaluation.py` · A/B experiment: `caffeinate -i python -u scripts/run_experiment.py --n-sims 1000` · Holdout: `python scripts/run_holdout.py --skip-primary-train`
+
+### Limitations
+
+1. **Offline replay assumption:** No feedback effects (exposure/position bias) are modelled. Online lift may differ.
+2. **Temporal scope:** Robustness measured on lift across weeks 101–104 (four folds); the one-shot holdout itself is a single week (week 104). Generalisation to other seasons or demand patterns is not measured.
+3. **Candidate recall ceiling:** Recall@200 ≈ 17.5%; any purchase not in the candidate pool is unrecoverable by the ranker.
+4. **Cold-start:** 8.1% of target-week buyers have no prior history and receive only popularity-based candidates.
+5. **Online population caveat:** The offline metric is computed over customers who purchased in the target week. An online A/B test would randomise all active visitors, yielding a lower baseline hit rate and a higher required sample size than the offline power analysis indicates.

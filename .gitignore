@@ -26,3 +26,6 @@ scripts/check_nb04_numbers.py
 scripts/update_readme_ranker_section.py
 scripts/measure_inference_rss.py
 scripts/check_lgbm_autoselect.py
+scripts/build_evaluation_notebook.py
+scripts/run_nb05_numbers.py
+reports/evaluation/ab_run.log

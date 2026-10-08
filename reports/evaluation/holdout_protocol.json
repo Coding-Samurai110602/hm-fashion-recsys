@@ -1,0 +1,55 @@
+{
+  "description": "One-shot holdout protocol for week 104. This file was written before reading labels_104.parquet.",
+  "git_commit_hash": "13ec5dc831efc04143b452045283a48660262100",
+  "protocol_timestamp_utc": "2026-10-08T20:53:25.076540Z",
+  "model_sha256": {
+    "model_lgbm_ranker_txt": "397da1e44137b973c6e261c38d5c2ef75adbb595e176bf445282396693b74352"
+  },
+  "feature_table_sha256": {
+    "fold_100_parquet": "141b69c8279d463f3d10177314c2d27bae3976679ce4b9a938bcc88cf60b6d97",
+    "fold_101_parquet": "c35539dece1bc321ba3eed87d7d10b2884da771b8c0b74af1ca09c8db251729b",
+    "fold_102_parquet": "915018eab0aece088ae6b769196badf633160706f788e8972aa0200e5233e09f",
+    "fold_103_parquet": "a4bfd9bca911fd614db119eca102fd7011935577f89cf13a2f5194e750d6c511",
+    "fold_104_parquet": "84e21efbe02e04e75018be3e0713505742cb8ce1d6a25d684cfa6228a965069e"
+  },
+  "preregistered_models": {
+    "primary": {
+      "description": "LightGBM LambdaRank retrained on folds 100-103 with frozen params from tuning.json. Fold 103 uses 20%-negative-downsampled parquet (existing fold_103.parquet). Rounds scaled by: final_rounds = round(inner_rounds * n_rows_final / n_rows_inner).",
+      "train_folds": [
+        100,
+        101,
+        102,
+        103
+      ],
+      "frozen_params_source": "reports/ranker/tuning.json",
+      "inner_rounds": 256,
+      "scale_rule": "final_rounds = round(inner_rounds * n_rows_final / n_rows_inner)"
+    },
+    "secondary": {
+      "description": "Existing 100-102 model: models/lgbm_ranker.txt (trained on folds 100-102, 421 rounds).",
+      "model_file": "models/lgbm_ranker.txt",
+      "train_folds": [
+        100,
+        101,
+        102
+      ],
+      "final_rounds": 421
+    },
+    "heuristic": {
+      "description": "Heuristic top-12 from fold_104.parquet (final_rank <= 12)."
+    },
+    "baseline_b": {
+      "description": "Baseline B: recency-ordered repurchase + popularity fill from fold_104.parquet. EDA-verified MAP@12 = 0.024457."
+    }
+  },
+  "metrics_to_report": [
+    "MAP@12",
+    "NDCG@12",
+    "hit_rate@12",
+    "bootstrap_95_ci",
+    "lift_vs_heuristic",
+    "lift_vs_baseline_b"
+  ],
+  "baseline_b_expected_map12": 0.024457,
+  "no_changes_after_label_read": true
+}
