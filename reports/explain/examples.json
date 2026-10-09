@@ -14,7 +14,7 @@
         "colour": "Black",
         "score": 0.426398,
         "reasons": [
-          "Shoppers who bought this often come back (10% repurchase rate)"
+          "Customers re-buy this more than most items (10% vs 4.7% avg)"
         ]
       },
       {
@@ -58,7 +58,7 @@
         "colour": "Black",
         "score": 0.122536,
         "reasons": [
-          "Shoppers who bought this often come back (20% repurchase rate)"
+          "Customers re-buy this more than most items (20% vs 4.7% avg)"
         ]
       },
       {
@@ -179,7 +179,7 @@
         "score": -0.131323,
         "reasons": [
           "In a garment category you buy often (50% of your purchases)",
-          "Shoppers who bought this often come back (10% repurchase rate)",
+          "Customers re-buy this more than most items (10% vs 4.7% avg)",
           "Popular with customers your age"
         ]
       },
@@ -400,7 +400,7 @@
         "score": 0.378659,
         "reasons": [
           "In a garment category you've bought from before (14% of your purchases)",
-          "Shoppers who bought this often come back (10% repurchase rate)"
+          "Customers re-buy this more than most items (10% vs 4.7% avg)"
         ]
       }
     ]
@@ -589,7 +589,7 @@
         "colour": "Black",
         "score": 0.106801,
         "reasons": [
-          "Shoppers who bought this often come back (20% repurchase rate)"
+          "Customers re-buy this more than most items (20% vs 4.7% avg)"
         ]
       },
       {
@@ -607,7 +607,7 @@
         "colour": "Black",
         "score": 0.086596,
         "reasons": [
-          "Shoppers who bought this often come back (10% repurchase rate)"
+          "Customers re-buy this more than most items (10% vs 4.7% avg)"
         ]
       },
       {
@@ -617,7 +617,7 @@
         "colour": "Black",
         "score": 0.069505,
         "reasons": [
-          "Shoppers who bought this often come back (15% repurchase rate)"
+          "Customers re-buy this more than most items (15% vs 4.7% avg)"
         ]
       },
       {
@@ -635,7 +635,7 @@
         "colour": "Blue",
         "score": 0.043052,
         "reasons": [
-          "Shoppers who bought this often come back (13% repurchase rate)"
+          "Customers re-buy this more than most items (13% vs 4.7% avg)"
         ]
       },
       {

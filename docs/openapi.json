@@ -1,0 +1,1494 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "H&M Fashion Recommendation API",
+    "description": "Personalized fashion recommendations via LightGBM LambdaRank.",
+    "version": "v1"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "ops"
+        ],
+        "summary": "Liveness probe",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ready": {
+      "get": {
+        "tags": [
+          "ops"
+        ],
+        "summary": "Readiness probe",
+        "operationId": "ready_ready_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/version": {
+      "get": {
+        "tags": [
+          "ops"
+        ],
+        "summary": "Bundle and model metadata",
+        "operationId": "version_version_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metrics": {
+      "get": {
+        "tags": [
+          "ops"
+        ],
+        "summary": "Prometheus metrics",
+        "operationId": "metrics_metrics_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/customers/sample": {
+      "get": {
+        "tags": [
+          "customers"
+        ],
+        "summary": "Sample demo customers by segment",
+        "operationId": "sample_customers_api_v1_customers_sample_get",
+        "parameters": [
+          {
+            "name": "segment",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Segment: cold-start, light, medium, heavy",
+              "title": "Segment"
+            },
+            "description": "Segment: cold-start, light, medium, heavy"
+          },
+          {
+            "name": "n",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 20,
+              "minimum": 1,
+              "default": 5,
+              "title": "N"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SampleCustomer"
+                  },
+                  "title": "Response Sample Customers Api V1 Customers Sample Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/customers/{customer_id}": {
+      "get": {
+        "tags": [
+          "customers"
+        ],
+        "summary": "Customer profile summary",
+        "operationId": "customer_profile_api_v1_customers__customer_id__get",
+        "parameters": [
+          {
+            "name": "customer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Customer Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerProfile"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/customers/{customer_id}/recommendations": {
+      "get": {
+        "tags": [
+          "customers"
+        ],
+        "summary": "Ranked recommendations for a customer",
+        "operationId": "recommendations_api_v1_customers__customer_id__recommendations_get",
+        "parameters": [
+          {
+            "name": "customer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Customer Id"
+            }
+          },
+          {
+            "name": "k",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 12,
+              "title": "K"
+            }
+          },
+          {
+            "name": "include_reasons",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Include Reasons"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/customers/{customer_id}/baseline": {
+      "get": {
+        "tags": [
+          "customers"
+        ],
+        "summary": "Heuristic baseline top-k (for side-by-side comparison)",
+        "operationId": "baseline_api_v1_customers__customer_id__baseline_get",
+        "parameters": [
+          {
+            "name": "customer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Customer Id"
+            }
+          },
+          {
+            "name": "k",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 12,
+              "title": "K"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RecommendedItemNoReasons"
+                  },
+                  "title": "Response Baseline Api V1 Customers  Customer Id  Baseline Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/customers/{customer_id}/actual-purchases": {
+      "get": {
+        "tags": [
+          "customers"
+        ],
+        "summary": "Week-104 actual purchases (display only, labelled)",
+        "operationId": "actual_purchases_api_v1_customers__customer_id__actual_purchases_get",
+        "parameters": [
+          {
+            "name": "customer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Customer Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ArticleMeta"
+                  },
+                  "title": "Response Actual Purchases Api V1 Customers  Customer Id  Actual Purchases Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/customers/{customer_id}/funnel": {
+      "get": {
+        "tags": [
+          "customers"
+        ],
+        "summary": "Full candidate funnel: source, score, final rank",
+        "operationId": "funnel_api_v1_customers__customer_id__funnel_get",
+        "parameters": [
+          {
+            "name": "customer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Customer Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FunnelItem"
+                  },
+                  "title": "Response Funnel Api V1 Customers  Customer Id  Funnel Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/customers/{customer_id}/explain/{article_id}": {
+      "get": {
+        "tags": [
+          "customers"
+        ],
+        "summary": "Full contrast-SHAP breakdown for one (customer, article) pair",
+        "operationId": "explain_api_v1_customers__customer_id__explain__article_id__get",
+        "parameters": [
+          {
+            "name": "customer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Customer Id"
+            }
+          },
+          {
+            "name": "article_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Article Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExplainResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recommendations/custom": {
+      "post": {
+        "tags": [
+          "customers"
+        ],
+        "summary": "Recommendations for a custom history (build-your-own customer)",
+        "operationId": "custom_recommendations_api_v1_recommendations_custom_post",
+        "parameters": [
+          {
+            "name": "k",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 12,
+              "title": "K"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomRecommendRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/articles/search": {
+      "get": {
+        "tags": [
+          "articles"
+        ],
+        "summary": "Search articles by name/type",
+        "operationId": "search_articles_api_v1_articles_search_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Name or keyword search",
+              "title": "Q"
+            },
+            "description": "Name or keyword search"
+          },
+          {
+            "name": "product_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Product Type"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ArticleMeta"
+                  },
+                  "title": "Response Search Articles Api V1 Articles Search Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/articles/{article_id}": {
+      "get": {
+        "tags": [
+          "articles"
+        ],
+        "summary": "Article metadata by ID",
+        "operationId": "get_article_api_v1_articles__article_id__get",
+        "parameters": [
+          {
+            "name": "article_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Article Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticleMeta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/articles/{article_id}/image": {
+      "get": {
+        "tags": [
+          "articles"
+        ],
+        "summary": "Article image (local if available, placeholder otherwise)",
+        "operationId": "get_article_image_api_v1_articles__article_id__image_get",
+        "parameters": [
+          {
+            "name": "article_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Article Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/insights/summary": {
+      "get": {
+        "tags": [
+          "insights"
+        ],
+        "summary": "Headline metrics including week-104 holdout",
+        "operationId": "summary_api_v1_insights_summary_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/insights/weekly-lift": {
+      "get": {
+        "tags": [
+          "insights"
+        ],
+        "summary": "Rolling-origin MAP@12 by week",
+        "operationId": "weekly_lift_api_v1_insights_weekly_lift_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/insights/segments": {
+      "get": {
+        "tags": [
+          "insights"
+        ],
+        "summary": "Segment-level MAP@12 analysis",
+        "operationId": "segments_api_v1_insights_segments_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/insights/ablations": {
+      "get": {
+        "tags": [
+          "insights"
+        ],
+        "summary": "Feature group ablation deltas",
+        "operationId": "ablations_api_v1_insights_ablations_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/insights/importance": {
+      "get": {
+        "tags": [
+          "insights"
+        ],
+        "summary": "SHAP importance vs gain importance",
+        "operationId": "importance_api_v1_insights_importance_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/experiment/power": {
+      "post": {
+        "tags": [
+          "experiment"
+        ],
+        "summary": "Sample size and power calculation for an A/B test",
+        "operationId": "power_api_v1_experiment_power_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PowerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PowerResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/experiment/simulate": {
+      "post": {
+        "tags": [
+          "experiment"
+        ],
+        "summary": "Run vectorized A/B or A/A simulation using week-104 per-customer arrays",
+        "operationId": "simulate_api_v1_experiment_simulate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SimulateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulateResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ArticleMeta": {
+        "properties": {
+          "article_idx": {
+            "type": "integer",
+            "title": "Article Idx"
+          },
+          "article_id": {
+            "type": "string",
+            "title": "Article Id"
+          },
+          "prod_name": {
+            "type": "string",
+            "title": "Prod Name"
+          },
+          "product_type": {
+            "type": "string",
+            "title": "Product Type"
+          },
+          "colour": {
+            "type": "string",
+            "title": "Colour"
+          },
+          "department": {
+            "type": "string",
+            "title": "Department"
+          }
+        },
+        "type": "object",
+        "required": [
+          "article_idx",
+          "article_id",
+          "prod_name",
+          "product_type",
+          "colour",
+          "department"
+        ],
+        "title": "ArticleMeta"
+      },
+      "CustomHistoryItem": {
+        "properties": {
+          "article_id": {
+            "type": "string",
+            "title": "Article Id"
+          },
+          "t_dat": {
+            "type": "string",
+            "format": "date",
+            "title": "T Dat"
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price"
+          },
+          "sales_channel_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sales Channel Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "article_id",
+          "t_dat"
+        ],
+        "title": "CustomHistoryItem"
+      },
+      "CustomRecommendRequest": {
+        "properties": {
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/CustomHistoryItem"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "History"
+          }
+        },
+        "type": "object",
+        "required": [
+          "history"
+        ],
+        "title": "CustomRecommendRequest"
+      },
+      "CustomerProfile": {
+        "properties": {
+          "customer_idx": {
+            "type": "integer",
+            "title": "Customer Idx"
+          },
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id"
+          },
+          "age_bucket": {
+            "type": "string",
+            "title": "Age Bucket"
+          },
+          "n_purchases_all_time": {
+            "type": "integer",
+            "title": "N Purchases All Time"
+          },
+          "n_purchases_last_4w": {
+            "type": "integer",
+            "title": "N Purchases Last 4W"
+          },
+          "recent_history": {
+            "items": {
+              "$ref": "#/components/schemas/ArticleMeta"
+            },
+            "type": "array",
+            "title": "Recent History"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_idx",
+          "customer_id",
+          "age_bucket",
+          "n_purchases_all_time",
+          "n_purchases_last_4w",
+          "recent_history"
+        ],
+        "title": "CustomerProfile"
+      },
+      "ExplainResult": {
+        "properties": {
+          "customer_idx": {
+            "type": "integer",
+            "title": "Customer Idx"
+          },
+          "article_idx": {
+            "type": "integer",
+            "title": "Article Idx"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score"
+          },
+          "expected_value": {
+            "type": "number",
+            "title": "Expected Value"
+          },
+          "shap_values": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Shap Values"
+          },
+          "contrast": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Contrast"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_idx",
+          "article_idx",
+          "score",
+          "expected_value",
+          "shap_values",
+          "contrast",
+          "reasons"
+        ],
+        "title": "ExplainResult"
+      },
+      "FunnelItem": {
+        "properties": {
+          "article_idx": {
+            "type": "integer",
+            "title": "Article Idx"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "all_sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "All Sources"
+          },
+          "source_rank": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Rank"
+          },
+          "model_score": {
+            "type": "number",
+            "title": "Model Score"
+          },
+          "final_rank": {
+            "type": "integer",
+            "title": "Final Rank"
+          }
+        },
+        "type": "object",
+        "required": [
+          "article_idx",
+          "source",
+          "all_sources",
+          "source_rank",
+          "model_score",
+          "final_rank"
+        ],
+        "title": "FunnelItem"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "ok"
+          }
+        },
+        "type": "object",
+        "title": "HealthResponse"
+      },
+      "PowerRequest": {
+        "properties": {
+          "baseline_rate": {
+            "type": "number",
+            "exclusiveMaximum": 1.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Baseline Rate"
+          },
+          "relative_lift": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Relative Lift"
+          },
+          "alpha": {
+            "type": "number",
+            "exclusiveMaximum": 1.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Alpha",
+            "default": 0.05
+          },
+          "power": {
+            "type": "number",
+            "exclusiveMaximum": 1.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Power",
+            "default": 0.8
+          },
+          "weekly_traffic": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weekly Traffic"
+          },
+          "cuped_variance_reduction": {
+            "type": "number",
+            "exclusiveMaximum": 1.0,
+            "minimum": 0.0,
+            "title": "Cuped Variance Reduction",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "baseline_rate",
+          "relative_lift"
+        ],
+        "title": "PowerRequest"
+      },
+      "PowerResult": {
+        "properties": {
+          "n_per_arm": {
+            "type": "integer",
+            "title": "N Per Arm"
+          },
+          "n_per_arm_statsmodels": {
+            "type": "integer",
+            "title": "N Per Arm Statsmodels"
+          },
+          "n_per_arm_cuped": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "N Per Arm Cuped"
+          },
+          "weeks_needed": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weeks Needed"
+          },
+          "cohen_h": {
+            "type": "number",
+            "title": "Cohen H"
+          }
+        },
+        "type": "object",
+        "required": [
+          "n_per_arm",
+          "n_per_arm_statsmodels",
+          "n_per_arm_cuped",
+          "weeks_needed",
+          "cohen_h"
+        ],
+        "title": "PowerResult"
+      },
+      "ReadyResponse": {
+        "properties": {
+          "ready": {
+            "type": "boolean",
+            "title": "Ready"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ready"
+        ],
+        "title": "ReadyResponse"
+      },
+      "RecommendedItemNoReasons": {
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "title": "Rank"
+          },
+          "article_idx": {
+            "type": "integer",
+            "title": "Article Idx"
+          },
+          "article_id": {
+            "type": "string",
+            "title": "Article Id"
+          },
+          "prod_name": {
+            "type": "string",
+            "title": "Prod Name"
+          },
+          "product_type": {
+            "type": "string",
+            "title": "Product Type"
+          },
+          "colour": {
+            "type": "string",
+            "title": "Colour"
+          },
+          "department": {
+            "type": "string",
+            "title": "Department"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sources"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rank",
+          "article_idx",
+          "article_id",
+          "prod_name",
+          "product_type",
+          "colour",
+          "department",
+          "sources"
+        ],
+        "title": "RecommendedItemNoReasons"
+      },
+      "SampleCustomer": {
+        "properties": {
+          "customer_idx": {
+            "type": "integer",
+            "title": "Customer Idx"
+          },
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id"
+          },
+          "segment": {
+            "type": "string",
+            "title": "Segment"
+          },
+          "age_bucket": {
+            "type": "string",
+            "title": "Age Bucket"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_idx",
+          "customer_id",
+          "segment",
+          "age_bucket"
+        ],
+        "title": "SampleCustomer"
+      },
+      "SimulateRequest": {
+        "properties": {
+          "test_type": {
+            "type": "string",
+            "pattern": "^(ab|aa)$",
+            "title": "Test Type",
+            "default": "ab"
+          },
+          "n_per_arm": {
+            "type": "integer",
+            "maximum": 100000.0,
+            "exclusiveMinimum": 0.0,
+            "title": "N Per Arm"
+          },
+          "n_sims": {
+            "type": "integer",
+            "maximum": 2000.0,
+            "exclusiveMinimum": 0.0,
+            "title": "N Sims",
+            "default": 100
+          },
+          "peeking": {
+            "type": "boolean",
+            "title": "Peeking",
+            "default": false
+          },
+          "n_days": {
+            "type": "integer",
+            "maximum": 60.0,
+            "exclusiveMinimum": 0.0,
+            "title": "N Days",
+            "default": 14
+          },
+          "seed": {
+            "type": "integer",
+            "title": "Seed",
+            "default": 42
+          }
+        },
+        "type": "object",
+        "required": [
+          "n_per_arm"
+        ],
+        "title": "SimulateRequest"
+      },
+      "SimulateResult": {
+        "properties": {
+          "test_type": {
+            "type": "string",
+            "title": "Test Type"
+          },
+          "n_per_arm": {
+            "type": "integer",
+            "title": "N Per Arm"
+          },
+          "n_sims": {
+            "type": "integer",
+            "title": "N Sims"
+          },
+          "false_positive_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "False Positive Rate"
+          },
+          "empirical_power": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Empirical Power"
+          },
+          "peeking_fpr": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Peeking Fpr"
+          }
+        },
+        "type": "object",
+        "required": [
+          "test_type",
+          "n_per_arm",
+          "n_sims",
+          "false_positive_rate",
+          "empirical_power",
+          "peeking_fpr"
+        ],
+        "title": "SimulateResult"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "VersionResponse": {
+        "properties": {
+          "api_version": {
+            "type": "string",
+            "title": "Api Version"
+          },
+          "git_commit": {
+            "type": "string",
+            "title": "Git Commit"
+          },
+          "bundle_as_of_week": {
+            "type": "integer",
+            "title": "Bundle As Of Week"
+          },
+          "model_map12_fold103": {
+            "type": "number",
+            "title": "Model Map12 Fold103"
+          },
+          "model_map12_holdout": {
+            "type": "number",
+            "title": "Model Map12 Holdout"
+          },
+          "n_features": {
+            "type": "integer",
+            "title": "N Features"
+          }
+        },
+        "type": "object",
+        "required": [
+          "api_version",
+          "git_commit",
+          "bundle_as_of_week",
+          "model_map12_fold103",
+          "model_map12_holdout",
+          "n_features"
+        ],
+        "title": "VersionResponse"
+      }
+    }
+  }
+}

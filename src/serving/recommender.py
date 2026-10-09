@@ -10,16 +10,19 @@ API:
   candidate_funnel(customer_idx)  → all candidates with source/score/rank
   actual_purchases(customer_idx)  → week-104 purchases (display only)
 """
+
 from __future__ import annotations
 
-import time
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from src.serving.bundle import Bundle
 
 import numpy as np
 import polars as pl
 
-from src.model.data import FEATURE_NAMES
 from src.config import MERGE_PRIORITY
+from src.model.data import FEATURE_NAMES
 
 
 def _age_bucket(age: float | None) -> str:
@@ -43,8 +46,9 @@ class BundleRecommender:
     stored in the bundle. Contrast-SHAP explanations are computed on-the-fly.
     """
 
-    def __init__(self, bundle: "Bundle") -> None:  # noqa: F821
+    def __init__(self, bundle: Bundle) -> None:
         from src.serving.bundle import Bundle
+
         assert isinstance(bundle, Bundle)
         self._b = bundle
         self._booster = bundle.booster
@@ -83,6 +87,7 @@ class BundleRecommender:
         history_rows: list of dicts with keys: article_idx, t_dat (YYYY-MM-DD), price (opt), sales_channel_id (opt)
         """
         from datetime import date as date_type
+
         from src.config import ANCHOR_DATE
 
         synthetic_idx = -1
@@ -94,14 +99,16 @@ class BundleRecommender:
             week_idx = (t_dat - ANCHOR_DATE).days // 7
             if week_idx >= self._as_of_week:
                 continue
-            rows.append({
-                "customer_idx": synthetic_idx,
-                "article_idx": int(r["article_idx"]),
-                "t_dat": t_dat,
-                "price": float(r.get("price", 0.05)),
-                "sales_channel_id": int(r.get("sales_channel_id", 2)),
-                "week_idx": week_idx,
-            })
+            rows.append(
+                {
+                    "customer_idx": synthetic_idx,
+                    "article_idx": int(r["article_idx"]),
+                    "t_dat": t_dat,
+                    "price": float(r.get("price", 0.05)),
+                    "sales_channel_id": int(r.get("sales_channel_id", 2)),
+                    "week_idx": week_idx,
+                }
+            )
         if not rows:
             # No valid history — return top-k from popularity
             return self._popularity_fallback(k)
@@ -138,8 +145,8 @@ class BundleRecommender:
           contrast: {feature_name: contrast_val},
           reasons: [str]
         """
-        from src.explain.shap_values import compute_shap, compute_within_list_contrast
         from src.explain.reasons import generate_reasons
+        from src.explain.shap_values import compute_shap, compute_within_list_contrast
 
         df_feat, scores, _ = self._score_customer(customer_idx)
         if df_feat is None:
@@ -189,16 +196,17 @@ class BundleRecommender:
         """Heuristic top-12: recency-ordered repurchase + popularity fill."""
         b = self._b
         state = self._state
-        hist = state.history_df.filter(
-            pl.col("customer_idx") == int(customer_idx)
-        ) if state.history_df is not None else None
+        hist = (
+            state.history_df.filter(pl.col("customer_idx") == int(customer_idx))
+            if state.history_df is not None
+            else None
+        )
         results = []
 
         if hist is not None and len(hist) > 0:
             # Repurchase: most recent first, then article_idx ASC (Baseline B ordering)
             recent = (
-                hist
-                .group_by("article_idx")
+                hist.group_by("article_idx")
                 .agg(pl.col("t_dat").max().alias("last_date"))
                 .sort(["last_date", "article_idx"], descending=[True, False])
                 .head(k)
@@ -206,7 +214,14 @@ class BundleRecommender:
             for row in recent.iter_rows(named=True):
                 art_idx = int(row["article_idx"])
                 meta = self._get_article_meta(art_idx)
-                results.append({**meta, "score": None, "sources": ["repurchase"], "top_3_reasons": []})
+                results.append(
+                    {
+                        **meta,
+                        "score": None,
+                        "sources": ["repurchase"],
+                        "top_3_reasons": [],
+                    }
+                )
 
         # Fill remaining slots from popularity
         filled = {r["article_idx"] for r in results}
@@ -218,12 +233,14 @@ class BundleRecommender:
                 if art_idx not in filled:
                     filled.add(art_idx)
                     meta = self._get_article_meta(art_idx)
-                    results.append({
-                        **meta,
-                        "score": float(row.get("score", 0.0)),
-                        "sources": ["popularity_last_week"],
-                        "top_3_reasons": [],
-                    })
+                    results.append(
+                        {
+                            **meta,
+                            "score": float(row.get("score", 0.0)),
+                            "sources": ["popularity_last_week"],
+                            "top_3_reasons": [],
+                        }
+                    )
 
         return results[:k]
 
@@ -240,16 +257,24 @@ class BundleRecommender:
         results = []
         for final_rank, i in enumerate(order, start=1):
             art_idx = int(df_feat["article_idx"][int(i)])
-            src_list = [MERGE_PRIORITY[j] for j, v in enumerate(sources_arr[int(i)]) if v == 1]
-            final_rank_feat = float(df_feat["final_rank"][int(i)]) if "final_rank" in df_feat.columns else None
-            results.append({
-                "article_idx": art_idx,
-                "source": src_list[0] if src_list else "unknown",
-                "all_sources": src_list,
-                "source_rank": final_rank_feat,
-                "model_score": float(scores[int(i)]),
-                "final_rank": final_rank,
-            })
+            src_list = [
+                MERGE_PRIORITY[j] for j, v in enumerate(sources_arr[int(i)]) if v == 1
+            ]
+            final_rank_feat = (
+                float(df_feat["final_rank"][int(i)])
+                if "final_rank" in df_feat.columns
+                else None
+            )
+            results.append(
+                {
+                    "article_idx": art_idx,
+                    "source": src_list[0] if src_list else "unknown",
+                    "all_sources": src_list,
+                    "source_rank": final_rank_feat,
+                    "model_score": float(scores[int(i)]),
+                    "final_rank": final_rank,
+                }
+            )
         return results
 
     def actual_purchases(
@@ -285,8 +310,14 @@ class BundleRecommender:
 
         if custom_history is not None:
             # Merge synthetic history with the bundle's history
-            real_cols = ["customer_idx", "article_idx", "t_dat", "price",
-                         "sales_channel_id", "week_idx"]
+            real_cols = [
+                "customer_idx",
+                "article_idx",
+                "t_dat",
+                "price",
+                "sales_channel_id",
+                "week_idx",
+            ]
             combined = pl.concat(
                 [state.history_df.select(real_cols), custom_history.select(real_cols)],
                 how="vertical",
@@ -320,7 +351,7 @@ class BundleRecommender:
             .to_numpy(allow_copy=True)
         ).astype(np.float32)
 
-        scores = self._booster.predict(X).astype(np.float32)
+        scores = np.array(self._booster.predict(X), dtype=np.float32)
         source_cols = [f"in_{s}" for s in MERGE_PRIORITY]
         sources_arr = df_cust.select(source_cols).to_numpy(allow_copy=True)
 
@@ -335,12 +366,14 @@ class BundleRecommender:
         for row in b.pop_last_week.head(k).iter_rows(named=True):
             art_idx = int(row["article_idx"])
             meta = self._get_article_meta(art_idx)
-            results.append({
-                **meta,
-                "score": float(row.get("score", 0.0)),
-                "sources": ["popularity_last_week"],
-                "top_3_reasons": [],
-            })
+            results.append(
+                {
+                    **meta,
+                    "score": float(row.get("score", 0.0)),
+                    "sources": ["popularity_last_week"],
+                    "top_3_reasons": [],
+                }
+            )
         return results
 
     def _make_state_from_bundle(self):
@@ -349,15 +382,19 @@ class BundleRecommender:
         All data comes from the bundle's precomputed parquets — no raw scans.
         """
         from src.model.state import RecommenderState
+
         b = self._b
         # Use full customers table if available; fall back to age_buckets only
-        customers_df = b.customers if b.customers is not None else (
-            b.age_buckets if b.age_buckets is not None else pl.DataFrame()
+        customers_df = (
+            b.customers
+            if b.customers is not None
+            else (b.age_buckets if b.age_buckets is not None else pl.DataFrame())
         )
         # articles_lf must be the raw articles table (for compute_interaction_features:
         # product_code, product_group_name, garment_group_name)
         articles_lf = (
-            b.articles_raw.lazy() if b.articles_raw is not None
+            b.articles_raw.lazy()
+            if b.articles_raw is not None
             else b.article_feats.lazy()  # fallback: may not have all columns
         )
         return RecommenderState(
@@ -389,8 +426,8 @@ class BundleRecommender:
         customer_idx: int,
     ) -> list[dict[str, Any]]:
         """Format scored candidates into the recommendation output schema."""
-        from src.explain.shap_values import compute_shap, compute_within_list_contrast
         from src.explain.reasons import generate_reasons
+        from src.explain.shap_values import compute_shap, compute_within_list_contrast
 
         X = (
             df_cust.select(FEATURE_NAMES)
@@ -407,17 +444,21 @@ class BundleRecommender:
         for i in order[:k]:
             idx = int(i)
             art_idx = int(df_cust["article_idx"][idx])
-            src_list = [MERGE_PRIORITY[j] for j, v in enumerate(sources_arr[idx]) if v == 1]
+            src_list = [
+                MERGE_PRIORITY[j] for j, v in enumerate(sources_arr[idx]) if v == 1
+            ]
 
             reasons = generate_reasons(contrast[idx], X[idx], FEATURE_NAMES, top_k=3)
             meta = self._get_article_meta(art_idx)
 
-            results.append({
-                **meta,
-                "score": float(scores[idx]),
-                "sources": src_list,
-                "top_3_reasons": reasons,
-            })
+            results.append(
+                {
+                    **meta,
+                    "score": float(scores[idx]),
+                    "sources": src_list,
+                    "top_3_reasons": reasons,
+                }
+            )
 
         return results
 
@@ -425,17 +466,37 @@ class BundleRecommender:
         """Look up display metadata for one article."""
         b = self._b
         if b.article_meta is None:
-            return {"article_idx": article_idx, "article_id": str(article_idx),
-                    "prod_name": "", "product_type": "", "colour": "", "department": ""}
+            return {
+                "article_idx": article_idx,
+                "article_id": str(article_idx),
+                "prod_name": "",
+                "product_type": "",
+                "colour": "",
+                "department": "",
+            }
         row = b.article_meta.filter(pl.col("article_idx") == article_idx)
         if len(row) == 0:
-            return {"article_idx": article_idx, "article_id": str(article_idx),
-                    "prod_name": "", "product_type": "", "colour": "", "department": ""}
+            return {
+                "article_idx": article_idx,
+                "article_id": str(article_idx),
+                "prod_name": "",
+                "product_type": "",
+                "colour": "",
+                "department": "",
+            }
         return {
             "article_idx": article_idx,
             "article_id": str(row["article_id"][0]),
-            "prod_name": str(row.get_column("prod_name")[0]) if "prod_name" in row.columns else "",
-            "product_type": str(row.get_column("product_type_name")[0]) if "product_type_name" in row.columns else "",
-            "colour": str(row.get_column("colour_group_name")[0]) if "colour_group_name" in row.columns else "",
-            "department": str(row.get_column("department_name")[0]) if "department_name" in row.columns else "",
+            "prod_name": str(row.get_column("prod_name")[0])
+            if "prod_name" in row.columns
+            else "",
+            "product_type": str(row.get_column("product_type_name")[0])
+            if "product_type_name" in row.columns
+            else "",
+            "colour": str(row.get_column("colour_group_name")[0])
+            if "colour_group_name" in row.columns
+            else "",
+            "department": str(row.get_column("department_name")[0])
+            if "department_name" in row.columns
+            else "",
         }

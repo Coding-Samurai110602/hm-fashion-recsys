@@ -1,5 +1,7 @@
 # H&M Personalized Fashion Recommendations
 
+[![CI](https://github.com/Coding-Samurai110602/hm-fashion-recsys/actions/workflows/ci.yml/badge.svg)](https://github.com/Coding-Samurai110602/hm-fashion-recsys/actions/workflows/ci.yml)
+
 ## Description
 
 A production-quality recommender system built on the [H&M Personalized Fashion Recommendations](https://www.kaggle.com/competitions/h-and-m-personalized-fashion-recommendations) Kaggle dataset. The task is to predict the 12 articles each customer will purchase in the next 7 days, evaluated by MAP@12.
@@ -304,12 +306,17 @@ Faithfulness: ablating the top-contrast feature causes a 7× larger mean score d
 
 **Worked examples (from `reports/explain/examples.json`):**
 
-*Cold-start customer (0 prior purchases):*
-- Rank 1 (score=0.43): "Shoppers who bought this often come back (10% repurchase rate)"
+*Medium buyer — 7 prior purchases, age 48 (customer 896118):*
+- Rank 1: "You bought this exact item 9 days ago" / "In a garment category you've bought from before (14% of your purchases)" / "Often bought together with something you bought recently"
+- Rank 2: "In a garment category you buy often (29% of your purchases)"
+- Rank 3: "In a garment category you buy often (29% of your purchases)" / "Trending: 87% more sales this week than its 4-week average"
 
-*Light buyer (2 prior purchases, age 30):*
-- Rank 1 (score=0.01): "In a product category you buy often (50% of your purchases)"
-- Rank 2 (score=−0.05): "In a garment category you buy often (50% of your purchases)" / "You bought another colour or size of this product 195 days ago"
+*Cold-start customer — 0 prior purchases:*
+- Rank 1: "Customers re-buy this more than most items (10% vs 4.7% avg)"
+
+*Light buyer — 2 prior purchases, age 30:*
+- Rank 1: "In a product category you buy often (50% of your purchases)"
+- Rank 2: "In a garment category you buy often (50% of your purchases)" / "You bought another colour or size of this product 195 days ago"
 
 Run: `caffeinate -i python -u scripts/run_explain.py --from-cache`
 
@@ -324,14 +331,72 @@ Bundle at `artifacts/bundle_week104/` — all artifacts SHA-256 verified via `ma
 | model.txt (lgbm_ranker_primary_104.txt) | 5.5 MB |
 | state/customers.parquet | 5.9 MB |
 
-Parity: `BundleRecommender` top-12 matches in-memory `Recommender(lgbm_ranker_primary_104.txt)` on 200 customers (seed 42) — **200/200 exact match** (max score diff = 1.6 × 10⁻⁷). Note: segment-popular bucket name encoding (`lt25` → `<25`, `55plus` → `55+`) must be reversed in `bundle.py` during load; `load_bundle()` handles this automatically.
+Parity: `BundleRecommender` top-12 matches in-memory `Recommender(lgbm_ranker_primary_104.txt)` on 200 customers (seed 42) — **200/200 exact match** (max score diff = 1.6 × 10⁻⁷).
 
-Latency (100 calls, 5 warm-ups, bundle loaded from disk, `as_of_week=104`):
-- `recommend()` with SHAP reasons: p50=443ms, p95=492ms
-- `explain()`: p50=449ms, p95=493ms
-- Load time: 0.22s. RSS: 5,653 MB.
+Parity (200 customers, seed 42): **200/200 exact match**. Load time: 0.29s. RSS: 4,198 MB (bundle state in memory).
 
-Reasons require exact TreeSHAP on all ~200 candidates per customer to compute the within-list contrast (SHAP_i − mean SHAP across the customer's pool); this per-call TreeSHAP pass dominates the ~0.45 s latency.
+HTTP latency (real bundle, 100 calls per group, 5 warmups, see `reports/api/latency_http.json`):
+- Recommendations without reasons: p50=12ms, p95=39ms
+- Recommendations with reasons (warm LRU cache): p50=17ms, p95=47ms
+- `/explain` (no cache): p50=1330ms, p95=1839ms — TreeSHAP-dominated
+- `/insights/summary`: p50=2ms, p95=4ms
+
+Reasons require exact TreeSHAP on all ~200 candidates per customer to compute the within-list contrast (SHAP_i − mean SHAP across the customer's pool); this per-call TreeSHAP pass dominates latency. `/explain` latency is hardware-dependent (1.3–1.8 s on a loaded MacBook Air, 0.45 s on a lightly-loaded machine).
 
 Export: `caffeinate -i python -u scripts/export_bundle.py`
 Parity + benchmark: `caffeinate -i python -u scripts/run_explain_parity.py`
+
+## Run the API
+
+```bash
+# 1. Build the serving bundle (requires processed data)
+make bundle              # → artifacts/bundle_week104/
+
+# 2. Start locally (uvicorn, single worker, real bundle)
+make api                 # → http://localhost:8000/docs
+
+# or with Docker
+make docker-build        # Build image
+make docker-run          # Run with real bundle mounted
+
+# or with docker compose
+docker compose up
+```
+
+Swagger UI: http://localhost:8000/docs — all endpoints with examples.
+Full API reference: [docs/API.md](docs/API.md).
+
+### Backend architecture
+
+```mermaid
+flowchart LR
+    subgraph API ["FastAPI (single worker)"]
+        direction TB
+        MW[RequestMiddleware\nrequest ID · timing · JSON log]
+        subgraph Routers
+            OPS[/health /ready\n/version /metrics]
+            CUST[/customers/...]
+            ART[/articles/...]
+            INS[/insights/...]
+            EXP[/experiment/...]
+        end
+        SVC[Services\nrec_svc · insights_svc · exp_svc]
+        CACHE[LRU cache\nkeyed by customer_id + k + reasons]
+        EXEC[ThreadPoolExecutor\nmodel scoring off event loop]
+    end
+
+    BUNDLE[(Bundle\nartifacts/bundle_week104)]
+    REC[BundleRecommender\nprecomputed state from bundle]
+    REPORTS[(reports/\nevaluation · ranker · explain)]
+
+    BUNDLE -->|SHA-256 verified at startup| REC
+    REC --> EXEC
+    EXEC --> CACHE
+    CACHE --> SVC
+    REPORTS --> INS
+    SVC --> Routers
+    MW --> Routers
+```
+
+**Single-worker rationale:** the bundle RSS is ~5.7 GB; multiple uvicorn workers would each load a full copy. Deploy one worker per pod behind a load balancer instead.
+

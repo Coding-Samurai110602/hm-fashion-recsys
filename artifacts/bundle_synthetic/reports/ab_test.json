@@ -1,0 +1,15 @@
+{
+  "synthetic": true,
+  "note": "Synthetic bundle \u2014 values are illustrative only.",
+  "aa_test": {
+    "fpr_estimate": 0.05
+  },
+  "peeking": {
+    "peeking_false_positive_rate": 0.22
+  },
+  "simulation": {
+    "hit_rate_z_test": {
+      "z_statistic": 24.0
+    }
+  }
+}

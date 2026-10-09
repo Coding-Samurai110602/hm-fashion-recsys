@@ -1,0 +1,30 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: hm-recsys-api:latest
+    ports:
+      - "8000:8000"
+    environment:
+      BUNDLE_PATH: /bundle
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://localhost:3000}
+      CACHE_SIZE: ${CACHE_SIZE:-512}
+      MAX_CUSTOM_HISTORY: ${MAX_CUSTOM_HISTORY:-200}
+    volumes:
+      # Mount the real bundle read-only; create a directory and set BUNDLE_PATH if using
+      # a custom location. For the synthetic bundle (CI/dev), omit this volume.
+      - type: bind
+        source: ${BUNDLE_DIR:-./artifacts/bundle_week104}
+        target: /bundle
+        read_only: true
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8000/ready')"]
+      interval: 30s
+      timeout: 10s
+      start_period: 120s
+      retries: 3
+    # Memory note: the serving bundle RSS is ~5.7 GB. Ensure the host has ≥ 8 GB free.
+    restart: unless-stopped

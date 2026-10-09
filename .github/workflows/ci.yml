@@ -1,0 +1,127 @@
+name: CI
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  lint:
+    name: Lint & format check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: lint-${{ hashFiles('requirements-api.txt') }}
+
+      - name: Install ruff and mypy
+        run: pip install ruff mypy
+
+      - name: ruff lint
+        run: ruff check src/api/ tests/api/ src/serving/
+
+      - name: ruff format check
+        run: ruff format --check src/api/ tests/api/ src/serving/
+
+      - name: mypy (src/api src/serving — config in mypy.ini)
+        run: mypy src/api src/serving
+
+  test:
+    name: Unit & API tests (no Kaggle data)
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: api-${{ hashFiles('requirements-api.txt', 'requirements.txt') }}
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements-api.txt
+          pip install pytest>=8.0.0 statsmodels==0.14.4  # pytest+statsmodels needed for tests
+
+      - name: Build synthetic bundle
+        run: PYTHONPATH=. python scripts/make_synthetic_bundle.py
+
+      - name: Export OpenAPI snapshot
+        run: PYTHONPATH=. python scripts/export_openapi.py
+
+      - name: Run tests (excluding real bundle and slow)
+        env:
+          BUNDLE_PATH: artifacts/bundle_synthetic
+        run: |
+          PYTHONPATH=. python -m pytest \
+            -q \
+            -m "not integration_real and not slow" \
+            --tb=short
+
+  docker-build:
+    name: Docker build + smoke test
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t hm-recsys-api:ci .
+
+      - name: Start container with synthetic bundle
+        run: |
+          docker run -d \
+            --name hm-api \
+            -p 8000:8000 \
+            -e BUNDLE_PATH=/app/artifacts/bundle_synthetic \
+            -e LOG_LEVEL=INFO \
+            hm-recsys-api:ci
+          echo "Container started, waiting for /ready..."
+
+      - name: Wait for ready
+        run: |
+          for i in $(seq 1 60); do
+            STATUS=$(curl -sf http://localhost:8000/ready 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('ready','false'))" 2>/dev/null || echo "false")
+            if [ "$STATUS" = "True" ]; then
+              echo "/ready returned true after ${i}s"
+              break
+            fi
+            if [ $i -eq 60 ]; then
+              echo "Timed out waiting for /ready"
+              docker logs hm-api
+              exit 1
+            fi
+            sleep 2
+          done
+
+      - name: Smoke test endpoints
+        run: |
+          echo "=== /health ==="
+          curl -sf http://localhost:8000/health | python3 -m json.tool
+
+          echo "=== /version ==="
+          curl -sf http://localhost:8000/version | python3 -m json.tool
+
+          echo "=== /api/v1/insights/summary ==="
+          curl -sf http://localhost:8000/api/v1/insights/summary | python3 -m json.tool
+
+      - name: Stop container
+        if: always()
+        run: docker rm -f hm-api || true
+
+      - name: Report image size
+        run: docker image inspect hm-recsys-api:ci --format '{{.Size}}' | awk '{printf "Image size: %.1f MB\n", $1/1048576}'

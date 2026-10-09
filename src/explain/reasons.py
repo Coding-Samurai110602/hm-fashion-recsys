@@ -104,13 +104,20 @@ def _fmt_age_gap(gap: float | None) -> str | None:
     return "Popular with customers your age"
 
 
+# Average same-article repurchase rate across all articles (EDA, strict prior-date definition).
+# Reason fires only when the article's rate is >= 2× this average — i.e., clearly above typical.
+_AVG_ARTICLE_REPURCHASE_RATE: float = 0.0474
+_REPURCHASE_RATE_THRESHOLD: float = 2.0 * _AVG_ARTICLE_REPURCHASE_RATE  # 0.0948
+
+
 def _fmt_repurchase_rate(rate: float | None) -> str | None:
     if rate is None or np.isnan(rate):
         return None
-    pct = int(round(rate * 100))
-    if pct < 10:
+    if rate < _REPURCHASE_RATE_THRESHOLD:
         return None
-    return f"Shoppers who bought this often come back ({pct}% repurchase rate)"
+    pct = int(round(rate * 100))
+    avg_pct = round(_AVG_ARTICLE_REPURCHASE_RATE * 100, 1)
+    return f"Customers re-buy this more than most items ({pct}% vs {avg_pct}% avg)"
 
 
 _REASON_REGISTRY: dict[str, Any] = {

@@ -444,3 +444,41 @@ class TestNumpyInt64IndexingFix:
 
         # Highest score is index 1 → article_id 202
         assert recs == [202, 101, 303], f"Expected [202, 101, 303], got {recs}"
+
+
+class TestRepurchaseRateThreshold:
+    """Repurchase-rate reason fires only above 2× average (4.74%), with comparison wording."""
+
+    def _call(self, rate: float) -> str | None:
+        from src.explain.reasons import _fmt_repurchase_rate
+        return _fmt_repurchase_rate(rate)
+
+    def test_rate_clearly_above_average_generates_reason(self):
+        reason = self._call(0.10)  # 10% >> 4.74% avg
+        assert reason is not None, "10% repurchase rate must generate a reason"
+        assert "4.7%" in reason, f"Reason should contain '4.7%': {reason}"
+        assert "10%" in reason, f"Reason should contain '10%': {reason}"
+        assert "Shoppers" not in reason, "Old wording must not appear"
+
+    def test_rate_below_threshold_returns_none(self):
+        reason = self._call(0.09)  # 9% < 9.48% threshold → no reason
+        assert reason is None, "9% is below 2× average (9.48%) and must not generate a reason"
+
+    def test_rate_at_threshold_generates_reason(self):
+        # 2 × 0.0474 = 0.0948; exactly at threshold must fire
+        from src.explain.reasons import _REPURCHASE_RATE_THRESHOLD
+        reason = self._call(_REPURCHASE_RATE_THRESHOLD)
+        assert reason is not None, "Rate exactly at 2× average must generate a reason"
+
+    def test_rate_20pct_generates_reason_with_correct_wording(self):
+        reason = self._call(0.20)
+        assert reason is not None
+        assert "20%" in reason
+        assert "4.7%" in reason
+
+    def test_nan_returns_none(self):
+        import math
+        assert self._call(float("nan")) is None
+
+    def test_none_returns_none(self):
+        assert self._call(None) is None

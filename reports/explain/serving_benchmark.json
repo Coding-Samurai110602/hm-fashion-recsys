@@ -10,17 +10,17 @@
   },
   "n_customers": 100,
   "n_warmup": 5,
-  "load_time_s": 0.22,
-  "rss_mb": 5653.0,
+  "load_time_s": 0.53,
+  "rss_mb": 4156.0,
   "recommend_with_reasons": {
-    "p50_ms": 443.52,
-    "p95_ms": 491.71,
+    "p50_ms": 1030.63,
+    "p95_ms": 1323.64,
     "n_calls": 100
   },
   "explain": {
-    "p50_ms": 449.06,
-    "p95_ms": 493.24,
+    "p50_ms": 1099.13,
+    "p95_ms": 1692.04,
     "n_calls": 100
   },
-  "total_runtime_s": 240.5
+  "total_runtime_s": 642.6
 }

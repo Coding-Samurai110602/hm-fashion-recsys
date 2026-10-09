@@ -1,0 +1,41 @@
+{
+  "as_of_week": 104,
+  "git_commit": "synthetic",
+  "synthetic": true,
+  "model_metrics": {
+    "map12_fold103": 0.0,
+    "map12_holdout": 0.0
+  },
+  "file_hashes": {
+    "config.json": "beaf5018536c3313b26797d9f1a7674b1f7ae35f4bae3ccdfd56e74de4fcba6e",
+    "model.txt": "f8f1966c239e44455215d348761b656bbdf9e538945c6595e016efff201543b3",
+    "reports/ab_test.json": "b53465ceb1d6a029a0a93af46673aec4c5ee13a857b4066fbeec5c136f984dc2",
+    "reports/ablations.json": "0bc43d827b54bced3312680cd270e1c91338d8fbab1ef399d96aded2764a0097",
+    "reports/eval_fold103.json": "dc04db68f2d9d82ddd7b292cac3ddc41441552f40ce9dbd50edd4d029fa3be24",
+    "reports/holdout_results.json": "c66ea80b16d7eae17303b8483a4e6603852c9626d3ee478d33eee7defb85a938",
+    "reports/metric_suite.json": "218d7f08a546379ecc4580cad1bb07c0134c77b031ddea64875356fc13832eb6",
+    "reports/rolling_origin.json": "397a794de339ca3698cec93b931129cb130ce770b6955f3270dc6d39fa62b546",
+    "reports/segment_analysis.json": "1a169acec2600160046443a33112c07c48142c0864486b3dba4a1aee6cb2e575",
+    "reports/shap_summary.json": "3a6c1590fe2ee8a8feff5f02cd64bc158f52b3ea505d205e55e1da8df6e09267",
+    "state/ab_arrays.parquet": "548247594197b209329c76f10213c48e18360c12d24bfc1b8a4fdf138ab1d11d",
+    "state/age_buckets.parquet": "bc9373df55351de0fc857f39d505b77306d92d963989efbe99d49b586d18fd27",
+    "state/article_feats.parquet": "34c0e14a27351480c8216fd0a36610eddc3c243f8dc91ed30d24a4675eae96cd",
+    "state/article_meta.parquet": "cdc1c683925e27c5325968f72733bbe0dbed9f5c2cb34b0ffef588e03a6c1831",
+    "state/article_product_codes.parquet": "82ed9d4a7969d264794d9c48ff6b45d39a3888c6ff616b40b0f00f35a6dead58",
+    "state/articles_raw.parquet": "f99fad71f0a36cb4f8635fba413f27078ea8e746919c7f091f5a791cf67e093b",
+    "state/bucket_totals.parquet": "6832c23f58501c5486582875bf099e974580a585e9ab04853f4208ea61a7d25e",
+    "state/copurchase.parquet": "ecb064d5c523aa6193c5b420deec8385bef53291a242a303bc420f95c1efa336",
+    "state/customer_history.parquet": "e9f67d41209dbc7e0a75138d62e8bb282777c79e9c17b59f3a53cec028c7efcc",
+    "state/customers.parquet": "161c567756a9f056e97661ff9f4bd5b415dfb7683647fa94b37ff49e4d0f8ad2",
+    "state/gt_week104.parquet": "66fdb2b10cd253174fedbf3277532e947c8c45e34ebf09f0d601d46e6095f776",
+    "state/pop_decayed.parquet": "b98c1cdc836ef8697f9702731f5f796f95e74b8448b817aa26f4447ee95fa03c",
+    "state/pop_last_week.parquet": "f88c29d9a8931dd15c114cdc650ae1f8aa0855f104a24d202998ef2fa60197a0",
+    "state/prev_week_sales.parquet": "f2f5601b7bedf6c1395c10ebeba8e33bda57e4a177491f19f848a48208f12e51",
+    "state/seg_pop/25-34.parquet": "3809bddcec20fd20f50c2d5924a0b16255d03b1fb314c51df76055faf8bb5ba1",
+    "state/seg_pop/35-44.parquet": "e64ad9dab27743ca173ccc23eed6b6c3ace47533c7d304661da919487e0dfa97",
+    "state/seg_pop/45-54.parquet": "b125943a136ddc406a36e5639c01b5b072d56359d785eea41631fbe6fc161165",
+    "state/seg_pop/55plus.parquet": "37a5ac65ff063b04f24350a932e8924e494a4fe015f1b1f5a77538026155bcd8",
+    "state/seg_pop/lt25.parquet": "988607ed36edf7d48ce07cc957782cb8123d8723a9abac0529c8255d9cf2b879",
+    "state/seg_pop/missing.parquet": "8013990436265e215065dc69230177c7075f0ab779aa51ec0ef4ff03f8f54540"
+  }
+}

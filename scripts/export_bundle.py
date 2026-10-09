@@ -12,8 +12,11 @@ Bundle contents (all SHA-256 verified via manifest.json):
   state/age_buckets.parquet    : (customer_idx, age_bucket) all customers
   state/bucket_totals.parquet  : Segment normalization denominators
   state/customer_history.parquet: Transaction history up to week 104
+  state/customers.parquet      : Customer demographics including customer_id hex string
   state/article_meta.parquet   : Display metadata
   state/gt_week104.parquet     : Week-104 ground truth (display only, clearly labelled)
+  state/ab_arrays.parquet      : Per-customer hit@12/AP@12 (ranker + heuristic, week 104)
+  reports/*.json               : Snapshotted evaluation report JSONs (self-contained for Docker)
   config.json                  : Feature list + dtypes + reason templates + share denominators
   manifest.json                : SHA-256 hashes + git commit + model metrics + created_at
 
@@ -59,6 +62,117 @@ def _git_commit() -> str:
         ).strip()
     except Exception:
         return "unknown"
+
+
+def _export_ab_arrays(state_dir: Path, bundle_dir: Path, processed: Path) -> None:
+    """Compute per-customer hit@12/AP@12 (ranker + heuristic) on week-104 eval set."""
+    import numpy as np
+    from src.features.registry import FEATURE_LIST
+
+    feat_cols = [spec.name for spec in FEATURE_LIST]
+
+    # Load fold_104 features (labels=-1 placeholder) + join actual labels
+    print("  Loading fold_104 features...", flush=True)
+    fold104 = pl.read_parquet(processed / "features" / "fold_104.parquet")
+    labels104 = pl.read_parquet(processed / "features" / "labels_104.parquet").select(
+        ["customer_idx", "article_idx", "label"]
+    )
+    # Replace placeholder labels with actual labels
+    fold104 = fold104.drop("label").join(
+        labels104, on=["customer_idx", "article_idx"], how="left"
+    ).with_columns(pl.col("label").fill_null(0).cast(pl.Int8))
+    print(f"  fold_104: {len(fold104):,} rows, {fold104['label'].sum():,} positives", flush=True)
+
+    # Load primary model
+    import lightgbm as lgb
+    primary_model = lgb.Booster(model_file=str(bundle_dir / "model.txt"))
+
+    # Run ranker inference
+    print("  Running ranker inference...", flush=True)
+    X = fold104.select(feat_cols).to_numpy(allow_copy=True)
+    scores = primary_model.predict(X)
+
+    # Add scores to dataframe
+    fold104 = fold104.with_columns(
+        pl.Series("ranker_score", scores, dtype=pl.Float32)
+    )
+
+    # Compute per-customer AP@12 for ranker and heuristic (final_rank)
+    print("  Computing AP@12 per customer...", flush=True)
+
+    def _compute_ap12_per_customer(df: pl.DataFrame, score_col: str, ascending: bool) -> pl.DataFrame:
+        """Return DataFrame[customer_idx, ap12, hit12]."""
+        # Sort within customer by score
+        direction = ascending  # True = ascending (final_rank: low is good)
+        sorted_df = df.sort([score_col], descending=not direction).with_columns(
+            pl.col("label").cast(pl.Int32)
+        )
+
+        results = []
+        for cust_idx, group in sorted_df.group_by("customer_idx"):
+            labels_arr = group.head(12)["label"].to_numpy()
+            n_gt = int(group["label"].sum())
+            if n_gt == 0:
+                results.append({"customer_idx": int(cust_idx[0]), "ap12": 0.0, "hit12": 0})
+                continue
+            n_hit = int(labels_arr.sum())
+            if n_hit == 0:
+                results.append({"customer_idx": int(cust_idx[0]), "ap12": 0.0, "hit12": 0})
+                continue
+            # AP@12
+            prec_sum = 0.0
+            n_hits_so_far = 0
+            for k_i, lbl in enumerate(labels_arr, 1):
+                if lbl == 1:
+                    n_hits_so_far += 1
+                    prec_sum += n_hits_so_far / k_i
+            ap = prec_sum / min(n_gt, 12)
+            results.append({
+                "customer_idx": int(cust_idx[0]),
+                "ap12": float(ap),
+                "hit12": int(n_hit > 0),
+            })
+        return pl.DataFrame(results, schema={"customer_idx": pl.Int32, "ap12": pl.Float32, "hit12": pl.Int8})
+
+    ranker_stats = _compute_ap12_per_customer(fold104, "ranker_score", ascending=False)
+    heuristic_stats = _compute_ap12_per_customer(fold104, "final_rank", ascending=True)
+
+    # Join and save
+    ab_arrays = ranker_stats.rename({"ap12": "ranker_ap12", "hit12": "ranker_hit12"}).join(
+        heuristic_stats.rename({"ap12": "heuristic_ap12", "hit12": "heuristic_hit12"}),
+        on="customer_idx", how="inner",
+    )
+    ab_arrays.write_parquet(state_dir / "ab_arrays.parquet", compression="zstd")
+    n_cust = len(ab_arrays)
+    ranker_map = float(ab_arrays["ranker_ap12"].mean())
+    heuristic_map = float(ab_arrays["heuristic_ap12"].mean())
+    print(f"  ab_arrays: {n_cust:,} customers, ranker MAP@12={ranker_map:.6f}, "
+          f"heuristic MAP@12={heuristic_map:.6f}", flush=True)
+
+
+def _snapshot_reports(bundle_dir: Path, reports_dir: Path) -> None:
+    """Copy evaluation report JSONs into bundle/reports/ for Docker self-containedness."""
+    reports_out = bundle_dir / "reports"
+    reports_out.mkdir(exist_ok=True)
+
+    sources = {
+        "holdout_results.json": reports_dir / "evaluation" / "holdout_results.json",
+        "ab_test.json":         reports_dir / "evaluation" / "ab_test.json",
+        "metric_suite.json":    reports_dir / "evaluation" / "metric_suite.json",
+        "segment_analysis.json": reports_dir / "evaluation" / "segment_analysis.json",
+        "rolling_origin.json":  reports_dir / "evaluation" / "rolling_origin.json",
+        "eval_fold103.json":    reports_dir / "ranker" / "eval_fold103.json",
+        "ablations.json":       reports_dir / "ranker" / "ablations.json",
+        "shap_summary.json":    reports_dir / "explain" / "shap_summary.json",
+    }
+    copied = 0
+    for dest_name, src_path in sources.items():
+        if src_path.exists():
+            (reports_out / dest_name).write_bytes(src_path.read_bytes())
+            copied += 1
+        else:
+            print(f"  WARNING: report not found, skipping: {src_path}", flush=True)
+    print(f"  reports: {copied}/{len(sources)} JSONs snapshotted", flush=True)
 
 
 def main():
@@ -119,12 +233,13 @@ def main():
     state.all_cust_buckets.write_parquet(state_dir / "age_buckets.parquet", compression="zstd")
     state.bucket_totals.write_parquet(state_dir / "bucket_totals.parquet", compression="zstd")
 
-    # Customers table (for feature computation: age, FN, Active, club status, etc.)
+    # Customers table (for feature computation + customer_id→idx lookup for API)
     customers_slim = customers_lf.select([
-        "customer_idx", "age", "FN", "Active", "club_member_status", "fashion_news_frequency"
+        "customer_idx", "customer_id", "age", "FN", "Active",
+        "club_member_status", "fashion_news_frequency",
     ]).collect()
     customers_slim.write_parquet(state_dir / "customers.parquet", compression="zstd")
-    print(f"  customers: {len(customers_slim):,} rows", flush=True)
+    print(f"  customers: {len(customers_slim):,} rows (includes customer_id hex string)", flush=True)
 
     # Segment popular — per-bucket
     for bucket, df_bkt in state.seg_pop_by_bucket.items():
@@ -163,6 +278,14 @@ def main():
     gt_df = pl.DataFrame(rows, schema={"customer_idx": pl.Int32, "article_idx": pl.Int32})
     gt_df.write_parquet(state_dir / "gt_week104.parquet", compression="zstd")
     print(f"  gt_week104 (display only): {len(gt_df):,} rows", flush=True)
+
+    # ── 3b. Per-customer hit@12/AP@12 arrays (week 104, ranker + heuristic) ──
+    print("[3b] Computing per-customer hit@12/AP@12 arrays (week 104)...", flush=True)
+    _export_ab_arrays(state_dir, BUNDLE_DIR, PROCESSED)
+
+    # ── 3c. Snapshot evaluation report JSONs for self-contained Docker image ──
+    print("[3c] Snapshotting evaluation report JSONs...", flush=True)
+    _snapshot_reports(BUNDLE_DIR, REPORTS_DIR)
 
     # ── 4. Config JSON ────────────────────────────────────────────────────
     print("[4] Writing config.json...", flush=True)

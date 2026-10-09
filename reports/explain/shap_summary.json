@@ -200,14 +200,19 @@
   ],
   "shap_vs_gain_disagreements": [
     {
-      "feature": "i_days_since_bought_product_code",
-      "shap_rank": 4,
-      "gain_rank": 1
+      "feature": "a_garment_group_name",
+      "shap_rank": ">10",
+      "gain_rank": 8
     },
     {
-      "feature": "i_age_gap",
-      "shap_rank": 5,
+      "feature": "a_days_since_last_sale",
+      "shap_rank": 2,
       "gain_rank": ">10"
+    },
+    {
+      "feature": "a_sales_1w",
+      "shap_rank": 1,
+      "gain_rank": 4
     },
     {
       "feature": "a_sales_2w",
@@ -220,29 +225,9 @@
       "gain_rank": 6
     },
     {
-      "feature": "i_channel_gap",
-      "shap_rank": 3,
-      "gain_rank": 9
-    },
-    {
-      "feature": "i_days_since_bought_article",
-      "shap_rank": ">10",
-      "gain_rank": 2
-    },
-    {
-      "feature": "a_section_name",
-      "shap_rank": 8,
-      "gain_rank": 3
-    },
-    {
-      "feature": "i_price_ratio",
-      "shap_rank": 6,
+      "feature": "i_customer_share_garment_group",
+      "shap_rank": 7,
       "gain_rank": ">10"
-    },
-    {
-      "feature": "a_sales_1w",
-      "shap_rank": 1,
-      "gain_rank": 4
     },
     {
       "feature": "final_rank",
@@ -250,19 +235,19 @@
       "gain_rank": 7
     },
     {
-      "feature": "i_customer_share_garment_group",
-      "shap_rank": 7,
+      "feature": "i_days_since_bought_product_code",
+      "shap_rank": 4,
+      "gain_rank": 1
+    },
+    {
+      "feature": "i_age_gap",
+      "shap_rank": 5,
       "gain_rank": ">10"
     },
     {
-      "feature": "repurchase_rank",
+      "feature": "i_days_since_bought_article",
       "shap_rank": ">10",
-      "gain_rank": 5
-    },
-    {
-      "feature": "a_garment_group_name",
-      "shap_rank": ">10",
-      "gain_rank": 8
+      "gain_rank": 2
     },
     {
       "feature": "i_bought_same_product_code",
@@ -270,9 +255,24 @@
       "gain_rank": 10
     },
     {
-      "feature": "a_days_since_last_sale",
-      "shap_rank": 2,
+      "feature": "i_price_ratio",
+      "shap_rank": 6,
       "gain_rank": ">10"
+    },
+    {
+      "feature": "a_section_name",
+      "shap_rank": 8,
+      "gain_rank": 3
+    },
+    {
+      "feature": "i_channel_gap",
+      "shap_rank": 3,
+      "gain_rank": 9
+    },
+    {
+      "feature": "repurchase_rank",
+      "shap_rank": ">10",
+      "gain_rank": 5
     }
   ],
   "group_shap_all_candidates": {
@@ -410,5 +410,5 @@
     "n_duplicate_themes": 0,
     "passed": true
   },
-  "runtime_s": 12.2
+  "runtime_s": 9.8
 }

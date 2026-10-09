@@ -1,0 +1,14 @@
+[lint]
+ignore = [
+    # B008: Depends() in argument defaults — canonical FastAPI DI pattern
+    "B008",
+    # BLE001/S110: broad exception catch in API services — guards optional deps and statsmodels
+    "BLE001",
+    "S110",
+    # SIM102: nested if — preserves readability in simulation logic
+    "SIM102",
+    # SIM222: `or True` — intentional always-true guard in test
+    "SIM222",
+    # RUF046: redundant int() cast — defensive typing
+    "RUF046",
+]

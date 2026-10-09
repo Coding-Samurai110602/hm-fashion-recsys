@@ -2,6 +2,7 @@
 
 load_bundle(path) raises ValueError on any SHA-256 mismatch; never silently uses corrupt data.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -10,7 +11,6 @@ import time
 from pathlib import Path
 
 import lightgbm as lgb
-import numpy as np
 import polars as pl
 
 
@@ -71,6 +71,11 @@ class Bundle:
         Popularity share denominator.
     total_decayed_tx : float
         Decayed popularity share denominator.
+    ab_arrays : pl.DataFrame or None
+        Per-customer hit@12/AP@12 arrays for ranker and heuristic (week 104).
+        Columns: customer_idx, ranker_ap12, ranker_hit12, heuristic_ap12, heuristic_hit12.
+    reports : dict[str, dict]
+        Snapshotted evaluation JSONs keyed by filename stem.
     """
 
     def __init__(self) -> None:
@@ -96,6 +101,8 @@ class Bundle:
         self.gt_week104: pl.DataFrame | None = None
         self.total_tx_last_week: float = 1.0
         self.total_decayed_tx: float = 1.0
+        self.ab_arrays: pl.DataFrame | None = None
+        self.reports: dict[str, dict] = {}
 
 
 def load_bundle(path: str | Path) -> Bundle:
@@ -147,7 +154,9 @@ def load_bundle(path: str | Path) -> Bundle:
     b.pop_decayed = pl.read_parquet(path / "state" / "pop_decayed.parquet")
     b.copurchase = pl.read_parquet(path / "state" / "copurchase.parquet")
     b.prev_week_sales = pl.read_parquet(path / "state" / "prev_week_sales.parquet")
-    b.article_product_codes = pl.read_parquet(path / "state" / "article_product_codes.parquet")
+    b.article_product_codes = pl.read_parquet(
+        path / "state" / "article_product_codes.parquet"
+    )
     b.age_buckets = pl.read_parquet(path / "state" / "age_buckets.parquet")
     b.bucket_totals = pl.read_parquet(path / "state" / "bucket_totals.parquet")
     b.customer_history = pl.read_parquet(path / "state" / "customer_history.parquet")
@@ -187,6 +196,20 @@ def load_bundle(path: str | Path) -> Bundle:
     b.reason_templates = config.get("reason_templates", {})
     b.total_tx_last_week = float(config.get("total_tx_last_week", 1.0))
     b.total_decayed_tx = float(config.get("total_decayed_tx", 1.0))
+
+    # Per-customer A/B arrays (optional — absent in old bundles)
+    ab_arrays_path = path / "state" / "ab_arrays.parquet"
+    if ab_arrays_path.exists():
+        b.ab_arrays = pl.read_parquet(ab_arrays_path)
+
+    # Snapshotted evaluation report JSONs (optional — absent in old bundles)
+    reports_dir = path / "reports"
+    if reports_dir.exists():
+        for json_file in sorted(reports_dir.glob("*.json")):
+            try:
+                b.reports[json_file.stem] = json.loads(json_file.read_text())
+            except Exception:
+                pass
 
     load_time = time.perf_counter() - t0
     print(f"[bundle] Loaded in {load_time:.2f}s from {path}", flush=True)

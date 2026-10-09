@@ -1,0 +1,10 @@
+{
+  "synthetic": true,
+  "note": "Synthetic bundle \u2014 values are illustrative only.",
+  "ranker": {
+    "map@12": 0.03583
+  },
+  "heuristic": {
+    "map@12": 0.02468
+  }
+}

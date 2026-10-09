@@ -1,0 +1,19 @@
+{
+  "synthetic": true,
+  "note": "Synthetic bundle \u2014 values are illustrative only.",
+  "holdout_week": 104,
+  "n_eval_customers": 200,
+  "primary_lift_vs_heuristic_pct": 45.0,
+  "primary_lift_vs_baseline_b_pct": 48.0,
+  "models": {
+    "primary": {
+      "map@12": 0.036
+    },
+    "heuristic": {
+      "map@12": 0.025
+    },
+    "baseline_b": {
+      "map@12": 0.024
+    }
+  }
+}

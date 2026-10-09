@@ -1,0 +1,9 @@
+{
+  "synthetic": true,
+  "note": "Synthetic bundle \u2014 values are illustrative only.",
+  "top10_gain_importance": [],
+  "top10_shap_all_candidates": [],
+  "top10_contrast_shap_all_candidates": [],
+  "group_shap_all_candidates": {},
+  "group_contrast_shap_all_candidates": {}
+}
