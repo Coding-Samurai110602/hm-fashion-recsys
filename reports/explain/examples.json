@@ -1,0 +1,679 @@
+[
+  {
+    "segment": "cold-start",
+    "customer_idx": 98920,
+    "history_summary": {
+      "n_purchases": 0,
+      "age": "unknown"
+    },
+    "recommendations": [
+      {
+        "article_idx": 67522,
+        "prod_name": "Pluto RW slacks (1)",
+        "product_type": "Trousers",
+        "colour": "Black",
+        "score": 0.426398,
+        "reasons": [
+          "Shoppers who bought this often come back (10% repurchase rate)"
+        ]
+      },
+      {
+        "article_idx": 67543,
+        "prod_name": "Pluto RW slacks (1)",
+        "product_type": "Trousers",
+        "colour": "Black",
+        "score": 0.413028,
+        "reasons": []
+      },
+      {
+        "article_idx": 75912,
+        "prod_name": "Primo slacks",
+        "product_type": "Trousers",
+        "colour": "Black",
+        "score": 0.189769,
+        "reasons": []
+      },
+      {
+        "article_idx": 94674,
+        "prod_name": "Baraboom throw-on",
+        "product_type": "Cardigan",
+        "colour": "Black",
+        "score": 0.176947,
+        "reasons": []
+      },
+      {
+        "article_idx": 78505,
+        "prod_name": "SULIMA  jkt",
+        "product_type": "Jacket",
+        "colour": "Black",
+        "score": 0.126227,
+        "reasons": [
+          "Trending: 62% more sales this week than its 4-week average"
+        ]
+      },
+      {
+        "article_idx": 53892,
+        "prod_name": "Jade HW Skinny Denim TRS",
+        "product_type": "Trousers",
+        "colour": "Black",
+        "score": 0.122536,
+        "reasons": [
+          "Shoppers who bought this often come back (20% repurchase rate)"
+        ]
+      },
+      {
+        "article_idx": 67539,
+        "prod_name": "Pluto RW slacks (1)",
+        "product_type": "Trousers",
+        "colour": "Black",
+        "score": 0.117018,
+        "reasons": [
+          "Trending: 48% more sales this week than its 4-week average"
+        ]
+      },
+      {
+        "article_idx": 57069,
+        "prod_name": "Becka hoodie",
+        "product_type": "Hoodie",
+        "colour": "White",
+        "score": 0.085596,
+        "reasons": []
+      },
+      {
+        "article_idx": 16003,
+        "prod_name": "Mariette Blazer",
+        "product_type": "Blazer",
+        "colour": "Black",
+        "score": 0.065194,
+        "reasons": [
+          "Trending: 28% more sales this week than its 4-week average"
+        ]
+      },
+      {
+        "article_idx": 103796,
+        "prod_name": "Liliana",
+        "product_type": "Sweater",
+        "colour": "Black",
+        "score": 0.056817,
+        "reasons": []
+      },
+      {
+        "article_idx": 42626,
+        "prod_name": "Henry polo. (1)",
+        "product_type": "Sweater",
+        "colour": "Black",
+        "score": 0.048991,
+        "reasons": [
+          "Trending: 52% more sales this week than its 4-week average"
+        ]
+      },
+      {
+        "article_idx": 100938,
+        "prod_name": "Stacey",
+        "product_type": "Cardigan",
+        "colour": "Light Grey",
+        "score": 0.043368,
+        "reasons": [
+          "Trending: 110% more sales this week than its 4-week average"
+        ]
+      }
+    ]
+  },
+  {
+    "segment": "light_buyer_1-4",
+    "customer_idx": 1037002,
+    "history_summary": {
+      "n_purchases": 2,
+      "age": "30"
+    },
+    "recommendations": [
+      {
+        "article_idx": 103793,
+        "prod_name": "Nika vest",
+        "product_type": "Sweater",
+        "colour": "Off White",
+        "score": 0.004661,
+        "reasons": [
+          "In a product category you buy often (50% of your purchases)"
+        ]
+      },
+      {
+        "article_idx": 73701,
+        "prod_name": "Haze LS",
+        "product_type": "Top",
+        "colour": "Black",
+        "score": -0.049723,
+        "reasons": [
+          "In a garment category you buy often (50% of your purchases)",
+          "You bought another colour or size of this product 195 days ago",
+          "Often bought together with something you bought recently"
+        ]
+      },
+      {
+        "article_idx": 62638,
+        "prod_name": "Strap Top 2 pack",
+        "product_type": "Vest top",
+        "colour": "Black",
+        "score": -0.082211,
+        "reasons": [
+          "In a garment category you buy often (50% of your purchases)",
+          "Popular with customers your age"
+        ]
+      },
+      {
+        "article_idx": 46384,
+        "prod_name": "RICHIE HOOD",
+        "product_type": "Hoodie",
+        "colour": "White",
+        "score": -0.090634,
+        "reasons": [
+          "In a garment category you buy often (50% of your purchases)",
+          "Trending: 58% more sales this week than its 4-week average"
+        ]
+      },
+      {
+        "article_idx": 46351,
+        "prod_name": "PETAR SWEATSHIRT",
+        "product_type": "Sweater",
+        "colour": "Black",
+        "score": -0.131323,
+        "reasons": [
+          "In a garment category you buy often (50% of your purchases)",
+          "Shoppers who bought this often come back (10% repurchase rate)",
+          "Popular with customers your age"
+        ]
+      },
+      {
+        "article_idx": 94656,
+        "prod_name": "Morris",
+        "product_type": "Sweater",
+        "colour": "Off White",
+        "score": -0.147325,
+        "reasons": [
+          "In a product category you buy often (50% of your purchases)",
+          "Popular with customers your age",
+          "Trending: 45% more sales this week than its 4-week average"
+        ]
+      },
+      {
+        "article_idx": 46382,
+        "prod_name": "RICHIE HOOD",
+        "product_type": "Hoodie",
+        "colour": "Black",
+        "score": -0.152407,
+        "reasons": [
+          "In a garment category you buy often (50% of your purchases)",
+          "Trending: 51% more sales this week than its 4-week average"
+        ]
+      },
+      {
+        "article_idx": 71110,
+        "prod_name": "Lucy blouse",
+        "product_type": "Shirt",
+        "colour": "Dark Green",
+        "score": -0.20962,
+        "reasons": [
+          "In a product category you buy often (50% of your purchases)",
+          "Trending: 40% more sales this week than its 4-week average"
+        ]
+      },
+      {
+        "article_idx": 80057,
+        "prod_name": "Claudine rib t-shirt",
+        "product_type": "T-shirt",
+        "colour": "Black",
+        "score": -0.23577,
+        "reasons": [
+          "In a garment category you buy often (50% of your purchases)",
+          "Popular with customers your age"
+        ]
+      },
+      {
+        "article_idx": 16003,
+        "prod_name": "Mariette Blazer",
+        "product_type": "Blazer",
+        "colour": "Black",
+        "score": -0.252759,
+        "reasons": [
+          "In a product category you buy often (50% of your purchases)",
+          "Trending: 28% more sales this week than its 4-week average"
+        ]
+      },
+      {
+        "article_idx": 80920,
+        "prod_name": "Bradley trousers",
+        "product_type": "Trousers",
+        "colour": "Black",
+        "score": -0.265865,
+        "reasons": [
+          "In a garment category you buy often (50% of your purchases)",
+          "Popular with customers your age"
+        ]
+      },
+      {
+        "article_idx": 56694,
+        "prod_name": "Mom Fit Ultra HW",
+        "product_type": "Trousers",
+        "colour": "Blue",
+        "score": -0.299947,
+        "reasons": []
+      }
+    ]
+  },
+  {
+    "segment": "medium_buyer_5-19",
+    "customer_idx": 896118,
+    "history_summary": {
+      "n_purchases": 7,
+      "age": "48"
+    },
+    "recommendations": [
+      {
+        "article_idx": 101045,
+        "prod_name": "Strindberg boot",
+        "product_type": "Boots",
+        "colour": "Black",
+        "score": 2.83357,
+        "reasons": [
+          "You bought this exact item 9 days ago",
+          "In a garment category you've bought from before (14% of your purchases)",
+          "Often bought together with something you bought recently"
+        ]
+      },
+      {
+        "article_idx": 103796,
+        "prod_name": "Liliana",
+        "product_type": "Sweater",
+        "colour": "Black",
+        "score": 0.951793,
+        "reasons": [
+          "In a garment category you buy often (29% of your purchases)"
+        ]
+      },
+      {
+        "article_idx": 100937,
+        "prod_name": "Stacey",
+        "product_type": "Cardigan",
+        "colour": "Black",
+        "score": 0.951574,
+        "reasons": [
+          "In a garment category you buy often (29% of your purchases)",
+          "Trending: 87% more sales this week than its 4-week average",
+          "Popular with customers your age"
+        ]
+      },
+      {
+        "article_idx": 94674,
+        "prod_name": "Baraboom throw-on",
+        "product_type": "Cardigan",
+        "colour": "Black",
+        "score": 0.843828,
+        "reasons": [
+          "In a garment category you buy often (29% of your purchases)",
+          "Popular with customers your age"
+        ]
+      },
+      {
+        "article_idx": 57069,
+        "prod_name": "Becka hoodie",
+        "product_type": "Hoodie",
+        "colour": "White",
+        "score": 0.673123,
+        "reasons": [
+          "You bought another colour or size of this product 44 days ago",
+          "In a garment category you buy often (29% of your purchases)",
+          "Often bought together with something you bought recently"
+        ]
+      },
+      {
+        "article_idx": 57063,
+        "prod_name": "Becka hoodie",
+        "product_type": "Hoodie",
+        "colour": "Black",
+        "score": 0.550732,
+        "reasons": [
+          "You bought another colour or size of this product 44 days ago",
+          "In a garment category you buy often (29% of your purchases)",
+          "Often bought together with something you bought recently"
+        ]
+      },
+      {
+        "article_idx": 102067,
+        "prod_name": "Megan Ancle boot",
+        "product_type": "Boots",
+        "colour": "Black",
+        "score": 0.54103,
+        "reasons": [
+          "In a garment category you've bought from before (14% of your purchases)",
+          "Trending: 97% more sales this week than its 4-week average"
+        ]
+      },
+      {
+        "article_idx": 100938,
+        "prod_name": "Stacey",
+        "product_type": "Cardigan",
+        "colour": "Light Grey",
+        "score": 0.5028,
+        "reasons": [
+          "In a garment category you buy often (29% of your purchases)",
+          "Popular with customers your age",
+          "Trending: 110% more sales this week than its 4-week average"
+        ]
+      },
+      {
+        "article_idx": 67543,
+        "prod_name": "Pluto RW slacks (1)",
+        "product_type": "Trousers",
+        "colour": "Black",
+        "score": 0.459907,
+        "reasons": [
+          "In a garment category you've bought from before (14% of your purchases)",
+          "Popular with customers your age"
+        ]
+      },
+      {
+        "article_idx": 101758,
+        "prod_name": "Ibsen boot",
+        "product_type": "Boots",
+        "colour": "Black",
+        "score": 0.445656,
+        "reasons": [
+          "In a garment category you've bought from before (14% of your purchases)"
+        ]
+      },
+      {
+        "article_idx": 94696,
+        "prod_name": "Matey",
+        "product_type": "Sweater",
+        "colour": "Black",
+        "score": 0.41014,
+        "reasons": [
+          "In a garment category you buy often (29% of your purchases)",
+          "Trending: 160% more sales this week than its 4-week average"
+        ]
+      },
+      {
+        "article_idx": 67522,
+        "prod_name": "Pluto RW slacks (1)",
+        "product_type": "Trousers",
+        "colour": "Black",
+        "score": 0.378659,
+        "reasons": [
+          "In a garment category you've bought from before (14% of your purchases)",
+          "Shoppers who bought this often come back (10% repurchase rate)"
+        ]
+      }
+    ]
+  },
+  {
+    "segment": "heavy_buyer_20+",
+    "customer_idx": 594489,
+    "history_summary": {
+      "n_purchases": 139,
+      "age": "23"
+    },
+    "recommendations": [
+      {
+        "article_idx": 101517,
+        "prod_name": "James biker.",
+        "product_type": "Jacket",
+        "colour": "Black",
+        "score": 1.863266,
+        "reasons": [
+          "You bought this exact item 7 days ago",
+          "Popular with customers your age",
+          "In a product category you buy often (60% of your purchases)"
+        ]
+      },
+      {
+        "article_idx": 99398,
+        "prod_name": "Lucien CONSCIOUS",
+        "product_type": "Blouse",
+        "colour": "Light Beige",
+        "score": 1.476392,
+        "reasons": [
+          "You bought this exact item 6 days ago",
+          "In a garment category you buy often (41% of your purchases)",
+          "Often bought together with something you bought recently"
+        ]
+      },
+      {
+        "article_idx": 71101,
+        "prod_name": "Lucy blouse",
+        "product_type": "Shirt",
+        "colour": "Black",
+        "score": 1.340744,
+        "reasons": [
+          "Often bought together with something you bought recently",
+          "In a garment category you buy often (41% of your purchases)",
+          "You bought this exact item 25 days ago"
+        ]
+      },
+      {
+        "article_idx": 71106,
+        "prod_name": "Lucy blouse",
+        "product_type": "Shirt",
+        "colour": "Dark Turquoise",
+        "score": 1.162112,
+        "reasons": [
+          "Often bought together with something you bought recently",
+          "Trending: 300% more sales this week than its 4-week average",
+          "In a garment category you buy often (41% of your purchases)"
+        ]
+      },
+      {
+        "article_idx": 99396,
+        "prod_name": "Lucien CONSCIOUS",
+        "product_type": "Blouse",
+        "colour": "Light Beige",
+        "score": 1.160276,
+        "reasons": [
+          "You bought another colour or size of this product 6 days ago",
+          "Often bought together with something you bought recently",
+          "In a garment category you buy often (41% of your purchases)"
+        ]
+      },
+      {
+        "article_idx": 53918,
+        "prod_name": "Jade HW Skinny Denim TRS",
+        "product_type": "Trousers",
+        "colour": "Black",
+        "score": 0.884878,
+        "reasons": [
+          "Trending: 297% more sales this week than its 4-week average",
+          "Often bought together with something you bought recently",
+          "You bought another colour or size of this product 286 days ago"
+        ]
+      },
+      {
+        "article_idx": 97558,
+        "prod_name": "Elie",
+        "product_type": "Blouse",
+        "colour": "Black",
+        "score": 0.833986,
+        "reasons": [
+          "You bought another colour or size of this product 13 days ago",
+          "In a garment category you buy often (41% of your purchases)"
+        ]
+      },
+      {
+        "article_idx": 99399,
+        "prod_name": "Lucien CONSCIOUS",
+        "product_type": "Blouse",
+        "colour": "Pink",
+        "score": 0.797966,
+        "reasons": [
+          "You bought this exact item 9 days ago",
+          "In a garment category you buy often (41% of your purchases)",
+          "Often bought together with something you bought recently"
+        ]
+      },
+      {
+        "article_idx": 97560,
+        "prod_name": "Elie",
+        "product_type": "Blouse",
+        "colour": "Pink",
+        "score": 0.796771,
+        "reasons": [
+          "In a garment category you buy often (41% of your purchases)",
+          "You bought this exact item 13 days ago",
+          "Trending: 72% more sales this week than its 4-week average"
+        ]
+      },
+      {
+        "article_idx": 97557,
+        "prod_name": "Elie",
+        "product_type": "Blouse",
+        "colour": "Light Beige",
+        "score": 0.768037,
+        "reasons": [
+          "You bought this exact item 13 days ago",
+          "In a garment category you buy often (41% of your purchases)",
+          "Often bought together with something you bought recently"
+        ]
+      },
+      {
+        "article_idx": 99394,
+        "prod_name": "Lucien CONSCIOUS",
+        "product_type": "Blouse",
+        "colour": "Beige",
+        "score": 0.728114,
+        "reasons": [
+          "You bought another colour or size of this product 6 days ago",
+          "In a garment category you buy often (41% of your purchases)",
+          "Often bought together with something you bought recently"
+        ]
+      },
+      {
+        "article_idx": 71103,
+        "prod_name": "Lucy blouse",
+        "product_type": "Shirt",
+        "colour": "Light Pink",
+        "score": 0.711359,
+        "reasons": [
+          "Often bought together with something you bought recently",
+          "You bought another colour or size of this product 25 days ago",
+          "In a garment category you buy often (41% of your purchases)"
+        ]
+      }
+    ]
+  },
+  {
+    "segment": "additional",
+    "customer_idx": 585708,
+    "history_summary": {
+      "n_purchases": 0,
+      "age": "unknown"
+    },
+    "recommendations": [
+      {
+        "article_idx": 103793,
+        "prod_name": "Nika vest",
+        "product_type": "Sweater",
+        "colour": "Off White",
+        "score": 0.386717,
+        "reasons": []
+      },
+      {
+        "article_idx": 94656,
+        "prod_name": "Morris",
+        "product_type": "Sweater",
+        "colour": "Off White",
+        "score": 0.210945,
+        "reasons": []
+      },
+      {
+        "article_idx": 53892,
+        "prod_name": "Jade HW Skinny Denim TRS",
+        "product_type": "Trousers",
+        "colour": "Black",
+        "score": 0.106801,
+        "reasons": [
+          "Shoppers who bought this often come back (20% repurchase rate)"
+        ]
+      },
+      {
+        "article_idx": 104045,
+        "prod_name": "STRONG HW seamless tights",
+        "product_type": "Leggings/Tights",
+        "colour": "Black",
+        "score": 0.087724,
+        "reasons": []
+      },
+      {
+        "article_idx": 67522,
+        "prod_name": "Pluto RW slacks (1)",
+        "product_type": "Trousers",
+        "colour": "Black",
+        "score": 0.086596,
+        "reasons": [
+          "Shoppers who bought this often come back (10% repurchase rate)"
+        ]
+      },
+      {
+        "article_idx": 73,
+        "prod_name": "Highwaist 30 den 1p Tights",
+        "product_type": "Leggings/Tights",
+        "colour": "Black",
+        "score": 0.069505,
+        "reasons": [
+          "Shoppers who bought this often come back (15% repurchase rate)"
+        ]
+      },
+      {
+        "article_idx": 67543,
+        "prod_name": "Pluto RW slacks (1)",
+        "product_type": "Trousers",
+        "colour": "Black",
+        "score": 0.05431,
+        "reasons": []
+      },
+      {
+        "article_idx": 3091,
+        "prod_name": "Perrie Slim Mom Denim TRS",
+        "product_type": "Trousers",
+        "colour": "Blue",
+        "score": 0.043052,
+        "reasons": [
+          "Shoppers who bought this often come back (13% repurchase rate)"
+        ]
+      },
+      {
+        "article_idx": 103186,
+        "prod_name": "May Seamless Legging (J)",
+        "product_type": "Leggings/Tights",
+        "colour": "Black",
+        "score": 0.024632,
+        "reasons": [
+          "Trending: 166% more sales this week than its 4-week average"
+        ]
+      },
+      {
+        "article_idx": 60763,
+        "prod_name": "HAVANA HW tights",
+        "product_type": "Unknown",
+        "colour": "Black",
+        "score": -0.022945,
+        "reasons": []
+      },
+      {
+        "article_idx": 104157,
+        "prod_name": "Merry HW Slim Mom Denim TRS",
+        "product_type": "Trousers",
+        "colour": "Blue",
+        "score": -0.036414,
+        "reasons": [
+          "Trending: 226% more sales this week than its 4-week average"
+        ]
+      },
+      {
+        "article_idx": 94674,
+        "prod_name": "Baraboom throw-on",
+        "product_type": "Cardigan",
+        "colour": "Black",
+        "score": -0.048256,
+        "reasons": []
+      }
+    ]
+  }
+]

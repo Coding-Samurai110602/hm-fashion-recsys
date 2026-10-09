@@ -281,3 +281,57 @@ Run evaluation: `python scripts/run_evaluation.py` · A/B experiment: `caffeinat
 3. **Candidate recall ceiling:** Recall@200 ≈ 17.5%; any purchase not in the candidate pool is unrecoverable by the ranker.
 4. **Cold-start:** 8.1% of target-week buyers have no prior history and receive only popularity-based candidates.
 5. **Online population caveat:** The offline metric is computed over customers who purchased in the target week. An online A/B test would randomise all active visitors, yielding a lower baseline hit rate and a higher required sample size than the offline power analysis indicates.
+
+## SHAP Explainability
+
+TreeSHAP (LightGBM `pred_contrib=True`) on 5,000 fold-103 customers × 200 candidates = 1M rows. Additivity max error = 3.94 × 10⁻⁷ (tolerance 1 × 10⁻⁵).
+
+**Ranking-relevant importance (within-list contrast SHAP):** contrast_i = SHAP_i − mean(SHAP across customer's candidates). Customer-level features (age, purchase count) have high raw |SHAP| but low contrast |SHAP| because they shift all of a customer's scores equally without affecting within-list ranking. Article and interaction features dominate the contrast view.
+
+| Feature | mean |SHAP| (all) | mean |contrast| (all) | Gain rank |
+|---------|----------------|-------------------|-----------|
+| a_sales_1w | 0.311 | 0.281 | 4 |
+| a_days_since_last_sale | 0.183 | 0.170 | ranked lower by gain |
+| i_channel_gap | 0.156 | 0.129 | 9 |
+| i_days_since_bought_product_code | 0.113 | 0.090 | 1 |
+| i_age_gap | 0.098 | 0.057 | ranked lower by gain |
+
+Group contrast (ranking-relevant): article=1.105, interaction=0.535, candidate=0.291, customer=0.166.
+
+**Reason rules:** (1) exact-item reason (`i_days_since_bought_article`) suppresses product-code reason for the same item; (2) category-share thresholds — ≥25%: "you buy often", 10–25%: "you've bought from before", <10%: no reason; (3) at most one reason per theme (repurchase, category, popularity/trend, demographic fit, co-purchase). Quality check over 60,000 recommended rows: 0 conflicts, 0 duplicate-theme violations.
+
+Faithfulness: ablating the top-contrast feature causes a 7× larger mean score drop than ablating a random feature (Wilcoxon p ≈ 7 × 10⁻¹¹⁵). Reason coverage: 95.4% of top-12 rows have ≥1 reason.
+
+**Worked examples (from `reports/explain/examples.json`):**
+
+*Cold-start customer (0 prior purchases):*
+- Rank 1 (score=0.43): "Shoppers who bought this often come back (10% repurchase rate)"
+
+*Light buyer (2 prior purchases, age 30):*
+- Rank 1 (score=0.01): "In a product category you buy often (50% of your purchases)"
+- Rank 2 (score=−0.05): "In a garment category you buy often (50% of your purchases)" / "You bought another colour or size of this product 195 days ago"
+
+Run: `caffeinate -i python -u scripts/run_explain.py --from-cache`
+
+## Serving Bundle
+
+Bundle at `artifacts/bundle_week104/` — all artifacts SHA-256 verified via `manifest.json`. Loads cleanly in a fresh Python process with no reads from `data/processed/` during load or inference. Source: `src/serving/bundle.py`, `src/serving/recommender.py`.
+
+| Artifact | Size |
+|----------|------|
+| Total bundle | 191.9 MB (21 files) |
+| state/customer_history.parquet | 164.7 MB |
+| model.txt (lgbm_ranker_primary_104.txt) | 5.5 MB |
+| state/customers.parquet | 5.9 MB |
+
+Parity: `BundleRecommender` top-12 matches in-memory `Recommender(lgbm_ranker_primary_104.txt)` on 200 customers (seed 42) — **200/200 exact match** (max score diff = 1.6 × 10⁻⁷). Note: segment-popular bucket name encoding (`lt25` → `<25`, `55plus` → `55+`) must be reversed in `bundle.py` during load; `load_bundle()` handles this automatically.
+
+Latency (100 calls, 5 warm-ups, bundle loaded from disk, `as_of_week=104`):
+- `recommend()` with SHAP reasons: p50=443ms, p95=492ms
+- `explain()`: p50=449ms, p95=493ms
+- Load time: 0.22s. RSS: 5,653 MB.
+
+Reasons require exact TreeSHAP on all ~200 candidates per customer to compute the within-list contrast (SHAP_i − mean SHAP across the customer's pool); this per-call TreeSHAP pass dominates the ~0.45 s latency.
+
+Export: `caffeinate -i python -u scripts/export_bundle.py`
+Parity + benchmark: `caffeinate -i python -u scripts/run_explain_parity.py`

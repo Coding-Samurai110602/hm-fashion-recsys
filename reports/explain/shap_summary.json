@@ -1,0 +1,414 @@
+{
+  "n_customers_sampled": 5000,
+  "n_rows_sampled": 1000000,
+  "n_top12_rows": 60000,
+  "additivity": {
+    "all_candidates": {
+      "max_error": 3.942864168493543e-07,
+      "mean_error": 3.897291886438081e-08,
+      "n_rows": 1000000,
+      "tol": 1e-05,
+      "passed": true
+    },
+    "top12_rows": {
+      "max_error": 3.0358482661085873e-07,
+      "mean_error": 3.0558356352931394e-08,
+      "n_rows": 60000,
+      "tol": 1e-05,
+      "passed": true
+    }
+  },
+  "top10_shap_all_candidates": [
+    {
+      "feature": "a_sales_1w",
+      "mean_abs_shap": 0.31053764
+    },
+    {
+      "feature": "a_days_since_last_sale",
+      "mean_abs_shap": 0.18284324
+    },
+    {
+      "feature": "i_channel_gap",
+      "mean_abs_shap": 0.15624209
+    },
+    {
+      "feature": "i_days_since_bought_product_code",
+      "mean_abs_shap": 0.1129077
+    },
+    {
+      "feature": "i_age_gap",
+      "mean_abs_shap": 0.09759235
+    },
+    {
+      "feature": "i_price_ratio",
+      "mean_abs_shap": 0.08902746
+    },
+    {
+      "feature": "i_customer_share_garment_group",
+      "mean_abs_shap": 0.08684614
+    },
+    {
+      "feature": "a_section_name",
+      "mean_abs_shap": 0.07900861
+    },
+    {
+      "feature": "a_sales_2w",
+      "mean_abs_shap": 0.0771611
+    },
+    {
+      "feature": "a_colour_group_name",
+      "mean_abs_shap": 0.0712252
+    }
+  ],
+  "top10_shap_top12_rows": [
+    {
+      "feature": "i_days_since_bought_product_code",
+      "mean_abs_shap": 0.24552907
+    },
+    {
+      "feature": "a_sales_1w",
+      "mean_abs_shap": 0.22938462
+    },
+    {
+      "feature": "i_channel_gap",
+      "mean_abs_shap": 0.11374464
+    },
+    {
+      "feature": "a_days_since_last_sale",
+      "mean_abs_shap": 0.10719521
+    },
+    {
+      "feature": "final_rank",
+      "mean_abs_shap": 0.09937412
+    },
+    {
+      "feature": "i_customer_share_garment_group",
+      "mean_abs_shap": 0.09914999
+    },
+    {
+      "feature": "segment_popular_share",
+      "mean_abs_shap": 0.0887839
+    },
+    {
+      "feature": "a_colour_group_name",
+      "mean_abs_shap": 0.08303375
+    },
+    {
+      "feature": "a_section_name",
+      "mean_abs_shap": 0.08294785
+    },
+    {
+      "feature": "i_days_since_bought_article",
+      "mean_abs_shap": 0.0803026
+    }
+  ],
+  "top10_contrast_shap_all_candidates": [
+    {
+      "feature": "a_sales_1w",
+      "mean_abs_contrast_shap": 0.2808851
+    },
+    {
+      "feature": "a_days_since_last_sale",
+      "mean_abs_contrast_shap": 0.16969357
+    },
+    {
+      "feature": "i_channel_gap",
+      "mean_abs_contrast_shap": 0.12907664
+    },
+    {
+      "feature": "i_days_since_bought_product_code",
+      "mean_abs_contrast_shap": 0.0900538
+    },
+    {
+      "feature": "a_sales_2w",
+      "mean_abs_contrast_shap": 0.08089291
+    },
+    {
+      "feature": "i_customer_share_garment_group",
+      "mean_abs_contrast_shap": 0.07914416
+    },
+    {
+      "feature": "i_price_ratio",
+      "mean_abs_contrast_shap": 0.07864536
+    },
+    {
+      "feature": "a_section_name",
+      "mean_abs_contrast_shap": 0.07689084
+    },
+    {
+      "feature": "a_colour_group_name",
+      "mean_abs_contrast_shap": 0.06946559
+    },
+    {
+      "feature": "a_garment_group_name",
+      "mean_abs_contrast_shap": 0.06489844
+    }
+  ],
+  "top10_contrast_shap_top12_rows": [
+    {
+      "feature": "a_sales_1w",
+      "mean_abs_contrast_shap": 0.24091473
+    },
+    {
+      "feature": "i_days_since_bought_product_code",
+      "mean_abs_contrast_shap": 0.21676849
+    },
+    {
+      "feature": "a_days_since_last_sale",
+      "mean_abs_contrast_shap": 0.11109961
+    },
+    {
+      "feature": "i_channel_gap",
+      "mean_abs_contrast_shap": 0.10920461
+    },
+    {
+      "feature": "final_rank",
+      "mean_abs_contrast_shap": 0.09905741
+    },
+    {
+      "feature": "i_customer_share_garment_group",
+      "mean_abs_contrast_shap": 0.09274642
+    },
+    {
+      "feature": "segment_popular_share",
+      "mean_abs_contrast_shap": 0.08750018
+    },
+    {
+      "feature": "i_days_since_bought_article",
+      "mean_abs_contrast_shap": 0.08518363
+    },
+    {
+      "feature": "a_colour_group_name",
+      "mean_abs_contrast_shap": 0.07804938
+    },
+    {
+      "feature": "a_section_name",
+      "mean_abs_contrast_shap": 0.07704228
+    }
+  ],
+  "top10_gain_importance": [
+    "i_days_since_bought_product_code",
+    "i_days_since_bought_article",
+    "a_section_name",
+    "a_sales_1w",
+    "repurchase_rank",
+    "a_colour_group_name",
+    "final_rank",
+    "a_garment_group_name",
+    "i_channel_gap",
+    "i_bought_same_product_code"
+  ],
+  "shap_vs_gain_disagreements": [
+    {
+      "feature": "i_days_since_bought_product_code",
+      "shap_rank": 4,
+      "gain_rank": 1
+    },
+    {
+      "feature": "i_age_gap",
+      "shap_rank": 5,
+      "gain_rank": ">10"
+    },
+    {
+      "feature": "a_sales_2w",
+      "shap_rank": 9,
+      "gain_rank": ">10"
+    },
+    {
+      "feature": "a_colour_group_name",
+      "shap_rank": 10,
+      "gain_rank": 6
+    },
+    {
+      "feature": "i_channel_gap",
+      "shap_rank": 3,
+      "gain_rank": 9
+    },
+    {
+      "feature": "i_days_since_bought_article",
+      "shap_rank": ">10",
+      "gain_rank": 2
+    },
+    {
+      "feature": "a_section_name",
+      "shap_rank": 8,
+      "gain_rank": 3
+    },
+    {
+      "feature": "i_price_ratio",
+      "shap_rank": 6,
+      "gain_rank": ">10"
+    },
+    {
+      "feature": "a_sales_1w",
+      "shap_rank": 1,
+      "gain_rank": 4
+    },
+    {
+      "feature": "final_rank",
+      "shap_rank": ">10",
+      "gain_rank": 7
+    },
+    {
+      "feature": "i_customer_share_garment_group",
+      "shap_rank": 7,
+      "gain_rank": ">10"
+    },
+    {
+      "feature": "repurchase_rank",
+      "shap_rank": ">10",
+      "gain_rank": 5
+    },
+    {
+      "feature": "a_garment_group_name",
+      "shap_rank": ">10",
+      "gain_rank": 8
+    },
+    {
+      "feature": "i_bought_same_product_code",
+      "shap_rank": ">10",
+      "gain_rank": 10
+    },
+    {
+      "feature": "a_days_since_last_sale",
+      "shap_rank": 2,
+      "gain_rank": ">10"
+    }
+  ],
+  "group_shap_all_candidates": {
+    "article": 1.17388248,
+    "interaction": 0.65488207,
+    "candidate": 0.30672754,
+    "customer": 0.30582164
+  },
+  "group_contrast_shap_all_candidates": {
+    "article": 1.10506244,
+    "interaction": 0.53458243,
+    "candidate": 0.29102924,
+    "customer": 0.16587172
+  },
+  "group_shap_top12": {
+    "article": 1.00451645,
+    "interaction": 0.81856876,
+    "candidate": 0.55953416,
+    "customer": 0.32440742
+  },
+  "ablation_deltas": {
+    "candidate": -0.00046597,
+    "customer": -0.00068763,
+    "article": -0.00237231,
+    "interaction": -0.00188599
+  },
+  "segment_comparison": {
+    "cold_start": {
+      "n": 69000,
+      "top10": [
+        {
+          "feature": "a_sales_1w",
+          "mean_abs_shap": 0.21597192
+        },
+        {
+          "feature": "a_days_since_last_sale",
+          "mean_abs_shap": 0.12909181
+        },
+        {
+          "feature": "i_days_since_bought_product_code",
+          "mean_abs_shap": 0.08258287
+        },
+        {
+          "feature": "c_n_purchases_1w",
+          "mean_abs_shap": 0.06523523
+        },
+        {
+          "feature": "c_n_purchases_4w",
+          "mean_abs_shap": 0.05392152
+        },
+        {
+          "feature": "a_colour_group_name",
+          "mean_abs_shap": 0.0509099
+        },
+        {
+          "feature": "a_garment_group_name",
+          "mean_abs_shap": 0.05024498
+        },
+        {
+          "feature": "i_age_gap",
+          "mean_abs_shap": 0.04450041
+        },
+        {
+          "feature": "segment_popular_share",
+          "mean_abs_shap": 0.04447671
+        },
+        {
+          "feature": "final_rank",
+          "mean_abs_shap": 0.04399605
+        }
+      ]
+    },
+    "heavy_buyer_20plus": {
+      "n": 667000,
+      "top10": [
+        {
+          "feature": "a_sales_1w",
+          "mean_abs_shap": 0.34877533
+        },
+        {
+          "feature": "a_days_since_last_sale",
+          "mean_abs_shap": 0.20728692
+        },
+        {
+          "feature": "i_channel_gap",
+          "mean_abs_shap": 0.16043071
+        },
+        {
+          "feature": "i_days_since_bought_product_code",
+          "mean_abs_shap": 0.11879595
+        },
+        {
+          "feature": "i_age_gap",
+          "mean_abs_shap": 0.09833094
+        },
+        {
+          "feature": "i_price_ratio",
+          "mean_abs_shap": 0.09745464
+        },
+        {
+          "feature": "a_section_name",
+          "mean_abs_shap": 0.09108444
+        },
+        {
+          "feature": "a_sales_2w",
+          "mean_abs_shap": 0.08917429
+        },
+        {
+          "feature": "i_customer_share_garment_group",
+          "mean_abs_shap": 0.08146465
+        },
+        {
+          "feature": "a_colour_group_name",
+          "mean_abs_shap": 0.07501384
+        }
+      ]
+    }
+  },
+  "faithfulness": {
+    "top_mean_drop": 0.4252506659237887,
+    "random_mean_drop": 0.05995127953034195,
+    "mean_diff": 0.3652993863934468,
+    "wilcoxon_stat": 431661.0,
+    "p_value": 6.980270827083915e-115,
+    "n_rows": 1000,
+    "passed": true
+  },
+  "reasons_coverage": {
+    "n_top12_rows": 60000,
+    "n_with_reasons": 57252,
+    "pct_with_reasons": 95.42
+  },
+  "reason_quality_check": {
+    "n_conflicts": 0,
+    "n_duplicate_themes": 0,
+    "passed": true
+  },
+  "runtime_s": 12.2
+}

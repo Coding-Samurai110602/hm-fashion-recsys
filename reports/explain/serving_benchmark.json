@@ -1,0 +1,26 @@
+{
+  "parity": {
+    "n_customers": 200,
+    "n_exact_top12_match": 200,
+    "n_set_match": 200,
+    "pct_exact": 100.0,
+    "pct_set_match": 100.0,
+    "max_score_diff": 1.619e-07,
+    "passed": true
+  },
+  "n_customers": 100,
+  "n_warmup": 5,
+  "load_time_s": 0.22,
+  "rss_mb": 5653.0,
+  "recommend_with_reasons": {
+    "p50_ms": 443.52,
+    "p95_ms": 491.71,
+    "n_calls": 100
+  },
+  "explain": {
+    "p50_ms": 449.06,
+    "p95_ms": 493.24,
+    "n_calls": 100
+  },
+  "total_runtime_s": 240.5
+}

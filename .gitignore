@@ -29,3 +29,13 @@ scripts/check_lgbm_autoselect.py
 scripts/build_evaluation_notebook.py
 scripts/run_nb05_numbers.py
 reports/evaluation/ab_run.log
+artifacts/
+scripts/check_nb05_numbers.py
+scripts/build_explain_notebook.py
+scripts/run_explain_parity.py
+scripts/fix_explain_summary.py
+reports/explain/shap_vals_all.npy
+reports/explain/expected_val_all.npy
+reports/explain/scores_all.npy
+reports/explain/top12_mask.npy
+reports/explain/df_sample.parquet
