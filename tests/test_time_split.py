@@ -85,6 +85,7 @@ def fold_103():
     return history, ground_truth, eval_customers
 
 
+@pytest.mark.requires_data
 def test_fold_ground_truth_nonempty(fold_103):
     """Fold 103 ground truth must contain at least one customer."""
     _, ground_truth, eval_customers = fold_103
@@ -92,12 +93,14 @@ def test_fold_ground_truth_nonempty(fold_103):
     assert len(eval_customers) > 0
 
 
+@pytest.mark.requires_data
 def test_fold_eval_customers_match_ground_truth(fold_103):
     """Every eval_customer must appear in ground_truth and vice versa."""
     _, ground_truth, eval_customers = fold_103
     assert set(eval_customers) == set(ground_truth.keys())
 
 
+@pytest.mark.requires_data
 def test_fold_ground_truth_sets_nonempty(fold_103):
     """Every customer in ground_truth must have at least one article."""
     _, ground_truth, _ = fold_103
@@ -105,6 +108,7 @@ def test_fold_ground_truth_sets_nonempty(fold_103):
         assert len(articles) >= 1, f"customer {customer_idx} has empty ground truth"
 
 
+@pytest.mark.requires_data
 def test_fold_history_max_week_before_target(fold_103):
     """History max week_idx must be strictly less than 103."""
     import polars as pl
@@ -118,6 +122,7 @@ def test_fold_history_max_week_before_target(fold_103):
     assert max_week < 103, f"History contains week {max_week} >= 103 (leakage!)"
 
 
+@pytest.mark.requires_data
 def test_fold_history_no_target_week_dates(fold_103):
     """History must contain no dates from week 103 (2020-09-02 to 2020-09-08)."""
     import polars as pl
@@ -136,6 +141,7 @@ def test_fold_history_no_target_week_dates(fold_103):
     assert rows_in_target == 0, f"{rows_in_target} target-week rows leaked into history"
 
 
+@pytest.mark.requires_data
 def test_fold_eval_customers_sorted(fold_103):
     """eval_customers must be sorted ascending."""
     _, _, eval_customers = fold_103

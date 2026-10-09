@@ -3,6 +3,9 @@
 Strategy: build a synthetic history with a known sentinel transaction at week==cutoff_week
 (i.e., inside the target period). Each source filters week_idx < cutoff_week; the sentinel
 must never appear in candidate output or scores.
+
+TestCandidateLeakageSynthetic runs in CI (no Kaggle data required).
+The remaining tests use real data (requires_data) for broader coverage.
 """
 from datetime import date, timedelta
 
@@ -11,6 +14,8 @@ import pytest
 
 from src.config import ANCHOR_DATE, ANCHOR_EPOCH_DAYS
 from src.data_io import load_transactions
+
+pytestmark = pytest.mark.requires_data
 
 # Sentinel: a fake article_idx unlikely to appear in real data
 SENTINEL_ARTICLE = 999999

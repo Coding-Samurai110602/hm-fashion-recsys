@@ -282,11 +282,13 @@ class TestBootstrapSanity:
 # Fold 103 regression: MAP@12 must match eval_fold103.json to 6 decimals
 # ─────────────────────────────────────────────────────────────────────────────
 
+@pytest.mark.requires_data
 class TestFold103Regression:
     EXPECTED_MAP12 = 0.035832
 
     @pytest.fixture(scope="class")
-    def eval_103(self):
+    @staticmethod
+    def eval_103():
         path = Path(__file__).parent.parent / "reports" / "ranker" / "eval_fold103.json"
         if not path.exists():
             pytest.skip("eval_fold103.json not found")

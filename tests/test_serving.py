@@ -89,7 +89,8 @@ class TestBundleIntegrity:
 
 class TestBundleAPISchema:
     @pytest.fixture(scope="class")
-    def rec(self):
+    @staticmethod
+    def rec():
         if not _bundle_available():
             pytest.skip("bundle not built yet")
         from src.serving.bundle import load_bundle
@@ -205,6 +206,7 @@ class TestBundleAPISchema:
 # Parity test: bundle vs in-memory Recommender
 # ─────────────────────────────────────────────────────────────────────────────
 
+@pytest.mark.requires_data
 class TestBundleParity:
     def test_bundle_parity_sample(self):
         """For sampled customers, bundle top-12 matches in-memory Recommender top-12 exactly."""

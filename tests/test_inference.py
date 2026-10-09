@@ -8,6 +8,8 @@ import numpy as np
 import polars as pl
 import pytest
 
+pytestmark = pytest.mark.requires_data
+
 
 def _model_exists() -> bool:
     return (Path(__file__).parent.parent / "models" / "lgbm_ranker.txt").exists()

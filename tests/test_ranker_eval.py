@@ -49,6 +49,7 @@ class TestEvalMetrics:
         map_val = map_at_k(predictions, ground_truth, k=12)
         assert abs(mean_ap - map_val) < 1e-10
 
+    @pytest.mark.requires_data
     def test_heuristic_fold103_reproduces_0024675(self):
         """Heuristic ordering from fold_103.parquet gives MAP@12 = 0.024675 (regression)."""
         from src.config import PROCESSED_DIR

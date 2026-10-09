@@ -7,6 +7,8 @@ import random
 import polars as pl
 import pytest
 
+pytestmark = pytest.mark.requires_data
+
 from src.config import MERGE_N, MERGE_PRIORITY, RECALL_NS, SOURCE_K
 from src.time_split import build_fold
 from src.candidates.repurchase import generate as repurchase_gen

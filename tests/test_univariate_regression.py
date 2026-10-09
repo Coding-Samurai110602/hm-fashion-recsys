@@ -20,6 +20,7 @@ FOLD_103_PATH = PROCESSED_DIR / "features" / "fold_103.parquet"
 _HEURISTIC_MAP12_FOLD103 = 0.024675292792042714  # from reports/candidates/fold_103_results.json
 
 
+@pytest.mark.requires_data
 @pytest.mark.skipif(
     not FOLD_103_PATH.exists(),
     reason="fold_103.parquet not present — run scripts/build_features.py first",

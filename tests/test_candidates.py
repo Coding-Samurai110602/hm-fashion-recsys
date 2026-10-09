@@ -1,11 +1,15 @@
 """Tests for candidate sources: schema, dtypes, no dups, determinism.
 
 Uses a small sample of ~500 eval_customers from fold 103 to keep runtime under 90s.
+Tests marked requires_data need the processed Kaggle parquets.
+test_repurchase_recency_only_ordering uses synthetic data and always runs.
 """
 import random
 
 import polars as pl
 import pytest
+
+pytestmark = pytest.mark.requires_data
 
 from src.candidates.base import OUTPUT_COLUMNS, OUTPUT_DTYPES
 from src.time_split import build_fold
@@ -218,9 +222,10 @@ def test_segment_popular_max_k(fold_data):
 
 
 # ---------------------------------------------------------------------------
-# Repurchase: recency_only ordering
+# Repurchase: recency_only ordering (synthetic — runs in CI without data)
 # ---------------------------------------------------------------------------
 
+@pytest.mark.not_requires_data
 def test_repurchase_recency_only_ordering():
     """recency_only mode: ordering is last_date DESC, article_idx ASC (no purchase_count key).
 

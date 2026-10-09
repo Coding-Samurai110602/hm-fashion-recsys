@@ -63,13 +63,14 @@ jobs:
       - name: Export OpenAPI snapshot
         run: PYTHONPATH=. python scripts/export_openapi.py
 
-      - name: Run tests (excluding real bundle and slow)
+      - name: Run tests (excluding real bundle, slow, and Kaggle data tests)
         env:
           BUNDLE_PATH: artifacts/bundle_synthetic
+          HM_DATA_DIR: /tmp/no_data
         run: |
           PYTHONPATH=. python -m pytest \
             -q \
-            -m "not integration_real and not slow" \
+            -m "not integration_real and not slow and not requires_data" \
             --tb=short
 
   docker-build:

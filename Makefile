@@ -1,5 +1,5 @@
 .PHONY: install lint format test test-all synthetic-bundle bundle api \
-        docker-build docker-run compose-up ci-lint
+        docker-build docker-run compose-up ci-lint ci-test ci-docker-test
 
 PYTHON = .venv/bin/python
 PIP    = .venv/bin/pip
@@ -54,3 +54,27 @@ compose-up:
 ci-lint:
 	python3 -c "import yaml; yaml.safe_load(open('.github/workflows/ci.yml')); print('YAML OK')"
 	actionlint .github/workflows/ci.yml
+
+# Run the exact CI pytest command locally with an empty data dir so
+# requires_data tests are skipped — mirrors what GitHub Actions does.
+ci-test:
+	$(eval TMP := $(shell mktemp -d))
+	HM_DATA_DIR=$(TMP) BUNDLE_PATH=artifacts/bundle_synthetic PYTHONPATH=. \
+		$(PYTHON) -m pytest -q \
+		-m "not integration_real and not slow and not requires_data" \
+		--tb=short tests/
+	rm -rf $(TMP)
+
+# Run the CI test command inside a clean python:3.12-slim container with
+# only the repo mounted (no data/, models/, or real bundle).
+ci-docker-test:
+	docker run --rm \
+		-v $$(pwd):/repo:ro \
+		-w /repo \
+		-e BUNDLE_PATH=/repo/artifacts/bundle_synthetic \
+		-e HM_DATA_DIR=/tmp/no_data \
+		python:3.12-slim \
+		sh -c "pip install -q -r requirements.txt -r requirements-api.txt 'pytest>=8.0.0' 'statsmodels==0.14.4' && \
+			PYTHONPATH=. python -m pytest -q \
+			-m 'not integration_real and not slow and not requires_data' \
+			--tb=short tests/"

@@ -1,4 +1,5 @@
 """Central constants for the H&M recommendation system."""
+import os
 from datetime import date
 from pathlib import Path
 
@@ -6,7 +7,9 @@ from pathlib import Path
 # Paths
 # ---------------------------------------------------------------------------
 ROOT_DIR = Path(__file__).parent.parent
-DATA_DIR = ROOT_DIR / "data"
+# HM_DATA_DIR lets CI point to an empty tmpdir so data-dependent tests
+# are skipped via the requires_data marker without touching real data.
+DATA_DIR = Path(os.environ.get("HM_DATA_DIR", str(ROOT_DIR / "data")))
 PROCESSED_DIR = DATA_DIR / "processed"
 REPORTS_DIR = ROOT_DIR / "reports"
 CANDIDATES_DIR = REPORTS_DIR / "candidates"

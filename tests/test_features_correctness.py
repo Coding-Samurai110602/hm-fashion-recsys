@@ -99,7 +99,8 @@ def _articles() -> pl.LazyFrame:
 class TestCustomerFeatureCorrectness:
 
     @pytest.fixture(scope="class")
-    def cust_feats(self):
+    @staticmethod
+    def cust_feats():
         return compute_customer_features(_history(), CUTOFF_WEEK, _customers(), ANCHOR_EPOCH_DAYS)
 
     def test_n_purchases_total(self, cust_feats):
@@ -161,7 +162,8 @@ class TestCustomerFeatureCorrectness:
 class TestArticleFeatureCorrectness:
 
     @pytest.fixture(scope="class")
-    def art_feats(self):
+    @staticmethod
+    def art_feats():
         return compute_article_features(
             _history(), CUTOFF_WEEK, _articles(), _customers(), ANCHOR_EPOCH_DAYS
         )
@@ -232,7 +234,8 @@ class TestArticleFeatureCorrectness:
 class TestInteractionFeatureCorrectness:
 
     @pytest.fixture(scope="class")
-    def all_feats(self):
+    @staticmethod
+    def all_feats():
         hist = _history()
         art_feats = compute_article_features(hist, CUTOFF_WEEK, _articles(), _customers(), ANCHOR_EPOCH_DAYS)
         cust_feats = compute_customer_features(hist, CUTOFF_WEEK, _customers(), ANCHOR_EPOCH_DAYS)
