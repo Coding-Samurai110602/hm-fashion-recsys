@@ -16,3 +16,8 @@ repos:
       - id: check-yaml
       - id: check-added-large-files
         args: ["--maxkb=5120"]  # 5 MB guard
+
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.12
+    hooks:
+      - id: actionlint

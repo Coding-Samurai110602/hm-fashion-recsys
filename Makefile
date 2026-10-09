@@ -1,5 +1,5 @@
 .PHONY: install lint format test test-all synthetic-bundle bundle api \
-        docker-build docker-run compose-up
+        docker-build docker-run compose-up ci-lint
 
 PYTHON = .venv/bin/python
 PIP    = .venv/bin/pip
@@ -50,3 +50,7 @@ docker-run:
 
 compose-up:
 	docker compose up
+
+ci-lint:
+	python3 -c "import yaml; yaml.safe_load(open('.github/workflows/ci.yml')); print('YAML OK')"
+	actionlint .github/workflows/ci.yml

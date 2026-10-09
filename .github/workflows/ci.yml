@@ -90,38 +90,10 @@ jobs:
             -e BUNDLE_PATH=/app/artifacts/bundle_synthetic \
             -e LOG_LEVEL=INFO \
             hm-recsys-api:ci
-          echo "Container started, waiting for /ready..."
 
-      - name: Wait for ready
-        run: |
-          for i in $(seq 1 60); do
-            STATUS=$(curl -sf http://localhost:8000/ready 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('ready','false'))" 2>/dev/null || echo "false")
-            if [ "$STATUS" = "True" ]; then
-              echo "/ready returned true after ${i}s"
-              break
-            fi
-            if [ $i -eq 60 ]; then
-              echo "Timed out waiting for /ready"
-              docker logs hm-api
-              exit 1
-            fi
-            sleep 2
-          done
-
-      - name: Smoke test endpoints
-        run: |
-          echo "=== /health ==="
-          curl -sf http://localhost:8000/health | python3 -m json.tool
-
-          echo "=== /version ==="
-          curl -sf http://localhost:8000/version | python3 -m json.tool
-
-          echo "=== /api/v1/insights/summary ==="
-          curl -sf http://localhost:8000/api/v1/insights/summary | python3 -m json.tool
+      - name: Wait, smoke-test, and report image size
+        run: bash scripts/ci_smoke_test.sh
 
       - name: Stop container
         if: always()
         run: docker rm -f hm-api || true
-
-      - name: Report image size
-        run: docker image inspect hm-recsys-api:ci --format '{{.Size}}' | awk '{printf "Image size: %.1f MB\n", $1/1048576}'
