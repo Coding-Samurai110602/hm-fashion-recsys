@@ -74,7 +74,8 @@ ci-docker-test:
 		-e BUNDLE_PATH=/repo/artifacts/bundle_synthetic \
 		-e HM_DATA_DIR=/tmp/no_data \
 		python:3.12-slim \
-		sh -c "pip install -q -r requirements.txt -r requirements-api.txt 'pytest>=8.0.0' 'statsmodels==0.14.4' && \
+		sh -c "apt-get update -qq && apt-get install -y -q libgomp1 && \
+			pip install -q -r requirements.txt -r requirements-api.txt 'pytest>=8.0.0' 'statsmodels==0.14.4' && \
 			PYTHONPATH=. python -m pytest -q \
 			-m 'not integration_real and not slow and not requires_data' \
 			--tb=short tests/"

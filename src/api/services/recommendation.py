@@ -74,7 +74,9 @@ async def get_recommendations(
     loop = asyncio.get_event_loop()
     raw = await loop.run_in_executor(
         executor,
-        lambda: recommender.recommend(customer_idx, k=k),
+        lambda: recommender.recommend(
+            customer_idx, k=k, compute_reasons=include_reasons
+        ),
     )
     results = _format_recommendations(raw, include_reasons)
     with _cache_lock:

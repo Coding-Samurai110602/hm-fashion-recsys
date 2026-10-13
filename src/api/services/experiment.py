@@ -43,12 +43,14 @@ def compute_power(
             n_sm = int(result_sm.get("statsmodels_n_per_arm", n))
         else:
             n_sm = int(result_sm)
-    except Exception:
-        pass
+    except ImportError:
+        pass  # statsmodels optional; n_sm falls back to formula value
+    except (ValueError, TypeError) as e:
+        logger.warning("statsmodels power computation failed: %s", e)
 
     n_cuped = None
     if cuped_variance_reduction > 0:
-        effective_n = int(math.ceil(n * (1 - cuped_variance_reduction)))
+        effective_n = math.ceil(n * (1 - cuped_variance_reduction))
         n_cuped = effective_n
 
     weeks = None
@@ -81,13 +83,20 @@ async def run_simulation(
     loop = asyncio.get_event_loop()
 
     def _simulate():
-        result = {
+        from src.evaluation.ab_sim import (
+            empirical_power_curve_vec,
+            run_aa_test_vec,
+            run_peeking_null_vec,
+            run_peeking_power_vec,
+        )
+
+        result: dict = {
             "test_type": test_type,
             "n_per_arm": n_per_arm,
             "n_sims": n_sims,
             "false_positive_rate": None,
             "empirical_power": None,
-            "peeking_fpr": None,
+            "peeking_power": None,
             "data_source": "unavailable",
         }
 
@@ -100,95 +109,53 @@ async def run_simulation(
 
         if ab_df is not None and len(ab_df) > 0:
             result["data_source"] = "bundle_ab_arrays"
-            # AP@12 arrays available for paired t-test simulations (not used in current z-test)
             ranker_hit = ab_df["ranker_hit12"].to_numpy().astype(np.float64)
             heuristic_hit = ab_df["heuristic_hit12"].to_numpy().astype(np.float64)
 
-            rng = np.random.default_rng(seed)
-
             if test_type == "aa":
-                # A/A test: both arms from same heuristic distribution
-                combined = heuristic_hit
-                n_pop = len(combined)
-                rejections = 0
-                for _ in range(n_sims):
-                    idx_a = rng.choice(n_pop, size=n_per_arm, replace=True)
-                    idx_b = rng.choice(n_pop, size=n_per_arm, replace=True)
-                    rate_a = combined[idx_a].mean()
-                    rate_b = combined[idx_b].mean()
-                    p_pool = (combined[idx_a].sum() + combined[idx_b].sum()) / (
-                        2 * n_per_arm
-                    )
-                    se = (
-                        math.sqrt(p_pool * (1 - p_pool) * (2 / n_per_arm))
-                        if p_pool > 0
-                        else 1e-9
-                    )
-                    z = abs(rate_b - rate_a) / se if se > 0 else 0.0
-                    from scipy.stats import norm as _norm
-
-                    p_val = 2 * (1 - _norm.cdf(abs(z)))
-                    if p_val < 0.05:
-                        rejections += 1
-                result["false_positive_rate"] = rejections / n_sims
-            else:
-                # A/B test: arm A = heuristic, arm B = ranker
-                n_pop = len(ranker_hit)
-                rejections = 0
-                for _ in range(n_sims):
-                    idx_a = rng.choice(n_pop, size=n_per_arm, replace=True)
-                    idx_b = rng.choice(n_pop, size=n_per_arm, replace=True)
-                    rate_a = heuristic_hit[idx_a].mean()
-                    rate_b = ranker_hit[idx_b].mean()
-                    p_pool = (heuristic_hit[idx_a].sum() + ranker_hit[idx_b].sum()) / (
-                        2 * n_per_arm
-                    )
-                    se = (
-                        math.sqrt(p_pool * (1 - p_pool) * (2 / n_per_arm))
-                        if p_pool > 0
-                        else 1e-9
-                    )
-                    z = (rate_b - rate_a) / se if se > 0 else 0.0
-                    from scipy.stats import norm as _norm
-
-                    p_val = 1 - _norm.cdf(z)
-                    if p_val < 0.05:
-                        rejections += 1
-                result["empirical_power"] = rejections / n_sims
-
+                # A/A: both arms heuristic, permutation splits (no replacement)
+                aa_res = run_aa_test_vec(
+                    heuristic_hit, n_sims=n_sims, seed=seed, alpha=0.05
+                )
+                result["false_positive_rate"] = aa_res["false_positive_rate"]
                 if peeking:
-                    # Peeking simulation: 14-day sequential peeking
-                    daily_n = max(1, n_per_arm // n_days)
-                    peeking_rejections = 0
-                    for _ in range(n_sims):
-                        idx_a = rng.choice(n_pop, size=n_per_arm, replace=True)
-                        idx_b = rng.choice(n_pop, size=n_per_arm, replace=True)
-                        # Shuffle to simulate daily arrival
-                        rng.shuffle(idx_a)
-                        rng.shuffle(idx_b)
-                        rejected = False
-                        for d in range(1, n_days + 1):
-                            n_d = min(d * daily_n, n_per_arm)
-                            rate_a = heuristic_hit[idx_a[:n_d]].mean()
-                            rate_b = ranker_hit[idx_b[:n_d]].mean()
-                            p_pool = (
-                                heuristic_hit[idx_a[:n_d]].sum()
-                                + ranker_hit[idx_b[:n_d]].sum()
-                            ) / (2 * n_d)
-                            se = (
-                                math.sqrt(p_pool * (1 - p_pool) * (2 / n_d))
-                                if p_pool > 0
-                                else 1e-9
-                            )
-                            z = abs(rate_b - rate_a) / se if se > 0 else 0.0
-                            from scipy.stats import norm as _norm
+                    peek_res = run_peeking_null_vec(
+                        heuristic_hit,
+                        n_days=n_days,
+                        n_sims=n_sims,
+                        seed=seed,
+                        alpha=0.05,
+                    )
+                    result["peeking_power"] = peek_res["peeking_false_positive_rate"]
+            else:
+                # A/B: arm A = heuristic, arm B = ranker, permutation subsampling
+                power_res = empirical_power_curve_vec(
+                    heuristic_hit,
+                    ranker_hit,
+                    n_values=[n_per_arm],
+                    n_sims=n_sims,
+                    seed=seed,
+                    alpha=0.05,
+                )
+                raw_power = power_res[0]["empirical_power"] if power_res else None
+                import math as _math
 
-                            if 2 * (1 - _norm.cdf(z)) < 0.05:
-                                rejected = True
-                                break
-                        if rejected:
-                            peeking_rejections += 1
-                    result["peeking_fpr"] = peeking_rejections / n_sims
+                result["empirical_power"] = (
+                    None
+                    if raw_power is None
+                    or (isinstance(raw_power, float) and _math.isnan(raw_power))
+                    else raw_power
+                )
+                if peeking:
+                    peek_res = run_peeking_power_vec(
+                        heuristic_hit,
+                        ranker_hit,
+                        n_days=n_days,
+                        n_sims=n_sims,
+                        seed=seed,
+                        alpha=0.05,
+                    )
+                    result["peeking_power"] = peek_res["peeking_power"]
 
         return result
 

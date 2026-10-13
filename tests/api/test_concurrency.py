@@ -23,6 +23,8 @@ import pytest
 
 from tests.api.conftest import SYNTHETIC_BUNDLE
 
+pytestmark = [pytest.mark.api]
+
 
 def _get_customers(n: int = 5) -> list[str]:
     """Return n distinct hex customer_ids from the synthetic bundle."""
@@ -56,7 +58,7 @@ class TestConcurrency:
                     "status": r.status_code,
                     "n_items": len(r.json()) if r.status_code == 200 else 0,
                 }
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 return {"status": -1, "error": str(exc)}
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=20) as pool:

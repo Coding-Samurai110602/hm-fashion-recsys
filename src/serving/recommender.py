@@ -57,6 +57,18 @@ class BundleRecommender:
         # Build the state ONCE from bundle data; reuse for every call
         self._state = self._make_state_from_bundle()
 
+        # Two-tier cache:
+        # 1. Score cache: (df_cust, scores, sources_arr) — populated by ALL recommend() calls.
+        #    Lets explain() skip _score_customer() when no SHAP cache hit.
+        # 2. SHAP cache: (X, shap_vals, contrast, df_cust, scores) — populated only when
+        #    compute_reasons=True.  Lets explain() skip both _score_customer() and SHAP.
+        _CACHE_SIZE = 128
+        self._score_cache: dict[int, tuple] = {}
+        self._score_cache_order: list[int] = []
+        self._shap_cache: dict[int, tuple] = {}
+        self._shap_cache_order: list[int] = []
+        self._cache_maxsize = _CACHE_SIZE
+
         # Customer history index is already in state.history_df; no extra dict needed
 
     # ── Public API ─────────────────────────────────────────────────────────
@@ -65,17 +77,33 @@ class BundleRecommender:
         self,
         customer_idx: int,
         k: int = 12,
+        compute_reasons: bool = True,
     ) -> list[dict[str, Any]]:
         """Recommend top-k items for a real customer.
 
         Returns list of dicts:
           article_idx, article_id, prod_name, product_type, colour, department,
           score, sources, top_3_reasons
+
+        Parameters
+        ----------
+        compute_reasons : bool
+            When True (default) computes contrast-SHAP and populates the SHAP cache.
+            When False skips TreeSHAP; scores/features are still cached for explain().
         """
         df_feat, scores, sources_arr = self._score_customer(customer_idx)
         if df_feat is None:
             return []
-        return self._format_results(df_feat, scores, sources_arr, k, customer_idx)
+        # Always store score cache so explain() can skip _score_customer()
+        self._store_score_cache(int(customer_idx), df_feat, scores, sources_arr)
+        return self._format_results(
+            df_feat,
+            scores,
+            sources_arr,
+            k,
+            customer_idx,
+            compute_reasons=compute_reasons,
+        )
 
     def recommend_custom(
         self,
@@ -148,9 +176,40 @@ class BundleRecommender:
         from src.explain.reasons import generate_reasons
         from src.explain.shap_values import compute_shap, compute_within_list_contrast
 
-        df_feat, scores, _ = self._score_customer(customer_idx)
-        if df_feat is None:
-            return {"error": "customer not found"}
+        # Check SHAP cache populated by a prior recommend() call
+        cached = self._shap_cache.get(int(customer_idx))
+        if cached is not None:
+            X, shap_vals, contrast, df_cust, scores = cached
+            art_mask = (df_cust["article_idx"] == article_idx).to_numpy()
+            if not art_mask.any():
+                return {"error": "article not in candidate pool"}
+            row_i = int(np.where(art_mask)[0][0])
+            shap_row = shap_vals[row_i]
+            contrast_row = contrast[row_i]
+            fv_row = X[row_i]
+            reasons = generate_reasons(contrast_row, fv_row, FEATURE_NAMES, top_k=3)
+            return {
+                "customer_idx": customer_idx,
+                "article_idx": article_idx,
+                "score": float(scores[row_i]),
+                "expected_value": float(shap_vals[row_i].sum()),
+                "shap_values": {
+                    n: round(float(v), 8) for n, v in zip(FEATURE_NAMES, shap_row)
+                },
+                "contrast": {
+                    n: round(float(v), 8) for n, v in zip(FEATURE_NAMES, contrast_row)
+                },
+                "reasons": reasons,
+            }
+
+        # No SHAP cache hit — try score cache (skip _score_customer, run SHAP only)
+        score_cached = self._score_cache.get(int(customer_idx))
+        if score_cached is not None:
+            df_feat, scores, _ = score_cached
+        else:
+            df_feat, scores, _ = self._score_customer(customer_idx)
+            if df_feat is None:
+                return {"error": "customer not found"}
 
         # Find the row for this article
         art_mask = (df_feat["article_idx"] == article_idx).to_numpy()
@@ -166,6 +225,11 @@ class BundleRecommender:
         shap_vals, expected_val, _ = compute_shap(self._booster, X)
         custs = df_feat["customer_idx"].to_numpy()
         contrast = compute_within_list_contrast(shap_vals, custs)
+
+        # Cache for future calls
+        self._store_shap_cache(
+            int(customer_idx), X, shap_vals, contrast, df_feat, scores
+        )
 
         row_i = int(np.where(art_mask)[0][0])
         shap_row = shap_vals[row_i]
@@ -424,20 +488,33 @@ class BundleRecommender:
         sources_arr: np.ndarray,
         k: int,
         customer_idx: int,
+        compute_reasons: bool = True,
     ) -> list[dict[str, Any]]:
-        """Format scored candidates into the recommendation output schema."""
+        """Format scored candidates into the recommendation output schema.
+
+        When compute_reasons=True, runs TreeSHAP and populates the SHAP cache.
+        When False, skips SHAP entirely (faster for no-reasons requests).
+        """
         from src.explain.reasons import generate_reasons
         from src.explain.shap_values import compute_shap, compute_within_list_contrast
 
-        X = (
-            df_cust.select(FEATURE_NAMES)
-            .with_columns([pl.col(n).cast(pl.Float32) for n in FEATURE_NAMES])
-            .to_numpy(allow_copy=True)
-        ).astype(np.float32)
+        shap_vals = contrast = X = None
 
-        shap_vals, _, _ = compute_shap(self._booster, X)
-        custs = df_cust["customer_idx"].to_numpy()
-        contrast = compute_within_list_contrast(shap_vals, custs)
+        if compute_reasons:
+            X = (
+                df_cust.select(FEATURE_NAMES)
+                .with_columns([pl.col(n).cast(pl.Float32) for n in FEATURE_NAMES])
+                .to_numpy(allow_copy=True)
+            ).astype(np.float32)
+
+            shap_vals, _, _ = compute_shap(self._booster, X)
+            custs = df_cust["customer_idx"].to_numpy()
+            contrast = compute_within_list_contrast(shap_vals, custs)
+
+            # Cache SHAP for fast subsequent explain() calls
+            self._store_shap_cache(
+                int(customer_idx), X, shap_vals, contrast, df_cust, scores
+            )
 
         order = np.argsort(-scores)
         results = []
@@ -448,7 +525,12 @@ class BundleRecommender:
                 MERGE_PRIORITY[j] for j, v in enumerate(sources_arr[idx]) if v == 1
             ]
 
-            reasons = generate_reasons(contrast[idx], X[idx], FEATURE_NAMES, top_k=3)
+            if compute_reasons and contrast is not None and X is not None:
+                reasons = generate_reasons(
+                    contrast[idx], X[idx], FEATURE_NAMES, top_k=3
+                )
+            else:
+                reasons = []
             meta = self._get_article_meta(art_idx)
 
             results.append(
@@ -461,6 +543,40 @@ class BundleRecommender:
             )
 
         return results
+
+    def _store_score_cache(
+        self,
+        customer_idx: int,
+        df_cust: pl.DataFrame,
+        scores: np.ndarray,
+        sources_arr: np.ndarray,
+    ) -> None:
+        """Store scored candidates in bounded cache (populated by every recommend() call)."""
+        if customer_idx in self._score_cache:
+            self._score_cache_order.remove(customer_idx)
+        elif len(self._score_cache_order) >= self._cache_maxsize:
+            evict = self._score_cache_order.pop(0)
+            self._score_cache.pop(evict, None)
+        self._score_cache[customer_idx] = (df_cust, scores, sources_arr)
+        self._score_cache_order.append(customer_idx)
+
+    def _store_shap_cache(
+        self,
+        customer_idx: int,
+        X: np.ndarray,
+        shap_vals: np.ndarray,
+        contrast: np.ndarray,
+        df_cust: pl.DataFrame,
+        scores: np.ndarray,
+    ) -> None:
+        """Store SHAP computation in bounded cache (populated only by compute_reasons=True)."""
+        if customer_idx in self._shap_cache:
+            self._shap_cache_order.remove(customer_idx)
+        elif len(self._shap_cache_order) >= self._cache_maxsize:
+            evict = self._shap_cache_order.pop(0)
+            self._shap_cache.pop(evict, None)
+        self._shap_cache[customer_idx] = (X, shap_vals, contrast, df_cust, scores)
+        self._shap_cache_order.append(customer_idx)
 
     def _get_article_meta(self, article_idx: int) -> dict[str, Any]:
         """Look up display metadata for one article."""

@@ -1,6 +1,7 @@
 """Async load test: 10 concurrent users for 60 seconds on a realistic endpoint mix.
 
-Targets the REAL bundle (must be running). Reports throughput, p50/p95/p99, error rate.
+Targets the REAL bundle (must be running). Reports throughput, p50/p95/p99, error rate,
+and cache hit rate. Draws from 1,000+ distinct real customers (seeded).
 Saves results to reports/api/load_test.json.
 
 Usage:
@@ -18,7 +19,10 @@ import time
 from pathlib import Path
 
 import httpx
+import polars as pl
 
+BUNDLE_PATH = Path("artifacts/bundle_week104")
+N_DISTINCT_CUSTOMERS = 1000  # draw from at least this many distinct customers
 
 ENDPOINT_MIX = [
     # (weight, path_template)
@@ -36,10 +40,22 @@ ENDPOINT_MIX = [
 ]
 
 
+def _load_real_customer_ids(seed: int, n: int) -> list[str]:
+    """Load n distinct customer hex IDs from the real bundle (seeded)."""
+    customers_path = BUNDLE_PATH / "state" / "customers.parquet"
+    if not customers_path.exists():
+        return []
+    df = pl.read_parquet(customers_path)
+    if "customer_id" not in df.columns:
+        return []
+    sample = df.sample(n=min(n, len(df)), seed=seed)["customer_id"].to_list()
+    return [str(cid) for cid in sample]
+
+
 async def single_user(
     base_url: str,
     duration: float,
-    sample_customer_idxs: list[str],
+    sample_customer_ids: list[str],
     results: list[dict],
     user_id: int,
 ):
@@ -47,11 +63,11 @@ async def single_user(
     weights = [w for w, _ in ENDPOINT_MIX]
     paths = [p for _, p in ENDPOINT_MIX]
 
-    async with httpx.AsyncClient(base_url=base_url, timeout=10.0) as client:
+    async with httpx.AsyncClient(base_url=base_url, timeout=30.0) as client:
         deadline = time.perf_counter() + duration
         while time.perf_counter() < deadline:
             path_template = rng.choices(paths, weights=weights)[0]
-            cid = rng.choice(sample_customer_idxs)
+            cid = rng.choice(sample_customer_ids)
             path = path_template.replace("{cid}", str(cid))
             t0 = time.perf_counter()
             try:
@@ -63,7 +79,7 @@ async def single_user(
                     "elapsed_ms": elapsed,
                     "error": r.status_code >= 400,
                 })
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 elapsed = (time.perf_counter() - t0) * 1000
                 results.append({
                     "path": path,
@@ -77,16 +93,17 @@ async def single_user(
 async def main(base_url: str, n_users: int, duration: float, seed: int):
     print(f"[load_test] {n_users} users, {duration}s, target: {base_url}", flush=True)
 
-    # Get sample customers
-    async with httpx.AsyncClient(base_url=base_url, timeout=30.0) as client:
-        r = await client.get("/api/v1/customers/sample?n=20&segment=medium")
-        if r.status_code != 200:
-            print(f"[load_test] Failed to get sample customers: {r.status_code}")
-            sample_cidxs = list(range(0, 20))
-        else:
-            sample_cidxs = [item["customer_id"] for item in r.json()] or []
+    # Load distinct real customers from bundle (seeded for reproducibility)
+    sample_cidxs = _load_real_customer_ids(seed=seed, n=N_DISTINCT_CUSTOMERS)
+    if not sample_cidxs:
+        # Fallback: fetch from API sample endpoint
+        async with httpx.AsyncClient(base_url=base_url, timeout=30.0) as client:
+            r = await client.get("/api/v1/customers/sample?n=20&segment=medium")
+            sample_cidxs = [item["customer_id"] for item in r.json()] if r.status_code == 200 else []
 
-    print(f"[load_test] Sample customers: {sample_cidxs[:3]} ...", flush=True)
+    n_distinct = len(set(sample_cidxs))
+    print(f"[load_test] {n_distinct} distinct customers loaded (seed={seed})", flush=True)
+    print(f"[load_test] Sample: {sample_cidxs[0][:16]}...", flush=True)
 
     all_results: list[dict] = []
     tasks = [
@@ -97,6 +114,27 @@ async def main(base_url: str, n_users: int, duration: float, seed: int):
     t_start = time.perf_counter()
     await asyncio.gather(*tasks)
     elapsed_total = time.perf_counter() - t_start
+
+    # Fetch cache stats from API
+    cache_hit_rate = None
+    async with httpx.AsyncClient(base_url=base_url, timeout=5.0) as client:
+        try:
+            cr = await client.get("/api/v1/metrics")
+            if cr.status_code == 200:
+                metrics_text = cr.text
+                # Extract cache_hits and cache_misses from Prometheus metrics text
+                hits = misses = 0
+                for line in metrics_text.splitlines():
+                    if line.startswith("recommendation_cache_hits_total "):
+                        hits = int(float(line.split()[-1]))
+                    elif line.startswith("recommendation_cache_misses_total "):
+                        misses = int(float(line.split()[-1]))
+                total = hits + misses
+                if total > 0:
+                    cache_hit_rate = round(100.0 * hits / total, 1)
+                    print(f"[load_test] Cache: {hits} hits, {misses} misses ({cache_hit_rate}% hit rate)")
+        except Exception:  # noqa: BLE001
+            pass
 
     # Compute stats
     times = [r["elapsed_ms"] for r in all_results]
@@ -118,6 +156,9 @@ async def main(base_url: str, n_users: int, duration: float, seed: int):
         "n_errors": n_errors,
         "error_rate_pct": round(error_rate * 100, 2),
         "throughput_rps": round(throughput, 1),
+        "n_distinct_customers": n_distinct,
+        "cache_hit_rate_pct": cache_hit_rate,
+        "note": "Cold-cache numbers: 1000+ distinct customers seeded so most requests miss the warm LRU cache",
         "latency_ms": {
             "p50": round(p50, 1),
             "p95": round(p95, 1),
@@ -130,6 +171,7 @@ async def main(base_url: str, n_users: int, duration: float, seed: int):
     print(f"  Requests: {n_total} total, {n_errors} errors ({error_rate*100:.1f}%)")
     print(f"  Throughput: {throughput:.1f} req/s")
     print(f"  Latency: p50={p50:.0f}ms  p95={p95:.0f}ms  p99={p99:.0f}ms")
+    print(f"  Distinct customers: {n_distinct}  Cache hit rate: {cache_hit_rate}%")
 
     out_path = Path("reports/api/load_test.json")
     out_path.parent.mkdir(parents=True, exist_ok=True)

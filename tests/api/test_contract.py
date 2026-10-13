@@ -22,6 +22,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = [pytest.mark.api]
+
 OPENAPI_SNAPSHOT = Path("docs/openapi.json")
 
 
@@ -200,7 +202,8 @@ class TestOpenAPIContract:
         missing = []
         for path, methods in live.get("paths", {}).items():
             for method, op in methods.items():
-                if method in ("get", "post", "put", "patch", "delete"):
-                    if not op.get("summary"):
-                        missing.append(f"{method.upper()} {path}")
+                if method in ("get", "post", "put", "patch", "delete") and not op.get(
+                    "summary"
+                ):
+                    missing.append(f"{method.upper()} {path}")
         assert not missing, f"Endpoints missing summaries: {missing}"

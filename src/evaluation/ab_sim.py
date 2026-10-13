@@ -398,3 +398,208 @@ def cuped_adjustment(
         "t_test_unadjusted": t_res_unadj,
         "t_test_adjusted": t_res_adj,
     }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Vectorized simulation primitives (numpy batch operations)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _vz_reject(
+    sum_a: "np.ndarray",
+    n_a: int,
+    sum_b: "np.ndarray",
+    n_b: int,
+    alpha: float,
+) -> "np.ndarray":
+    """Vectorized two-sided two-proportion z-test rejection. Returns bool array."""
+    from scipy.stats import norm as _norm
+    p_a = sum_a / n_a
+    p_b = sum_b / n_b
+    p_pool = (sum_a + sum_b) / (n_a + n_b)
+    se = np.sqrt(p_pool * (1.0 - p_pool) * (1.0 / n_a + 1.0 / n_b))
+    z = np.where(se > 0.0, (p_b - p_a) / se, 0.0)
+    return 2.0 * (1.0 - _norm.cdf(np.abs(z))) < alpha
+
+
+def run_aa_test_vec(
+    hits: "np.ndarray",
+    n_sims: int,
+    seed: int,
+    alpha: float = 0.05,
+) -> dict:
+    """Vectorized A/A test: permutation splits (no replacement), both arms = heuristic.
+
+    Returns false_positive_rate (should be ≈ alpha under correct calibration).
+    """
+    rng = np.random.default_rng(seed)
+    n = len(hits)
+    mid = n // 2
+    n_b = n - mid
+    rejections = 0
+    BATCH = 50
+    for i in range(0, n_sims, BATCH):
+        bs = min(BATCH, n_sims - i)
+        perm = rng.random((bs, n)).argsort(axis=1)
+        sa = hits[perm[:, :mid]].sum(axis=1)
+        sb = hits[perm[:, mid:]].sum(axis=1)
+        rejections += int(_vz_reject(sa, mid, sb, n_b, alpha).sum())
+    fpr = rejections / n_sims
+    return {
+        "n_sims": n_sims,
+        "alpha": alpha,
+        "false_positive_rate": float(fpr),
+        "rejections": rejections,
+        "expected_fpr": alpha,
+        "within_expected": abs(fpr - alpha) < 0.02,
+    }
+
+
+def run_peeking_null_vec(
+    hits: "np.ndarray",
+    n_days: int,
+    n_sims: int,
+    seed: int,
+    alpha: float = 0.05,
+) -> dict:
+    """Vectorized peeking simulation under H0 (both arms = heuristic, permutation splits).
+
+    Returns peeking_false_positive_rate and fixed_horizon_false_positive_rate.
+    """
+    rng = np.random.default_rng(seed)
+    n = len(hits)
+    bucket_size = n // n_days
+    BATCH = 50
+    peek_rej = 0
+    fixed_rej = 0
+
+    for i in range(0, n_sims, BATCH):
+        bs = min(BATCH, n_sims - i)
+        perm = rng.random((bs, n)).argsort(axis=1)
+        cum_a = np.zeros(bs)
+        cum_b = np.zeros(bs)
+        cum_na = 0
+        cum_nb = 0
+        peeked = np.zeros(bs, dtype=bool)
+
+        for day in range(n_days):
+            start = day * bucket_size
+            end = start + bucket_size if day < n_days - 1 else n
+            day_n = end - start
+            day_mid = day_n // 2
+            day_custs = perm[:, start:end]
+            cum_a += hits[day_custs[:, :day_mid]].sum(axis=1)
+            cum_b += hits[day_custs[:, day_mid:]].sum(axis=1)
+            cum_na += day_mid
+            cum_nb += day_n - day_mid
+
+            if cum_na > 0 and cum_nb > 0:
+                reject = _vz_reject(cum_a, cum_na, cum_b, cum_nb, alpha)
+                peeked |= reject
+                if day == n_days - 1:
+                    fixed_rej += int(reject.sum())
+
+        peek_rej += int(peeked.sum())
+
+    peek_fpr = peek_rej / n_sims
+    fixed_fpr = fixed_rej / n_sims
+    return {
+        "n_sims": n_sims,
+        "n_days": n_days,
+        "alpha": alpha,
+        "peeking_false_positive_rate": float(peek_fpr),
+        "fixed_horizon_false_positive_rate": float(fixed_fpr),
+        "inflation_factor": float(peek_fpr / fixed_fpr) if fixed_fpr > 0 else float("nan"),
+    }
+
+
+def run_peeking_power_vec(
+    hits_a: "np.ndarray",
+    hits_b: "np.ndarray",
+    n_days: int,
+    n_sims: int,
+    seed: int,
+    alpha: float = 0.05,
+) -> dict:
+    """Vectorized peeking power: A/B test (arm_a=heuristic, arm_b=ranker) with early stopping.
+
+    Returns the empirical power when using the peeking rule (stop at first significance).
+    """
+    rng = np.random.default_rng(seed)
+    n = len(hits_a)
+    bucket_size = n // n_days
+    BATCH = 50
+    peek_rej = 0
+    fixed_rej = 0
+
+    for i in range(0, n_sims, BATCH):
+        bs = min(BATCH, n_sims - i)
+        perm_a = rng.random((bs, n)).argsort(axis=1)
+        perm_b = rng.random((bs, n)).argsort(axis=1)
+        cum_a = np.zeros(bs)
+        cum_b = np.zeros(bs)
+        cum_na = 0
+        cum_nb = 0
+        peeked = np.zeros(bs, dtype=bool)
+
+        for day in range(n_days):
+            start = day * bucket_size
+            end = start + bucket_size if day < n_days - 1 else n
+            day_n = end - start
+            day_mid = day_n // 2
+            cum_a += hits_a[perm_a[:, start:start + day_mid]].sum(axis=1)
+            cum_b += hits_b[perm_b[:, start:start + day_mid]].sum(axis=1)
+            cum_na += day_mid
+            cum_nb += day_mid
+
+            if cum_na > 0 and cum_nb > 0:
+                reject = _vz_reject(cum_a, cum_na, cum_b, cum_nb, alpha)
+                peeked |= reject
+                if day == n_days - 1:
+                    fixed_rej += int(reject.sum())
+
+        peek_rej += int(peeked.sum())
+
+    peek_power = peek_rej / n_sims
+    fixed_power = fixed_rej / n_sims
+    return {
+        "n_sims": n_sims,
+        "n_days": n_days,
+        "alpha": alpha,
+        "peeking_power": float(peek_power),
+        "fixed_horizon_power": float(fixed_power),
+    }
+
+
+def empirical_power_curve_vec(
+    hits_a: "np.ndarray",
+    hits_b: "np.ndarray",
+    n_values: "list[int]",
+    n_sims: int,
+    seed: int,
+    alpha: float = 0.05,
+) -> "list[dict]":
+    """Vectorized empirical power curve: permutation subsampling (no replacement)."""
+    rng = np.random.default_rng(seed)
+    n = len(hits_a)
+    results = []
+    for n_per_arm in n_values:
+        if 2 * n_per_arm > n:
+            results.append({
+                "n_per_arm": n_per_arm,
+                "empirical_power": float("nan"),
+                "note": "exceeds pool",
+            })
+            continue
+        rejections = 0
+        BATCH = 50
+        for i in range(0, n_sims, BATCH):
+            bs = min(BATCH, n_sims - i)
+            perm = rng.random((bs, n)).argsort(axis=1)[:, :2 * n_per_arm]
+            sa = hits_a[perm[:, :n_per_arm]].sum(axis=1)
+            sb = hits_b[perm[:, n_per_arm:]].sum(axis=1)
+            rejections += int(_vz_reject(sa, n_per_arm, sb, n_per_arm, alpha).sum())
+        results.append({
+            "n_per_arm": n_per_arm,
+            "empirical_power": float(rejections / n_sims),
+        })
+    return results

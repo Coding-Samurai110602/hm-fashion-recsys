@@ -1395,7 +1395,7 @@
             ],
             "title": "Empirical Power"
           },
-          "peeking_fpr": {
+          "peeking_power": {
             "anyOf": [
               {
                 "type": "number"
@@ -1404,7 +1404,18 @@
                 "type": "null"
               }
             ],
-            "title": "Peeking Fpr"
+            "title": "Peeking Power"
+          },
+          "data_source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Source"
           }
         },
         "type": "object",
@@ -1414,7 +1425,7 @@
           "n_sims",
           "false_positive_rate",
           "empirical_power",
-          "peeking_fpr"
+          "peeking_power"
         ],
         "title": "SimulateResult"
       },

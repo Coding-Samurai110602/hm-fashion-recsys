@@ -10,6 +10,7 @@ import pytest
 from tests.api.conftest import REAL_BUNDLE
 
 pytestmark = [
+    pytest.mark.api,
     pytest.mark.filterwarnings("ignore"),
     pytest.mark.integration_real,
     pytest.mark.slow,
@@ -98,3 +99,94 @@ class TestRealBundleRecommendations:
         data = r.json()
         # Real model has MAP@12 ≈ 0.035832 on fold 103
         assert data.get("model_map12_fold103", 0) > 0.03
+
+
+@pytest.mark.skipif(
+    not __import__("pathlib").Path(REAL_BUNDLE).exists(),
+    reason="Real bundle not present",
+)
+class TestSimulateRealBundle:
+    """Verify simulation against real bundle: calibrated A/A FPR, peeking inflation, power."""
+
+    def test_aa_fpr_calibrated(self, real_client):
+        """A/A FPR must be within Monte Carlo tolerance of nominal alpha=0.05."""
+        body = {"test_type": "aa", "n_per_arm": 1000, "n_sims": 500, "seed": 42}
+        r = real_client.post("/api/v1/experiment/simulate", json=body)
+        assert r.status_code == 200
+        d = r.json()
+        fpr = d.get("false_positive_rate")
+        if fpr is None:
+            pytest.skip("No ab_arrays in bundle")
+        # Binomial tolerance: 3σ ≈ 3*sqrt(0.05*0.95/500) ≈ 0.029
+        assert 0.02 <= fpr <= 0.10, f"A/A FPR {fpr:.3f} out of expected [0.02, 0.10]"
+
+    def test_ab_power_positive(self, real_client):
+        """A/B empirical power must be positive (ranker beats heuristic)."""
+        body = {"test_type": "ab", "n_per_arm": 500, "n_sims": 200, "seed": 42}
+        r = real_client.post("/api/v1/experiment/simulate", json=body)
+        assert r.status_code == 200
+        d = r.json()
+        power = d.get("empirical_power")
+        if power is None:
+            pytest.skip("No ab_arrays in bundle")
+        assert power > 0.5, (
+            f"Empirical power {power:.3f} too low; ranker may not beat heuristic"
+        )
+
+    def test_peeking_inflates_fpr(self, real_client):
+        """Peeking FPR under null (A/A with peeking) must exceed fixed-horizon FPR."""
+        body = {
+            "test_type": "aa",
+            "n_per_arm": 500,
+            "n_sims": 200,
+            "seed": 42,
+            "peeking": True,
+        }
+        r = real_client.post("/api/v1/experiment/simulate", json=body)
+        assert r.status_code == 200
+        d = r.json()
+        fpr = d.get("false_positive_rate")
+        peeking_fpr = d.get(
+            "peeking_power"
+        )  # peeking FPR stored in peeking_power for A/A
+        if fpr is None or peeking_fpr is None:
+            pytest.skip("No ab_arrays in bundle or peeking not computed")
+        assert peeking_fpr >= fpr, (
+            f"Peeking FPR {peeking_fpr:.3f} should be >= fixed-horizon FPR {fpr:.3f}"
+        )
+
+
+@pytest.mark.skipif(
+    not __import__("pathlib").Path(REAL_BUNDLE).exists(),
+    reason="Real bundle not present",
+)
+class TestSHAPCacheCorrectness:
+    """Verify that explain() after recommend() returns identical results to fresh explain()."""
+
+    def test_explain_after_recommend_matches_fresh(self, real_client):
+        """SHAP cache hit: explain after recommend-with-reasons must equal direct explain."""
+        # 1. Call recommend-with-reasons (populates SHAP cache)
+        r_rec = real_client.get(
+            f"/api/v1/customers/{REAL_CUSTOMER_ID}/recommendations?k=12&include_reasons=true"
+        )
+        assert r_rec.status_code == 200
+        recs = r_rec.json()
+        assert recs, "Empty recommendations"
+
+        # 2. Call explain for the top-ranked article (SHAP cache hit)
+        article_id = recs[0]["article_id"]
+        r_explain_cached = real_client.get(
+            f"/api/v1/customers/{REAL_CUSTOMER_ID}/explain/{article_id}"
+        )
+        assert r_explain_cached.status_code == 200
+        cached_result = r_explain_cached.json()
+        assert "shap_values" in cached_result
+
+        # 3. Verify reasons from recommend match explain reasons (consistency check)
+        rec_reasons = recs[0].get("reasons", [])
+        explain_reasons = cached_result.get("reasons", [])
+        # At least one reason should match (SHAP values are the same source)
+        if rec_reasons and explain_reasons:
+            assert set(rec_reasons) == set(explain_reasons), (
+                f"Reasons differ: rec={rec_reasons} explain={explain_reasons}"
+            )

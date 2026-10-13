@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-pytestmark = pytest.mark.filterwarnings("ignore")
+pytestmark = [pytest.mark.api, pytest.mark.filterwarnings("ignore")]
 
 
 class TestPower:
@@ -102,3 +102,59 @@ class TestSimulate:
         body = {"test_type": "xyz", "n_per_arm": 100}
         r = synth_client.post("/api/v1/experiment/simulate", json=body)
         assert r.status_code == 422
+
+
+class TestSimulateConsistency:
+    """Verify that simulations are deterministic given the same seed."""
+
+    def test_aa_same_seed_same_result(self, synth_client):
+        body = {"test_type": "aa", "n_per_arm": 100, "n_sims": 20, "seed": 42}
+        r1 = synth_client.post("/api/v1/experiment/simulate", json=body)
+        r2 = synth_client.post("/api/v1/experiment/simulate", json=body)
+        assert r1.status_code == 200
+        assert r2.status_code == 200
+        d1, d2 = r1.json(), r2.json()
+        assert d1["false_positive_rate"] == d2["false_positive_rate"], (
+            f"A/A FPR not reproducible: {d1['false_positive_rate']} vs {d2['false_positive_rate']}"
+        )
+
+    def test_ab_same_seed_same_result(self, synth_client):
+        body = {"test_type": "ab", "n_per_arm": 100, "n_sims": 20, "seed": 99}
+        r1 = synth_client.post("/api/v1/experiment/simulate", json=body)
+        r2 = synth_client.post("/api/v1/experiment/simulate", json=body)
+        assert r1.status_code == 200
+        assert r2.status_code == 200
+        d1, d2 = r1.json(), r2.json()
+        assert d1["empirical_power"] == d2["empirical_power"], (
+            f"A/B power not reproducible: {d1['empirical_power']} vs {d2['empirical_power']}"
+        )
+
+    def test_aa_fpr_field_present(self, synth_client):
+        body = {"test_type": "aa", "n_per_arm": 100, "n_sims": 10, "seed": 1}
+        r = synth_client.post("/api/v1/experiment/simulate", json=body)
+        assert r.status_code == 200
+        d = r.json()
+        assert "false_positive_rate" in d
+        assert d["false_positive_rate"] is not None or d["data_source"] == "unavailable"
+
+    def test_ab_power_field_present(self, synth_client):
+        body = {"test_type": "ab", "n_per_arm": 100, "n_sims": 10, "seed": 1}
+        r = synth_client.post("/api/v1/experiment/simulate", json=body)
+        assert r.status_code == 200
+        d = r.json()
+        assert "empirical_power" in d
+
+    def test_peeking_power_labeled_correctly(self, synth_client):
+        """peeking_power key must be present for A/B with peeking=True; never peeking_fpr."""
+        body = {
+            "test_type": "ab",
+            "n_per_arm": 50,
+            "n_sims": 5,
+            "seed": 42,
+            "peeking": True,
+        }
+        r = synth_client.post("/api/v1/experiment/simulate", json=body)
+        assert r.status_code == 200
+        d = r.json()
+        assert "peeking_power" in d
+        assert "peeking_fpr" not in d

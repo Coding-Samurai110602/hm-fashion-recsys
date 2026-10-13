@@ -6,7 +6,7 @@ import pytest
 
 from tests.api.conftest import SYNTHETIC_BUNDLE
 
-pytestmark = pytest.mark.filterwarnings("ignore")
+pytestmark = [pytest.mark.api, pytest.mark.filterwarnings("ignore")]
 
 
 def _get_article_id() -> str:

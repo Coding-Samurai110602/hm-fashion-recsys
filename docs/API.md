@@ -101,22 +101,26 @@ HTTP status codes: 404 unknown ID, 422 validation, 503 bundle not loaded.
 | `history` length (custom) | 1–`MAX_CUSTOM_HISTORY` (200) |
 | `t_dat` (custom history) | must be ≤ 2020-09-22 (bundle cutoff) |
 
-## Latency budgets — measured (local, real bundle, warm cache, 100 calls, 5 warmups)
+## Latency budgets — measured (local, real bundle, 30 calls per endpoint)
 
-| Endpoint group | Budget p50 | Budget p95 | Measured p50 | Measured p95 | Status |
-|----------------|-----------|-----------|-------------|-------------|--------|
-| Ops + insights | < 5 ms | < 50 ms | 1.9 ms | 3.9 ms | OK |
-| Recommendations without reasons | < 150 ms | < 150 ms | 12 ms | 39 ms | OK |
-| Recommendations with reasons | < 500 ms | < 700 ms | 17 ms | 47 ms | OK (LRU cache hit) |
-| `/experiment/power` | < 5 ms | < 50 ms | 2.5 ms | 2.9 ms | OK |
-| `/experiment/simulate` | < 500 ms | < 500 ms | 4.1 ms | 5.0 ms | OK |
-| `/explain` | < 500 ms | < 700 ms | 1330 ms | 1839 ms | **MISS** |
-| `/recommendations/custom` | < 500 ms | < 700 ms | 551 ms | 947 ms | **MISS** (p95) |
+**Primary figures are cold-cache (distinct customers); warm-cache shown separately.**
 
-**Notes on misses:**
-- `/explain`: per-call TreeSHAP on all ~200 candidates in the pool takes ~1.3 s on this hardware (MacBook Air, loaded). Session 6 measured 449ms on a lightly-loaded machine; 700ms budget is not achievable under concurrent load. The computation is O(200 × 68 features) and cannot be reduced without approximating SHAP.
-- `/recommendations/custom`: builds the full candidate + feature pipeline for a new customer on each call (no LRU cache benefit); p95 exceeds 700ms under load. Cold-path inference is bounded by LightGBM predict on 200 candidates (~550ms).
-- Recommendations **with reasons** appears fast (p50=17ms) because the LRU cache returns cached results for 99/100 warm calls. Cold-cache first call ≈ 450–700ms (TreeSHAP-dominated).
+| Endpoint group | Budget p95 | Cold p50 | Cold p95 | Warm p50 | Warm p95 | Status (cold) |
+|----------------|-----------|---------|---------|---------|---------|--------------|
+| Ops + insights | < 50 ms | 2 ms | 4 ms | 2 ms | 4 ms | PASS |
+| Recommendations — no reasons | < 150 ms | 397 ms | 422 ms | 2 ms | 2 ms | **MISS** (cold) |
+| Recommendations — with reasons | < 700 ms | 396 ms | 431 ms | 2 ms | 2 ms | PASS |
+| `/explain` (after recommend) | < 700 ms | 3 ms | 3 ms | 3 ms | 3 ms | PASS |
+| `/explain` (cold first call) | < 700 ms | ~430 ms | ~450 ms | — | — | PASS |
+| `/recommendations/custom` | < 700 ms | ~430 ms | ~480 ms | — | — | PASS |
+| `/experiment/power` | < 50 ms | 2 ms | 3 ms | — | — | PASS |
+| `/experiment/simulate` | < 500 ms | 4 ms | 5 ms | — | — | PASS |
+
+**Notes:**
+- **No-reasons cold MISS**: candidate generation + feature assembly + LightGBM scoring takes ~400ms per new customer. The 150ms budget assumed a warm LRU cache. Warm (LRU hit) is 2ms — well within budget.
+- **Explain improvement**: Previously 1330ms/1839ms (cold TreeSHAP, no cache). After this session: 3ms after a prior `recommend-with-reasons` call (SHAP cache hit); ~430ms if no prior recommend call (score cache reused, only SHAP runs).
+- **Custom improvement**: Previously 551ms/947ms. Now ~430ms cold because the SHAP cache avoids redundant computation.
+- **Load test (10 users, 60s, 1000 distinct customers)**: 561 requests, 0 errors (0.0%), throughput 9.1 req/s, p50=10ms, p95=4298ms, p99=4549ms. The high p95 reflects cold TreeSHAP calls dominating the tail; most requests (ops/insights endpoints) return in <10ms.
 
 ## Single-worker note
 

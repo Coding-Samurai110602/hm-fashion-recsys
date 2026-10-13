@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-pytestmark = pytest.mark.filterwarnings("ignore")
+pytestmark = [pytest.mark.api, pytest.mark.filterwarnings("ignore")]
 
 
 class TestInsightsSummary:

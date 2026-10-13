@@ -7,11 +7,14 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import time
 from pathlib import Path
 
 import lightgbm as lgb
 import polars as pl
+
+logger = logging.getLogger(__name__)
 
 
 def _sha256_file(path: Path) -> str:
@@ -208,8 +211,8 @@ def load_bundle(path: str | Path) -> Bundle:
         for json_file in sorted(reports_dir.glob("*.json")):
             try:
                 b.reports[json_file.stem] = json.loads(json_file.read_text())
-            except Exception:
-                pass
+            except Exception as e:  # noqa: BLE001
+                logger.warning("Failed to load bundle report %s: %s", json_file.name, e)
 
     load_time = time.perf_counter() - t0
     print(f"[bundle] Loaded in {load_time:.2f}s from {path}", flush=True)

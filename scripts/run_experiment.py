@@ -36,7 +36,11 @@ from src.config import PROCESSED_DIR, REPORTS_DIR
 from src.data_io import load_customers, load_transactions
 from src.evaluation.ab_sim import (
     OFFLINE_REPLAY_ASSUMPTION,
+    _vz_reject,
     cuped_adjustment,
+    empirical_power_curve_vec as _emp_power_vec,
+    run_aa_test_vec as _aa_test_vec,
+    run_peeking_null_vec as _peeking_vec,
     two_proportion_z_test,
     welch_t_test,
 )
@@ -64,126 +68,9 @@ MODELS_DIR = Path(__file__).parent.parent / "models"
 norm_cdf = scipy_stats.norm.cdf
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Vectorized primitives (all operate on pre-built numpy arrays)
-# ─────────────────────────────────────────────────────────────────────────────
-
-def _vz_reject(sum_a: np.ndarray, n_a: int,
-               sum_b: np.ndarray, n_b: int, alpha: float) -> np.ndarray:
-    """Vectorized two-proportion z-test rejection. Returns bool array."""
-    p_a = sum_a / n_a
-    p_b = sum_b / n_b
-    p_pool = (sum_a + sum_b) / (n_a + n_b)
-    se = np.sqrt(p_pool * (1.0 - p_pool) * (1.0 / n_a + 1.0 / n_b))
-    z = np.where(se > 0.0, (p_b - p_a) / se, 0.0)
-    return 2.0 * (1.0 - norm_cdf(np.abs(z))) < alpha
-
-
 def _vz_stats(sum_a: float, n_a: int, sum_b: float, n_b: int) -> dict:
     """Single-scalar z-test (for reporting the one main A/B split)."""
     return two_proportion_z_test(int(sum_a), n_a, int(sum_b), n_b)
-
-
-def _aa_test_vec(hits: np.ndarray, n_sims: int, seed: int, alpha: float) -> dict:
-    """Vectorized A/A test: n_sims random 50/50 splits, both arms heuristic."""
-    rng = np.random.default_rng(seed)
-    n = len(hits)
-    mid = n // 2
-    n_b = n - mid
-    rejections = 0
-    BATCH = 50
-    for i in range(0, n_sims, BATCH):
-        bs = min(BATCH, n_sims - i)
-        # (bs, n) array of random floats; argsort gives bs independent permutations
-        perm = rng.random((bs, n)).argsort(axis=1)
-        sa = hits[perm[:, :mid]].sum(axis=1)
-        sb = hits[perm[:, mid:]].sum(axis=1)
-        rejections += int(_vz_reject(sa, mid, sb, n_b, alpha).sum())
-    fpr = rejections / n_sims
-    return {
-        "n_sims": n_sims,
-        "alpha": alpha,
-        "false_positive_rate": float(fpr),
-        "rejections": rejections,
-        "expected_fpr": alpha,
-        "within_expected": abs(fpr - alpha) < 0.02,
-    }
-
-
-def _peeking_vec(hits: np.ndarray, n_days: int,
-                 n_sims: int, seed: int, alpha: float) -> dict:
-    """Vectorized peeking simulation under H0 (both arms = heuristic hits)."""
-    rng = np.random.default_rng(seed)
-    n = len(hits)
-    bucket_size = n // n_days
-    BATCH = 50
-    peek_rej = 0
-    fixed_rej = 0
-
-    for i in range(0, n_sims, BATCH):
-        bs = min(BATCH, n_sims - i)
-        perm = rng.random((bs, n)).argsort(axis=1)   # (bs, n)
-        cum_a = np.zeros(bs)
-        cum_b = np.zeros(bs)
-        cum_na = 0
-        cum_nb = 0
-        peeked = np.zeros(bs, dtype=bool)
-
-        for day in range(n_days):
-            start = day * bucket_size
-            end = start + bucket_size if day < n_days - 1 else n
-            day_n = end - start
-            day_mid = day_n // 2
-            day_custs = perm[:, start:end]           # (bs, day_n)
-            cum_a += hits[day_custs[:, :day_mid]].sum(axis=1)
-            cum_b += hits[day_custs[:, day_mid:]].sum(axis=1)
-            cum_na += day_mid
-            cum_nb += day_n - day_mid
-
-            if cum_na > 0 and cum_nb > 0:
-                reject = _vz_reject(cum_a, cum_na, cum_b, cum_nb, alpha)
-                peeked |= reject
-                if day == n_days - 1:
-                    fixed_rej += int(reject.sum())
-
-        peek_rej += int(peeked.sum())
-
-    peek_fpr = peek_rej / n_sims
-    fixed_fpr = fixed_rej / n_sims
-    return {
-        "n_sims": n_sims,
-        "n_days": n_days,
-        "alpha": alpha,
-        "peeking_false_positive_rate": float(peek_fpr),
-        "fixed_horizon_false_positive_rate": float(fixed_fpr),
-        "inflation_factor": float(peek_fpr / fixed_fpr) if fixed_fpr > 0 else float("nan"),
-    }
-
-
-def _emp_power_vec(hit_h: np.ndarray, hit_r: np.ndarray,
-                   n_values: list[int], n_sims: int, seed: int, alpha: float) -> list[dict]:
-    """Vectorized empirical power curve."""
-    rng = np.random.default_rng(seed)
-    n = len(hit_h)
-    results = []
-    for n_per_arm in n_values:
-        if 2 * n_per_arm > n:
-            results.append({"n_per_arm": n_per_arm,
-                             "empirical_power": float("nan"),
-                             "note": "exceeds pool"})
-            continue
-        rejections = 0
-        BATCH = 50
-        for i in range(0, n_sims, BATCH):
-            bs = min(BATCH, n_sims - i)
-            # Each row: 2*n_per_arm unique indices from n
-            perm = rng.random((bs, n)).argsort(axis=1)[:, :2 * n_per_arm]
-            sa = hit_h[perm[:, :n_per_arm]].sum(axis=1)
-            sb = hit_r[perm[:, n_per_arm:]].sum(axis=1)
-            rejections += int(_vz_reject(sa, n_per_arm, sb, n_per_arm, alpha).sum())
-        results.append({"n_per_arm": n_per_arm,
-                         "empirical_power": float(rejections / n_sims)})
-    return results
 
 
 # ─────────────────────────────────────────────────────────────────────────────
