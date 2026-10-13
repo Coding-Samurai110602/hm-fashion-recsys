@@ -1,0 +1,25 @@
+{
+  "customer_idx": 896118,
+  "article_idx": 42,
+  "score": 2.834,
+  "expected_value": 0.012,
+  "shap_values": {
+    "a_sales_1w": 0.31,
+    "i_channel_gap": -0.05,
+    "i_age_gap": 0.04,
+    "i_price_ratio": 0.02
+  },
+  "contrast": {
+    "a_sales_1w": 0.25,
+    "i_channel_gap": -0.08,
+    "i_days_since_bought_article": 0.15,
+    "i_age_gap": 0.06,
+    "i_price_ratio": 0.03,
+    "a_days_since_last_sale": -0.02
+  },
+  "reasons": [
+    "You bought this exact item 9 days ago",
+    "In a garment category you've bought from before (14% of your purchases)",
+    "Often bought together with something you bought recently"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "test_type": "aa",
+  "n_per_arm": 500,
+  "n_sims": 200,
+  "false_positive_rate": 0.052,
+  "empirical_power": null,
+  "peeking_fpr": null,
+  "peeking_power": null
+}

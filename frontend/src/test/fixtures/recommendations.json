@@ -1,0 +1,35 @@
+[
+  {
+    "rank": 1,
+    "article_idx": 42,
+    "article_id": "0108775015",
+    "prod_name": "Strindberg Boot",
+    "product_type": "Boots",
+    "colour": "Black",
+    "department": "Shoes",
+    "sources": ["repurchase"],
+    "reasons": ["You bought this exact item 9 days ago", "In a garment category you buy often (14%)"]
+  },
+  {
+    "rank": 2,
+    "article_idx": 99,
+    "article_id": "0108775016",
+    "prod_name": "Liliana Dress",
+    "product_type": "Dress",
+    "colour": "Navy",
+    "department": "Ladies Clothing",
+    "sources": ["product_code"],
+    "reasons": ["Popular this week", "Age group fit"]
+  },
+  {
+    "rank": 3,
+    "article_idx": 101,
+    "article_id": "0108775017",
+    "prod_name": "Classic T-shirt",
+    "product_type": "T-shirt",
+    "colour": "White",
+    "department": "Jersey Basic",
+    "sources": ["popularity_last_week"],
+    "reasons": ["Trending item"]
+  }
+]

@@ -1,0 +1,9 @@
+{
+  "holdout_map12_ranker": 0.036904,
+  "holdout_map12_heuristic": 0.024999,
+  "holdout_lift_pct": 47.62,
+  "fold103_ci_lo": 0.010563,
+  "fold103_ci_hi": 0.011758,
+  "fold103_ranker_map12": 0.035832,
+  "fold103_heuristic_map12": 0.024675
+}

@@ -145,7 +145,7 @@ TreeSHAP with n_jobs=4 (saved in model params): 299 ms per call (200 candidates 
 | 3 users | 5,125 | 167 req/s | 3 ms | 31 ms | 588 ms | 0 |
 | 10 users | 5,147 | 166 req/s | 10 ms | 184 ms | 1375 ms | 0 |
 
-Cache hit rate (cumulative, all profiles): **81.9%** (6435 hits / 7855 total). High hit rate because 1000 distinct customers fit mostly in the LRU cache of size 512 after the first profile warms it. Tail latency (p99=437ms for 1 user, p99=1375ms for 10 users) comes from cold with-reasons calls (409ms service time) queueing behind other cold calls.
+Cache hit rate (cumulative, all profiles): **81.9%** (6435 hits / 7855 total). High hit rate because the load test runs three profiles back-to-back against the same 1,000-customer pool: the first profile populates the LRU cache with the most-recently-requested customers (up to the cache size of 512), and subsequent profiles re-request many of the same customers, generating hits. 1,000 > 512, so not all customers fit simultaneously; the high rate comes from repeat visits across the three profiles rather than all customers fitting at once. Tail latency (p99=437ms for 1 user, p99=1375ms for 10 users) comes from cold with-reasons calls (409ms service time) queueing behind other cold calls.
 
 **Notes:**
 - Cold no-reasons: candidate_gen (9ms) + feature_assembly (38ms) + predict (2ms) = 49ms total, well under 150ms.

@@ -1,0 +1,7 @@
+{
+  "n_per_arm": 427,
+  "n_per_arm_statsmodels": 421,
+  "n_per_arm_cuped": 416,
+  "weeks_needed": 0.01,
+  "cohen_h": 0.193
+}

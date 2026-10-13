@@ -1,0 +1,51 @@
+{
+  "name": "hm-fashion-recsys-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --max-warnings 0",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "generate-types": "openapi-typescript $(cd ../.. && pwd)/docs/openapi.json -o src/api/types.generated.ts",
+    "check-types-fresh": "openapi-typescript $(cd ../.. && pwd)/docs/openapi.json -o /tmp/hm_types_tmp.ts && diff /tmp/hm_types_tmp.ts src/api/types.generated.ts"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.62.7",
+    "@testing-library/dom": "^10.4.2",
+    "axios": "^1.7.9",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router": "^7.0.2",
+    "recharts": "^2.13.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@tailwindcss/vite": "^4.0.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.2",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^9.17.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.16",
+    "globals": "^15.13.0",
+    "jsdom": "^26.1.0",
+    "msw": "^2.6.8",
+    "openapi-typescript": "^7.4.4",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.1",
+    "vite": "^6.0.5",
+    "vitest": "^2.1.8"
+  }
+}

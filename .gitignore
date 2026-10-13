@@ -48,3 +48,8 @@ reports/api/*.log
 scripts/profile_stages.py
 scripts/benchmark_num_threads.py
 scripts/measure_http_latency.py
+# Frontend
+frontend/node_modules/
+frontend/dist/
+data/images/
+.claude/

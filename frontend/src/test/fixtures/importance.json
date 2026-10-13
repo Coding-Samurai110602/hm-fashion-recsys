@@ -1,0 +1,7 @@
+[
+  { "rank_shap": 1, "feature": "a_sales_1w", "mean_abs_shap": 0.3105, "rank_gain": 4 },
+  { "rank_shap": 2, "feature": "a_days_since_last_sale", "mean_abs_shap": 0.1828, "rank_gain": null },
+  { "rank_shap": 3, "feature": "i_channel_gap", "mean_abs_shap": 0.1562, "rank_gain": 9 },
+  { "rank_shap": 4, "feature": "i_days_since_bought_product_code", "mean_abs_shap": 0.1129, "rank_gain": 1 },
+  { "rank_shap": 5, "feature": "i_age_gap", "mean_abs_shap": 0.0976, "rank_gain": null }
+]

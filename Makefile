@@ -1,5 +1,7 @@
 .PHONY: install lint format test test-all synthetic-bundle bundle api \
-        docker-build docker-run compose-up ci-lint ci-test ci-docker-test
+        docker-build docker-run compose-up ci-lint ci-test ci-docker-test \
+        frontend-install frontend-dev frontend-build frontend-lint \
+        frontend-test frontend-check-types frontend-all
 
 PYTHON = .venv/bin/python
 PIP    = .venv/bin/pip
@@ -79,3 +81,23 @@ ci-docker-test:
 			PYTHONPATH=. python -m pytest -q \
 			-m 'not integration_real and not slow and not requires_data' \
 			--tb=short tests/"
+
+frontend-install:
+	cd frontend && npm ci
+
+frontend-dev:
+	cd frontend && npm run dev
+
+frontend-build:
+	cd frontend && npm run build
+
+frontend-lint:
+	cd frontend && npm run lint && npm run typecheck
+
+frontend-test:
+	cd frontend && npm run test -- --run
+
+frontend-check-types:
+	cd frontend && npm run check-types-fresh
+
+frontend-all: frontend-lint frontend-test frontend-build

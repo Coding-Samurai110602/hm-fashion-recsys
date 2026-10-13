@@ -1,0 +1,17 @@
+{
+  "customer_idx": 896118,
+  "customer_id": "a73eaaa3b5e5c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2",
+  "age_bucket": "45-54",
+  "n_purchases_all_time": 45,
+  "n_purchases_last_4w": 3,
+  "recent_history": [
+    {
+      "article_idx": 42,
+      "article_id": "0108775015",
+      "prod_name": "Strindberg Boot",
+      "product_type": "Boots",
+      "colour": "Black",
+      "department": "Shoes"
+    }
+  ]
+}
