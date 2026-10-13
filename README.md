@@ -335,16 +335,16 @@ Parity: `BundleRecommender` top-12 matches in-memory `Recommender(lgbm_ranker_pr
 
 Parity (200 customers, seed 42): **200/200 exact match**. Load time: 0.29s. RSS: 4,198 MB (bundle state in memory).
 
-Cold-cache latency (BundleRecommender direct, 22 customers, seed=99, `reports/api/latency_http.json`):
-- Recommendations without reasons: cold p50=50ms, cold p95=51ms; warm p50=2ms (LRU hit)
-- Recommendations with reasons: cold p50=403ms, cold p95=422ms; warm p50=2ms
-- `/recommendations/custom`: cold p50=398ms, cold p95=448ms
-- `/explain` (after recommend): 3ms (SHAP cache hit); cold first call: p50=430ms
-- `/insights/summary`: 2ms
+HTTP latency (cold-cache, 30 calls each, `reports/api/latency_http.json`):
+- Recommendations without reasons: cold p50=56ms, cold p95=58ms; warm p50=1ms (LRU hit)
+- Recommendations with reasons: cold p50=409ms, cold p95=480ms; warm p50=1ms
+- `/recommendations/custom`: cold p50=427ms, cold p95=458ms
+- `/explain` (after recommend): 2ms (SHAP cache hit); cold first call: p50=364ms, p95=408ms
+- `/insights/summary`: <1ms; `/experiment/simulate` (50 sims): p50=223ms
 
-Stage breakdown (no-reasons cold, 20 customers): candidate_gen 9ms + feature_assembly 38ms + predict 2ms = 49ms total. TreeSHAP (with-reasons) adds 342ms (pred_contrib on 200 rows × 68 features × 421 trees with n_jobs=4).
+Stage breakdown (no-reasons cold, 20 customers, `reports/api/profiling_stages.json`): candidate_gen 9ms + feature_assembly 38ms + predict 2ms = 49ms direct. HTTP overhead ~7ms (loopback + FastAPI + JSON serialization). TreeSHAP (with-reasons) adds 342ms (n_jobs=4 on 200 rows × 68 features × 421 trees).
 
-Capacity: ThreadPoolExecutor(max_workers=4). Cold no-reasons: ~80 req/s; cold with-reasons: ~10 req/s. Warm (LRU hit): ~2000 req/s.
+Capacity (ThreadPoolExecutor(max_workers=4), 8 cores): cold no-reasons ≈71 req/s; cold with-reasons ≈10 req/s; warm (LRU hit) ≈2000 req/s.
 
 Export: `caffeinate -i python -u scripts/export_bundle.py`
 Parity + benchmark: `caffeinate -i python -u scripts/run_explain_parity.py`

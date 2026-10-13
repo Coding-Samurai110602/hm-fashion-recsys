@@ -40,9 +40,11 @@ reports/explain/expected_val_all.npy
 reports/explain/scores_all.npy
 reports/explain/top12_mask.npy
 reports/explain/df_sample.parquet
-# API load test log (generated, not tracked)
-reports/api/
+# API measurement JSONs tracked (latency_http.json, profiling_stages.json, load_test.json)
+# Ignore only non-JSON output files if any are generated
+reports/api/*.log
 # Docker
 *.tar.gz
 scripts/profile_stages.py
 scripts/benchmark_num_threads.py
+scripts/measure_http_latency.py

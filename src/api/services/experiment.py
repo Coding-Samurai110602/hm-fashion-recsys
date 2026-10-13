@@ -96,6 +96,7 @@ async def run_simulation(
             "n_sims": n_sims,
             "false_positive_rate": None,
             "empirical_power": None,
+            "peeking_fpr": None,
             "peeking_power": None,
             "data_source": "unavailable",
         }
@@ -126,7 +127,8 @@ async def run_simulation(
                         seed=seed,
                         alpha=0.05,
                     )
-                    result["peeking_power"] = peek_res["peeking_false_positive_rate"]
+                    # A/A peeking: false-positive rate under the null
+                    result["peeking_fpr"] = peek_res["peeking_false_positive_rate"]
             else:
                 # A/B: arm A = heuristic, arm B = ranker, permutation subsampling
                 power_res = empirical_power_curve_vec(

@@ -1,0 +1,56 @@
+{
+  "note": "Per-stage timings from instrumented BundleRecommender.recommend(). Cold = distinct customers (no LRU hit). n=20 customers, seed=42, real bundle.",
+  "n_customers": 20,
+  "stages": {
+    "candidate_gen": {"mean_ms": 9.0, "p95_ms": 10.8},
+    "feature_assembly": {"mean_ms": 38.1, "p95_ms": 41.1},
+    "lgbm_predict": {"mean_ms": 1.9, "p95_ms": 2.1},
+    "treeshap": {"mean_ms": 341.9, "p95_ms": 368.5},
+    "reason_format": {"mean_ms": 0.1, "p95_ms": 0.3}
+  },
+  "totals": {
+    "no_reasons": {"mean_ms": 49.1, "p95_ms": 51.7},
+    "with_reasons": {"mean_ms": 391.1, "p95_ms": 418.7}
+  },
+  "http_overhead": {
+    "note": "HTTP loopback adds serialization and FastAPI routing on top of BundleRecommender direct timing.",
+    "no_reasons_direct_mean_ms": 49.1,
+    "no_reasons_http_cold_p50_ms": 55.9,
+    "overhead_ms": 6.8
+  },
+  "budget": {
+    "no_reasons_cold_p95_ms": 51.7,
+    "budget_ms": 150,
+    "status": "PASS",
+    "note": "Cold no-reasons p95=52ms is under 150ms budget. Dominant stage: feature_assembly (mean 38.1ms of 49.1ms total)."
+  },
+  "num_threads_comparison": {
+    "model_file": "models/lgbm_ranker.txt",
+    "n_rows": 200,
+    "n_features": 68,
+    "n_rounds": 421,
+    "n_reps": 5,
+    "note": "booster.predict(X, num_threads=N) on 200x68 float32 matrix with 30% NaN (mimics cold-customer sparsity).",
+    "results": [
+      {"num_threads": 1, "label": "1", "predict_mean_ms": 5.5, "pred_contrib_mean_ms": 1118.2},
+      {"num_threads": 2, "label": "2", "predict_mean_ms": 2.8, "pred_contrib_mean_ms": 577.9},
+      {"num_threads": 4, "label": "4 (n_jobs=4 saved in model)", "predict_mean_ms": 1.6, "pred_contrib_mean_ms": 299.0},
+      {"num_threads": -1, "label": "default (all cores)", "predict_mean_ms": 1.3, "pred_contrib_mean_ms": 247.6}
+    ],
+    "speedup_n4_vs_n1": {"predict": 3.4, "pred_contrib": 3.7},
+    "interpretation": "n_jobs=4 (saved in model file) gives 3.7x SHAP speedup: 1118ms (1 thread) -> 299ms (4 threads). Without n_jobs=4, cold with-reasons = ~50ms + 1118ms = ~1168ms, above the 700ms budget."
+  },
+  "capacity_math": {
+    "os_cpu_count": 8,
+    "executor_max_workers": 4,
+    "shap_threads_per_call": 4,
+    "shap_total_threads_at_capacity": 16,
+    "note": "4 workers x 4 SHAP threads = 16 concurrent SHAP threads on 8 cores => 2x oversubscription during SHAP at full load.",
+    "cold_no_reasons_service_time_ms": 56,
+    "max_cold_no_reasons_rps": 71,
+    "cold_with_reasons_service_time_ms": 415,
+    "max_cold_with_reasons_rps": 9.6,
+    "warm_service_time_ms": 2,
+    "max_warm_rps": 2000
+  }
+}

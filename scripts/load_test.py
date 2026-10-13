@@ -95,7 +95,7 @@ def _fetch_cache_stats(base_url: str) -> tuple[int, int]:
     import httpx as _httpx
 
     with _httpx.Client(base_url=base_url, timeout=5.0) as client:
-        cr = client.get("/api/v1/metrics")
+        cr = client.get("/metrics")
 
     if cr.status_code != 200:
         raise RuntimeError(
@@ -105,17 +105,17 @@ def _fetch_cache_stats(base_url: str) -> tuple[int, int]:
     hits = misses = 0
     found_hits = found_misses = False
     for line in cr.text.splitlines():
-        if line.startswith("recommendation_cache_hits_total "):
+        if line.startswith("api_cache_hits_total "):
             hits = int(float(line.split()[-1]))
             found_hits = True
-        elif line.startswith("recommendation_cache_misses_total "):
+        elif line.startswith("api_cache_misses_total "):
             misses = int(float(line.split()[-1]))
             found_misses = True
 
     if not found_hits or not found_misses:
         raise RuntimeError(
-            "[load_test] Could not find recommendation_cache_hits_total / "
-            "recommendation_cache_misses_total in /metrics output.\n"
+            "[load_test] Could not find api_cache_hits_total / "
+            "api_cache_misses_total in /metrics output.\n"
             f"Got:\n{cr.text[:500]}"
         )
 

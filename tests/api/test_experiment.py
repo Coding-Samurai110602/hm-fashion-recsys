@@ -145,7 +145,7 @@ class TestSimulateConsistency:
         assert "empirical_power" in d
 
     def test_peeking_power_labeled_correctly(self, synth_client):
-        """peeking_power key must be present for A/B with peeking=True; never peeking_fpr."""
+        """A/B with peeking=True → peeking_power is set; peeking_fpr is None."""
         body = {
             "test_type": "ab",
             "n_per_arm": 50,
@@ -156,5 +156,22 @@ class TestSimulateConsistency:
         r = synth_client.post("/api/v1/experiment/simulate", json=body)
         assert r.status_code == 200
         d = r.json()
-        assert "peeking_power" in d
-        assert "peeking_fpr" not in d
+        # A/B peeking → peeking_power populated; peeking_fpr stays None
+        assert d.get("peeking_power") is not None
+        assert d.get("peeking_fpr") is None
+
+    def test_peeking_fpr_labeled_correctly_aa(self, synth_client):
+        """A/A with peeking=True → peeking_fpr is set (FPR under null); peeking_power is None."""
+        body = {
+            "test_type": "aa",
+            "n_per_arm": 50,
+            "n_sims": 5,
+            "seed": 42,
+            "peeking": True,
+        }
+        r = synth_client.post("/api/v1/experiment/simulate", json=body)
+        assert r.status_code == 200
+        d = r.json()
+        # A/A peeking → peeking_fpr populated; peeking_power stays None
+        assert d.get("peeking_fpr") is not None
+        assert d.get("peeking_power") is None

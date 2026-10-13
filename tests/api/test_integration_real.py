@@ -146,9 +146,7 @@ class TestSimulateRealBundle:
         assert r.status_code == 200
         d = r.json()
         fpr = d.get("false_positive_rate")
-        peeking_fpr = d.get(
-            "peeking_power"
-        )  # peeking FPR stored in peeking_power for A/A
+        peeking_fpr = d.get("peeking_fpr")  # A/A peeking → peeking_fpr field
         if fpr is None or peeking_fpr is None:
             pytest.skip("No ab_arrays in bundle or peeking not computed")
         assert peeking_fpr >= fpr, (
@@ -214,7 +212,7 @@ class TestSimulateVsAbTestJson:
         r = real_client.post("/api/v1/experiment/simulate", json=body)
         assert r.status_code == 200
         d = r.json()
-        peeking_fpr = d.get("peeking_power")
+        peeking_fpr = d.get("peeking_fpr")  # A/A peeking → peeking_fpr field
         if peeking_fpr is None:
             pytest.skip("No ab_arrays in bundle or peeking not computed")
         assert lo <= peeking_fpr <= hi, (

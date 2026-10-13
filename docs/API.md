@@ -101,20 +101,20 @@ HTTP status codes: 404 unknown ID, 422 validation, 503 bundle not loaded.
 | `history` length (custom) | 1–`MAX_CUSTOM_HISTORY` (200) |
 | `t_dat` (custom history) | must be ≤ 2020-09-22 (bundle cutoff) |
 
-## Latency budgets — measured (local, real bundle, BundleRecommender direct)
+## Latency budgets — measured (local, real bundle, HTTP over loopback)
 
-**Primary figures are cold-cache (distinct customers, cache cleared before each call); warm-cache (LRU hit) shown separately.**
+**Primary figures are cold-cache (distinct customers, fresh customer → cache miss); warm-cache (same customer repeated → LRU hit) shown separately. Stage breakdown from direct BundleRecommender timing (profiling_stages.json).**
 
 | Endpoint group | Budget p95 | Cold p50 | Cold p95 | Warm p50 | Warm p95 | Status (cold) |
 |----------------|-----------|---------|---------|---------|---------|--------------|
-| Ops + insights | < 50 ms | 2 ms | 4 ms | 2 ms | 4 ms | PASS |
-| Recommendations — no reasons | < 150 ms | 50 ms | 51 ms | 2 ms | 2 ms | PASS |
-| Recommendations — with reasons | < 700 ms | 403 ms | 422 ms | 2 ms | 2 ms | PASS |
-| `/explain` (after recommend) | < 700 ms | 3 ms | 3 ms | 3 ms | 3 ms | PASS |
-| `/explain` (cold first call) | < 700 ms | 430 ms | 450 ms | — | — | PASS |
-| `/recommendations/custom` | < 700 ms | 398 ms | 448 ms | — | — | PASS |
-| `/experiment/power` | < 50 ms | 2 ms | 3 ms | — | — | PASS |
-| `/experiment/simulate` | < 500 ms | 4 ms | 5 ms | — | — | PASS |
+| Ops + insights | < 50 ms | 1 ms | 1 ms | 1 ms | 1 ms | PASS |
+| Recommendations — no reasons | < 150 ms | 56 ms | 58 ms | 1 ms | 2 ms | PASS |
+| Recommendations — with reasons | < 700 ms | 409 ms | 480 ms | 1 ms | 2 ms | PASS |
+| `/explain` (after recommend) | < 700 ms | 2 ms | 3 ms | — | — | PASS |
+| `/explain` (cold first call) | < 700 ms | 364 ms | 408 ms | — | — | PASS |
+| `/recommendations/custom` | < 700 ms | 427 ms | 458 ms | — | — | PASS |
+| `/experiment/power` | < 50 ms | 2 ms | 2 ms | — | — | PASS |
+| `/experiment/simulate` (50 sims) | < 500 ms | 223 ms | 225 ms | — | — | PASS |
 
 **Stage breakdown (no-reasons cold, 20 customers, seed=42):**
 
@@ -130,20 +130,25 @@ HTTP status codes: 404 unknown ID, 422 validation, 503 bundle not loaded.
 
 TreeSHAP with n_jobs=4 (saved in model params): 299 ms per call (200 candidates × 68 features × 421 trees). Single-threaded: 1118 ms — would exceed the 700 ms budget without the 3.7× parallelism gain.
 
-**Capacity math — executor: ThreadPoolExecutor(max_workers=4):**
-- Cold no-reasons service time: ~50 ms
-- Service capacity (cold): 4 workers / 50 ms = ~80 cold req/s
-- Cold with-reasons service time: ~400 ms
-- Service capacity (cold with-reasons): 4 workers / 400 ms = ~10 req/s
-- Warm (LRU hit) service time: ~2 ms → ~2000 req/s effective with warm cache
-- Observed (10 users, warm mix): 9.1 req/s at p95=4298ms (cold SHAP calls dominate tail)
-- 1 user cold: minimal queueing, p95 ≈ cold service time
-- 3 users cold: 3/4 workers busy → low queueing, p95 ≈ 1.5× cold service time
-- 10 users cold: queueing adds multi-second delays for with-reasons calls
+**Capacity math — executor: ThreadPoolExecutor(max_workers=4), os.cpu_count()=8:**
+- Cold no-reasons HTTP p50: 56 ms → 4 workers / 56 ms ≈ **71 cold req/s** (executor-bound)
+- Cold with-reasons HTTP p50: 409 ms → 4 workers / 409 ms ≈ **10 cold req/s** (executor-bound)
+  - SHAP uses n_jobs=4 per call; at 4 workers: 16 SHAP threads on 8 cores → 2× oversubscription reduces CPU capacity to ~5.6 cold with-reasons req/s during full SHAP saturation
+- Warm (LRU hit) service time: ~2 ms → ~**2000 req/s** effective with warm cache
+- HTTP overhead vs direct: no-reasons p50 56ms HTTP vs 49ms direct → **~7ms overhead** (loopback + FastAPI + JSON)
+
+**Load test (mixed endpoint traffic, 1000 distinct seeded customers, 30s per profile):**
+
+| Profile | Requests | Throughput | p50 | p95 | p99 | Errors |
+|---------|---------|-----------|-----|-----|-----|--------|
+| 1 user | 2,841 | 94 req/s | 1 ms | 6 ms | 437 ms | 0 |
+| 3 users | 5,125 | 167 req/s | 3 ms | 31 ms | 588 ms | 0 |
+| 10 users | 5,147 | 166 req/s | 10 ms | 184 ms | 1375 ms | 0 |
+
+Cache hit rate (cumulative, all profiles): **81.9%** (6435 hits / 7855 total). High hit rate because 1000 distinct customers fit mostly in the LRU cache of size 512 after the first profile warms it. Tail latency (p99=437ms for 1 user, p99=1375ms for 10 users) comes from cold with-reasons calls (409ms service time) queueing behind other cold calls.
 
 **Notes:**
-- Cold no-reasons PASS: candidate_gen (9ms) + feature_assembly (38ms) + predict (2ms) = 49ms total, well under 150ms.
-- Prior measurement (397ms) was taken before the server was restarted after the `compute_reasons=False` optimisation — both paths were still computing SHAP. After restart: correct 50ms.
+- Cold no-reasons: candidate_gen (9ms) + feature_assembly (38ms) + predict (2ms) = 49ms total, well under 150ms.
 - **Explain after recommend**: 3ms (SHAP cache hit). Cold first call: 430ms (SHAP only; score cache reused, no candidate gen).
 - **Custom recs**: 398ms p50, 448ms p95 — includes full candidate gen + feature assembly + TreeSHAP.
 

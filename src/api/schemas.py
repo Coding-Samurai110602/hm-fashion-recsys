@@ -139,7 +139,8 @@ class SimulateResult(BaseModel):
     n_sims: int
     false_positive_rate: float | None
     empirical_power: float | None
-    peeking_power: float | None
+    peeking_fpr: float | None = None
+    peeking_power: float | None = None
     data_source: str | None = None
 
 

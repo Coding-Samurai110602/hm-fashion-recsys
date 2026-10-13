@@ -1,0 +1,114 @@
+{
+  "measurement_context": "HTTP over loopback (httpx sequential). real bundle (artifacts/bundle_week104), MacBook Air 16GB. 5 warmups then 30 timed calls per group. Cold = distinct customers (no LRU hit). Warm = same customer repeated (LRU hit).",
+  "n_warmups": 5,
+  "n_calls": 30,
+  "http_overhead_vs_direct": "no-reasons cold p50: HTTP 55.9ms vs direct (BundleRecommender) 49.1ms \u2192 HTTP overhead ~6.8ms (loopback + FastAPI routing + JSON serialization)",
+  "endpoints": {
+    "recommendations_no_reasons": {
+      "cold_n": 30,
+      "cold_p50_ms": 55.9,
+      "cold_p95_ms": 58.2,
+      "cold_mean_ms": 56.2,
+      "warm_n": 30,
+      "warm_p50_ms": 1.4,
+      "warm_p95_ms": 1.8,
+      "budget_ms": 150,
+      "meets_budget_cold": true,
+      "meets_budget_warm": true
+    },
+    "recommendations_with_reasons": {
+      "cold_n": 30,
+      "cold_p50_ms": 408.9,
+      "cold_p95_ms": 479.9,
+      "cold_mean_ms": 415.5,
+      "warm_n": 30,
+      "warm_p50_ms": 1.4,
+      "warm_p95_ms": 1.6,
+      "budget_ms": 700,
+      "meets_budget_cold": true,
+      "meets_budget_warm": true
+    },
+    "explain_after_recommend": {
+      "cold_n": 30,
+      "cold_p50_ms": 2.3,
+      "cold_p95_ms": 2.6,
+      "cold_mean_ms": 2.3,
+      "budget_ms": 700,
+      "meets_budget_cold": true,
+      "note": "SHAP cache hit after recommend-with-reasons"
+    },
+    "explain_cold_first_call": {
+      "cold_n": 30,
+      "cold_p50_ms": 363.5,
+      "cold_p95_ms": 407.5,
+      "cold_mean_ms": 366.0,
+      "budget_ms": 700,
+      "meets_budget_cold": true,
+      "note": "No prior recommend; score cache used but SHAP cache cold"
+    },
+    "custom_recommendations": {
+      "cold_n": 30,
+      "cold_p50_ms": 427.2,
+      "cold_p95_ms": 457.5,
+      "cold_mean_ms": 429.7,
+      "budget_ms": 700,
+      "meets_budget_cold": true,
+      "note": "Always cold (no cache for custom history)"
+    },
+    "insights_summary": {
+      "cold_n": 30,
+      "cold_p50_ms": 0.5,
+      "cold_p95_ms": 0.6,
+      "budget_ms": 50,
+      "meets_budget_cold": true
+    },
+    "power": {
+      "cold_n": 30,
+      "cold_p50_ms": 2.0,
+      "cold_p95_ms": 2.2,
+      "budget_ms": 50,
+      "meets_budget_cold": true
+    },
+    "simulate": {
+      "cold_n": 30,
+      "cold_p50_ms": 223.3,
+      "cold_p95_ms": 224.5,
+      "budget_ms": 500,
+      "meets_budget_cold": true
+    }
+  },
+  "budget_summary": {
+    "recommendations_no_reasons": {
+      "cold_p95": "58.2ms",
+      "meets_budget": true
+    },
+    "recommendations_with_reasons": {
+      "cold_p95": "479.9ms",
+      "meets_budget": true
+    },
+    "explain_after_recommend": {
+      "cold_p95": "2.6ms",
+      "meets_budget": true
+    },
+    "explain_cold_first_call": {
+      "cold_p95": "407.5ms",
+      "meets_budget": true
+    },
+    "custom_recommendations": {
+      "cold_p95": "457.5ms",
+      "meets_budget": true
+    },
+    "insights_summary": {
+      "cold_p95": "0.6ms",
+      "meets_budget": true
+    },
+    "power": {
+      "cold_p95": "2.2ms",
+      "meets_budget": true
+    },
+    "simulate": {
+      "cold_p95": "224.5ms",
+      "meets_budget": true
+    }
+  }
+}
