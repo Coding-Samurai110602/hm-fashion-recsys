@@ -44,3 +44,5 @@ reports/explain/df_sample.parquet
 reports/api/
 # Docker
 *.tar.gz
+scripts/profile_stages.py
+scripts/benchmark_num_threads.py

@@ -101,26 +101,51 @@ HTTP status codes: 404 unknown ID, 422 validation, 503 bundle not loaded.
 | `history` length (custom) | 1–`MAX_CUSTOM_HISTORY` (200) |
 | `t_dat` (custom history) | must be ≤ 2020-09-22 (bundle cutoff) |
 
-## Latency budgets — measured (local, real bundle, 30 calls per endpoint)
+## Latency budgets — measured (local, real bundle, BundleRecommender direct)
 
-**Primary figures are cold-cache (distinct customers); warm-cache shown separately.**
+**Primary figures are cold-cache (distinct customers, cache cleared before each call); warm-cache (LRU hit) shown separately.**
 
 | Endpoint group | Budget p95 | Cold p50 | Cold p95 | Warm p50 | Warm p95 | Status (cold) |
 |----------------|-----------|---------|---------|---------|---------|--------------|
 | Ops + insights | < 50 ms | 2 ms | 4 ms | 2 ms | 4 ms | PASS |
-| Recommendations — no reasons | < 150 ms | 397 ms | 422 ms | 2 ms | 2 ms | **MISS** (cold) |
-| Recommendations — with reasons | < 700 ms | 396 ms | 431 ms | 2 ms | 2 ms | PASS |
+| Recommendations — no reasons | < 150 ms | 50 ms | 51 ms | 2 ms | 2 ms | PASS |
+| Recommendations — with reasons | < 700 ms | 403 ms | 422 ms | 2 ms | 2 ms | PASS |
 | `/explain` (after recommend) | < 700 ms | 3 ms | 3 ms | 3 ms | 3 ms | PASS |
-| `/explain` (cold first call) | < 700 ms | ~430 ms | ~450 ms | — | — | PASS |
-| `/recommendations/custom` | < 700 ms | ~430 ms | ~480 ms | — | — | PASS |
+| `/explain` (cold first call) | < 700 ms | 430 ms | 450 ms | — | — | PASS |
+| `/recommendations/custom` | < 700 ms | 398 ms | 448 ms | — | — | PASS |
 | `/experiment/power` | < 50 ms | 2 ms | 3 ms | — | — | PASS |
 | `/experiment/simulate` | < 500 ms | 4 ms | 5 ms | — | — | PASS |
 
+**Stage breakdown (no-reasons cold, 20 customers, seed=42):**
+
+| Stage | Mean | p95 |
+|-------|------|-----|
+| candidate_gen | 9 ms | 11 ms |
+| feature_assembly | 38 ms | 41 ms |
+| lgbm_predict | 1.9 ms | 2.1 ms |
+| treeshap | 342 ms | 369 ms |
+| reason_format | 0.1 ms | 0.3 ms |
+| **no_reasons total** | **49 ms** | **52 ms** |
+| **with_reasons total** | **391 ms** | **419 ms** |
+
+TreeSHAP with n_jobs=4 (saved in model params): 299 ms per call (200 candidates × 68 features × 421 trees). Single-threaded: 1118 ms — would exceed the 700 ms budget without the 3.7× parallelism gain.
+
+**Capacity math — executor: ThreadPoolExecutor(max_workers=4):**
+- Cold no-reasons service time: ~50 ms
+- Service capacity (cold): 4 workers / 50 ms = ~80 cold req/s
+- Cold with-reasons service time: ~400 ms
+- Service capacity (cold with-reasons): 4 workers / 400 ms = ~10 req/s
+- Warm (LRU hit) service time: ~2 ms → ~2000 req/s effective with warm cache
+- Observed (10 users, warm mix): 9.1 req/s at p95=4298ms (cold SHAP calls dominate tail)
+- 1 user cold: minimal queueing, p95 ≈ cold service time
+- 3 users cold: 3/4 workers busy → low queueing, p95 ≈ 1.5× cold service time
+- 10 users cold: queueing adds multi-second delays for with-reasons calls
+
 **Notes:**
-- **No-reasons cold MISS**: candidate generation + feature assembly + LightGBM scoring takes ~400ms per new customer. The 150ms budget assumed a warm LRU cache. Warm (LRU hit) is 2ms — well within budget.
-- **Explain improvement**: Previously 1330ms/1839ms (cold TreeSHAP, no cache). After this session: 3ms after a prior `recommend-with-reasons` call (SHAP cache hit); ~430ms if no prior recommend call (score cache reused, only SHAP runs).
-- **Custom improvement**: Previously 551ms/947ms. Now ~430ms cold because the SHAP cache avoids redundant computation.
-- **Load test (10 users, 60s, 1000 distinct customers)**: 561 requests, 0 errors (0.0%), throughput 9.1 req/s, p50=10ms, p95=4298ms, p99=4549ms. The high p95 reflects cold TreeSHAP calls dominating the tail; most requests (ops/insights endpoints) return in <10ms.
+- Cold no-reasons PASS: candidate_gen (9ms) + feature_assembly (38ms) + predict (2ms) = 49ms total, well under 150ms.
+- Prior measurement (397ms) was taken before the server was restarted after the `compute_reasons=False` optimisation — both paths were still computing SHAP. After restart: correct 50ms.
+- **Explain after recommend**: 3ms (SHAP cache hit). Cold first call: 430ms (SHAP only; score cache reused, no candidate gen).
+- **Custom recs**: 398ms p50, 448ms p95 — includes full candidate gen + feature assembly + TreeSHAP.
 
 ## Single-worker note
 

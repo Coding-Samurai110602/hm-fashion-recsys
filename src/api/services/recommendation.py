@@ -16,8 +16,6 @@ from concurrent.futures import ThreadPoolExecutor
 from threading import Lock
 from typing import Any
 
-import polars as pl  # noqa: F401 (kept for potential future use by format helpers)
-
 logger = logging.getLogger("api")
 
 # Thread-safe LRU cache keyed by (customer_idx, k, include_reasons).

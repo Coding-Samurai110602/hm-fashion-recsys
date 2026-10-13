@@ -160,6 +160,95 @@ class TestSimulateRealBundle:
     not __import__("pathlib").Path(REAL_BUNDLE).exists(),
     reason="Real bundle not present",
 )
+class TestSimulateVsAbTestJson:
+    """Verify /experiment/simulate is consistent with the committed ab_test.json values.
+
+    Committed values (reports/evaluation/ab_test.json):
+      A/A FPR (n_sims=10000): 0.0532
+      Peeking FPR (n_sims=1000, n_days=14): 0.224
+      Empirical power at n=500/arm (n_sims=1000): 0.876
+
+    Each test uses n_sims=1000 and checks the result within the 99% binomial MC CI
+    for the committed value (p_committed ± z_99 * sqrt(p*(1-p)/n_sims)).
+    """
+
+    def test_aa_fpr_within_mc_tolerance_of_committed(self, real_client):
+        """A/A FPR (n_sims=1000, seed=42) must be within 99% MC CI of committed 0.0532."""
+        import math
+
+        committed = 0.0532
+        n_sims = 1000
+        z99 = 2.576
+        se = math.sqrt(committed * (1 - committed) / n_sims)
+        lo, hi = committed - z99 * se, committed + z99 * se
+
+        body = {"test_type": "aa", "n_per_arm": 1000, "n_sims": n_sims, "seed": 42}
+        r = real_client.post("/api/v1/experiment/simulate", json=body)
+        assert r.status_code == 200
+        d = r.json()
+        fpr = d.get("false_positive_rate")
+        if fpr is None:
+            pytest.skip("No ab_arrays in bundle")
+        assert lo <= fpr <= hi, (
+            f"A/A FPR API={fpr:.4f} vs committed=0.0532; "
+            f"99% MC CI=[{lo:.4f},{hi:.4f}] (n_sims={n_sims})"
+        )
+
+    def test_peeking_fpr_within_mc_tolerance_of_committed(self, real_client):
+        """Peeking FPR (n_sims=1000, seed=42) must be within 99% MC CI of committed 0.224."""
+        import math
+
+        committed = 0.224
+        n_sims = 1000
+        z99 = 2.576
+        se = math.sqrt(committed * (1 - committed) / n_sims)
+        lo, hi = committed - z99 * se, committed + z99 * se
+
+        body = {
+            "test_type": "aa",
+            "n_per_arm": 1000,
+            "n_sims": n_sims,
+            "seed": 42,
+            "peeking": True,
+        }
+        r = real_client.post("/api/v1/experiment/simulate", json=body)
+        assert r.status_code == 200
+        d = r.json()
+        peeking_fpr = d.get("peeking_power")
+        if peeking_fpr is None:
+            pytest.skip("No ab_arrays in bundle or peeking not computed")
+        assert lo <= peeking_fpr <= hi, (
+            f"Peeking FPR API={peeking_fpr:.4f} vs committed=0.224; "
+            f"99% MC CI=[{lo:.4f},{hi:.4f}] (n_sims={n_sims})"
+        )
+
+    def test_empirical_power_n500_within_mc_tolerance_of_committed(self, real_client):
+        """Empirical power at n=500/arm (n_sims=200, seed=42) within 99% CI of committed 0.876."""
+        import math
+
+        committed = 0.876
+        n_sims = 200
+        z99 = 2.576
+        se = math.sqrt(committed * (1 - committed) / n_sims)
+        lo, hi = committed - z99 * se, committed + z99 * se
+
+        body = {"test_type": "ab", "n_per_arm": 500, "n_sims": n_sims, "seed": 42}
+        r = real_client.post("/api/v1/experiment/simulate", json=body)
+        assert r.status_code == 200
+        d = r.json()
+        power = d.get("empirical_power")
+        if power is None:
+            pytest.skip("No ab_arrays in bundle")
+        assert lo <= power <= hi, (
+            f"Empirical power API={power:.4f} vs committed=0.876; "
+            f"99% MC CI=[{lo:.4f},{hi:.4f}] (n_sims={n_sims})"
+        )
+
+
+@pytest.mark.skipif(
+    not __import__("pathlib").Path(REAL_BUNDLE).exists(),
+    reason="Real bundle not present",
+)
 class TestSHAPCacheCorrectness:
     """Verify that explain() after recommend() returns identical results to fresh explain()."""
 

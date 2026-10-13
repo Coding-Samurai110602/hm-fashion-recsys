@@ -180,10 +180,10 @@ def generate_reasons(
             fval = feature_values[aidx]
             try:
                 fval_py = float(fval)
-                if not np.isnan(fval_py) and int(round(fval_py)) > 0:
-                    article_eligible = True
             except (ValueError, TypeError):
-                pass
+                fval_py = float("nan")
+            if not np.isnan(fval_py) and int(round(fval_py)) > 0:
+                article_eligible = True
 
     # Collect (contrast, reason) tuples per theme
     eligible_by_theme: dict[str, list[tuple[float, str]]] = {}

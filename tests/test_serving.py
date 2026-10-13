@@ -48,21 +48,22 @@ class TestBundleIntegrity:
             assert actual == expected, f"Hash mismatch: {rel}"
 
     def test_tampered_file_fails_to_load(self):
-        """load_bundle raises ValueError when a file is tampered."""
-        if not _bundle_available():
-            pytest.skip("bundle not built yet")
+        """load_bundle raises ValueError when a file is tampered.
+
+        Uses the synthetic bundle (< 200 KB) so the copytree never touches the
+        239 MB real bundle.  The SHA-256 verification logic is identical.
+        """
+        import shutil
+
+        synthetic = Path("artifacts/bundle_synthetic")
+        if not synthetic.exists() or not (synthetic / "manifest.json").exists():
+            pytest.skip("synthetic bundle not available")
 
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
-            # Copy just manifest and model.txt, then corrupt model.txt
-            (tmp_path / "state").mkdir()
-            (tmp_path / "state" / "seg_pop").mkdir()
+            shutil.copytree(synthetic, tmp_path, dirs_exist_ok=True)
 
-            # Copy all bundle files
-            import shutil
-            shutil.copytree(BUNDLE_PATH, tmp_path, dirs_exist_ok=True)
-
-            # Corrupt model.txt
+            # Corrupt model.txt so the SHA-256 check fires
             model_path = tmp_path / "model.txt"
             content = model_path.read_bytes()
             model_path.write_bytes(content + b"CORRUPTED")

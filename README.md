@@ -335,13 +335,16 @@ Parity: `BundleRecommender` top-12 matches in-memory `Recommender(lgbm_ranker_pr
 
 Parity (200 customers, seed 42): **200/200 exact match**. Load time: 0.29s. RSS: 4,198 MB (bundle state in memory).
 
-HTTP latency (real bundle, 100 calls per group, 5 warmups, see `reports/api/latency_http.json`):
-- Recommendations without reasons: p50=12ms, p95=39ms
-- Recommendations with reasons (warm LRU cache): p50=17ms, p95=47ms
-- `/explain` (no cache): p50=1330ms, p95=1839ms — TreeSHAP-dominated
-- `/insights/summary`: p50=2ms, p95=4ms
+Cold-cache latency (BundleRecommender direct, 22 customers, seed=99, `reports/api/latency_http.json`):
+- Recommendations without reasons: cold p50=50ms, cold p95=51ms; warm p50=2ms (LRU hit)
+- Recommendations with reasons: cold p50=403ms, cold p95=422ms; warm p50=2ms
+- `/recommendations/custom`: cold p50=398ms, cold p95=448ms
+- `/explain` (after recommend): 3ms (SHAP cache hit); cold first call: p50=430ms
+- `/insights/summary`: 2ms
 
-Reasons require exact TreeSHAP on all ~200 candidates per customer to compute the within-list contrast (SHAP_i − mean SHAP across the customer's pool); this per-call TreeSHAP pass dominates latency. `/explain` latency is hardware-dependent (1.3–1.8 s on a loaded MacBook Air, 0.45 s on a lightly-loaded machine).
+Stage breakdown (no-reasons cold, 20 customers): candidate_gen 9ms + feature_assembly 38ms + predict 2ms = 49ms total. TreeSHAP (with-reasons) adds 342ms (pred_contrib on 200 rows × 68 features × 421 trees with n_jobs=4).
+
+Capacity: ThreadPoolExecutor(max_workers=4). Cold no-reasons: ~80 req/s; cold with-reasons: ~10 req/s. Warm (LRU hit): ~2000 req/s.
 
 Export: `caffeinate -i python -u scripts/export_bundle.py`
 Parity + benchmark: `caffeinate -i python -u scripts/run_explain_parity.py`
