@@ -24,10 +24,10 @@ export default function ForYou() {
     return <Navigate to="/" replace />
   }
 
-  const recs = recsQuery.data ?? []
-  const isColdStart = profile.purchase_count === 0 || recs.every((r) => r.cold_start)
-  const latencyMs =
-    recs.length > 0 ? recs[0]?.latency_ms : null
+  const recsData = recsQuery.data  // ProfileRecsResponse | undefined
+  const recs = recsData?.items ?? []
+  const isColdStart = recsData?.cold_start ?? (profile.purchase_count === 0)
+  const latencyMs = recsData?.latency_ms ?? null
 
   return (
     <div className="space-y-8">

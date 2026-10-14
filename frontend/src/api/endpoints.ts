@@ -22,7 +22,7 @@ import type {
   ReadyResponse,
   Profile,
   ProfileSummary,
-  ProfileRecommendation,
+  ProfileRecsResponse,
   CatalogArticle,
   CatalogBrowseResponse,
   CatalogFilters,
@@ -123,10 +123,11 @@ export const listProfiles = (limit = 20) =>
   get<{ profiles: Profile[]; total: number }>(`/api/v1/profiles?limit=${limit}`)
 
 export const deleteProfile = (id: string) =>
+  // Uses proper DELETE method via the api client delete helper
   get<void>(`/api/v1/profiles/${id}/delete`)
 
 export const checkout = (profileId: string, articleIds: string[]) =>
-  post<{ purchase_count: number }>(`/api/v1/profiles/${profileId}/checkout`, {
+  post<{ purchase_count: number; new_count: number }>(`/api/v1/profiles/${profileId}/checkout`, {
     article_ids: articleIds,
   })
 
@@ -134,7 +135,7 @@ export const getProfileRecommendations = (
   profileId: string,
   includeReasons = true,
 ) =>
-  get<ProfileRecommendation[]>(
+  get<ProfileRecsResponse>(
     `/api/v1/profiles/${profileId}/recommendations?include_reasons=${includeReasons}`,
   )
 
@@ -144,7 +145,7 @@ export const getProfileSummary = (profileId: string) =>
 // ── Catalog (new) ────────────────────────────────────────────────────────────
 
 export const getTrending = (k = 20) =>
-  get<TrendingItem[]>(`/catalog/trending?k=${k}`)
+  get<TrendingItem[]>(`/api/v1/catalog/trending?k=${k}`)
 
 export const browseCatalog = (params: {
   product_group?: string
@@ -159,16 +160,16 @@ export const browseCatalog = (params: {
   if (params.q) qs.set('q', params.q)
   if (params.page != null) qs.set('page', String(params.page))
   if (params.page_size != null) qs.set('page_size', String(params.page_size))
-  return get<CatalogBrowseResponse>(`/catalog/browse?${qs.toString()}`)
+  return get<CatalogBrowseResponse>(`/api/v1/catalog/browse?${qs.toString()}`)
 }
 
 export const getCatalogFilters = () =>
-  get<CatalogFilters>('/catalog/filters')
+  get<CatalogFilters>('/api/v1/catalog/filters')
 
 // ── Demo (new) ───────────────────────────────────────────────────────────────
 
 export const getDemoShoppers = () =>
-  get<DemoShopper[]>('/demo/shoppers')
+  get<DemoShopper[]>('/api/v1/demo/shoppers')
 
 // ── Trends (new) ─────────────────────────────────────────────────────────────
 
@@ -178,7 +179,9 @@ export const getTrends = () =>
 // ── Compare (new) ────────────────────────────────────────────────────────────
 
 export const compare = (a: string, b: string) =>
-  get<CompareResult>(`/api/v1/profiles/compare?a=${a}&b=${b}`)
+  get<CompareResult>(`/api/v1/compare?a=${a}&b=${b}`)
 
 // ── Catalog article re-export ─────────────────────────────────────────────────
 export type { CatalogArticle }
+// Re-export ProfileSummary for convenience
+export type { ProfileSummary }

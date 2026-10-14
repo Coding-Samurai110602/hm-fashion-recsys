@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router'
 import { useCart } from '../contexts/CartContext'
 import { useProfile } from '../contexts/ProfileContext'
@@ -15,6 +15,7 @@ export function CartDrawer({ open, onClose }: Props) {
   const { items, removeItem, clearCart } = useCart()
   const { profile, setProfile } = useProfile()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [toast, setToast] = useState('')
 
   const checkoutMutation = useMutation({
@@ -27,7 +28,11 @@ export function CartDrawer({ open, onClose }: Props) {
     },
     onSuccess: (data) => {
       if (profile) {
-        setProfile({ ...profile, purchase_count: data.purchase_count })
+        // Use new_count (the updated total) not purchase_count (the old count)
+        setProfile({ ...profile, purchase_count: data.new_count })
+        queryClient.invalidateQueries({ queryKey: ['profile-summary', profile.id] })
+        queryClient.invalidateQueries({ queryKey: ['profile-recs', profile.id] })
+        queryClient.invalidateQueries({ queryKey: ['profiles'] })
       }
       clearCart()
       setToast('Purchases saved! Your recommendations are updated.')

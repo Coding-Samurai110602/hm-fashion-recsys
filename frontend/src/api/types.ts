@@ -101,7 +101,7 @@ export interface Profile {
 }
 
 export interface ProfileSummary {
-  id: string
+  profile_id: string
   nickname: string
   age_range: string
   channel: string
@@ -122,6 +122,13 @@ export interface ProfileRecommendation {
   source: string
   latency_ms: number
   cold_start: boolean
+}
+
+export interface ProfileRecsResponse {
+  profile_id: string
+  cold_start: boolean
+  items: ProfileRecommendation[]
+  latency_ms: number
 }
 
 // ── Catalog endpoints ────────────────────────────────────────────────────────

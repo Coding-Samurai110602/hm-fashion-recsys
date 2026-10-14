@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import logging
+import math
 import threading
-from typing import Optional
 
 import polars as pl
 from fastapi import APIRouter, Depends
@@ -16,7 +16,7 @@ logger = logging.getLogger("api")
 router = APIRouter(tags=["demo"])
 
 # Module-level cache: set once, never recomputed
-_demo_shoppers_cache: list["DemoShopper"] | None = None
+_demo_shoppers_cache: list[DemoShopper] | None = None
 _demo_cache_lock = threading.Lock()
 
 # ---------------------------------------------------------------------------
@@ -31,7 +31,7 @@ class DemoShopper(BaseModel):
     channel: str
     purchase_count: int
     top_product_groups: list[str]
-    top_colour: Optional[str]
+    top_colour: str | None
     summary: str
 
 
@@ -40,7 +40,7 @@ class DemoShopper(BaseModel):
 # ---------------------------------------------------------------------------
 
 def _age_to_range(age: float | None) -> str:
-    if age is None or (isinstance(age, float) and age != age):
+    if age is None or (isinstance(age, float) and math.isnan(age)):
         return "25-34"
     if age < 25:
         return "<25"
@@ -200,7 +200,7 @@ def _compute_demo_shoppers(bundle) -> list[DemoShopper]:
 
 
 @router.get(
-    "/demo/shoppers",
+    "/shoppers",
     response_model=list[DemoShopper],
     summary="Diverse demo customer profiles for showcasing recommendations",
 )

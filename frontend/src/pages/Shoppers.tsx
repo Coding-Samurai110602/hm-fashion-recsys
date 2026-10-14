@@ -5,7 +5,7 @@ import {
   listProfiles,
   getDemoShoppers,
   getProfileSummary,
-  getProfileRecommendations,
+  compare,
   fetchActualPurchases,
   fetchBaseline,
 } from '../api/endpoints'
@@ -13,7 +13,7 @@ import { useProfile } from '../contexts/ProfileContext'
 import { ShopperCard } from '../components/ShopperCard'
 import { SkeletonGrid } from '../components/SkeletonGrid'
 import { LoadingSpinner } from '../components/LoadingSpinner'
-import type { ProfileSummary, DemoShopper } from '../api/types'
+import type { ProfileSummary, DemoShopper, CompareResult } from '../api/types'
 import type { ArticleMeta } from '../api/types'
 
 // ── Profile compare view ─────────────────────────────────────────────────────
@@ -27,32 +27,17 @@ function CompareView({
   profileBId: string
   onBack: () => void
 }) {
-  const aRecsQuery = useQuery({
-    queryKey: ['profile-recs', profileAId],
-    queryFn: () => getProfileRecommendations(profileAId, false),
+  const compareQuery = useQuery({
+    queryKey: ['compare', profileAId, profileBId],
+    queryFn: () => compare(profileAId, profileBId),
     staleTime: 60 * 1000,
   })
 
-  const bRecsQuery = useQuery({
-    queryKey: ['profile-recs', profileBId],
-    queryFn: () => getProfileRecommendations(profileBId, false),
-    staleTime: 60 * 1000,
-  })
-
-  const aSummaryQuery = useQuery({
-    queryKey: ['profile-summary', profileAId],
-    queryFn: () => getProfileSummary(profileAId),
-    staleTime: 60 * 1000,
-  })
-
-  const bSummaryQuery = useQuery({
-    queryKey: ['profile-summary', profileBId],
-    queryFn: () => getProfileSummary(profileBId),
-    staleTime: 60 * 1000,
-  })
-
-  const aIds = new Set(aRecsQuery.data?.map((r) => r.article_id) ?? [])
-  const overlapCount = bRecsQuery.data?.filter((r) => aIds.has(r.article_id)).length ?? 0
+  const result: CompareResult | undefined = compareQuery.data
+  const aRecs = result?.a_recommendations ?? []
+  const bRecs = result?.b_recommendations ?? []
+  const overlapCount = result?.overlap_count ?? 0
+  const aIds = new Set(aRecs.map((r) => r.article_id))
 
   function SummaryCard({ summary }: { summary: ProfileSummary }) {
     return (
@@ -85,55 +70,63 @@ function CompareView({
         <h2 className="text-lg font-bold text-gray-900">Comparing profiles</h2>
       </div>
 
+      {compareQuery.isLoading && <SkeletonGrid count={4} />}
+
+      {compareQuery.error && (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-red-700">
+          Could not load comparison. Please try again.
+        </div>
+      )}
+
       {overlapCount > 0 && (
         <div className="rounded-xl border border-indigo-200 bg-indigo-50 px-5 py-3 text-sm text-indigo-700">
           These shoppers have <strong>{overlapCount}</strong> item{overlapCount !== 1 ? 's' : ''} in common.
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Column A */}
-        <div className="space-y-4">
-          {aSummaryQuery.data && <SummaryCard summary={aSummaryQuery.data} />}
-          {aRecsQuery.isLoading && <SkeletonGrid count={4} />}
-          <div className="grid grid-cols-2 gap-3">
-            {aRecsQuery.data?.slice(0, 6).map((item) => (
-              <div
-                key={item.article_idx}
-                className={`rounded-lg border p-3 text-xs ${
-                  aIds.has(item.article_id) && bRecsQuery.data?.some((b) => b.article_id === item.article_id)
-                    ? 'border-green-300 bg-green-50'
-                    : 'border-gray-100 bg-white'
-                }`}
-              >
-                <p className="font-medium text-gray-800 truncate">{item.prod_name}</p>
-                <p className="text-gray-500">{item.colour}</p>
-              </div>
-            ))}
+      {result && (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          {/* Column A */}
+          <div className="space-y-4">
+            <SummaryCard summary={result.a_summary} />
+            <div className="grid grid-cols-2 gap-3">
+              {aRecs.slice(0, 6).map((item) => (
+                <div
+                  key={item.article_idx}
+                  className={`rounded-lg border p-3 text-xs ${
+                    aIds.has(item.article_id) && bRecs.some((b) => b.article_id === item.article_id)
+                      ? 'border-green-300 bg-green-50'
+                      : 'border-gray-100 bg-white'
+                  }`}
+                >
+                  <p className="font-medium text-gray-800 truncate">{item.prod_name}</p>
+                  <p className="text-gray-500">{item.colour}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Column B */}
-        <div className="space-y-4">
-          {bSummaryQuery.data && <SummaryCard summary={bSummaryQuery.data} />}
-          {bRecsQuery.isLoading && <SkeletonGrid count={4} />}
-          <div className="grid grid-cols-2 gap-3">
-            {bRecsQuery.data?.slice(0, 6).map((item) => (
-              <div
-                key={item.article_idx}
-                className={`rounded-lg border p-3 text-xs ${
-                  aIds.has(item.article_id)
-                    ? 'border-green-300 bg-green-50'
-                    : 'border-gray-100 bg-white'
-                }`}
-              >
-                <p className="font-medium text-gray-800 truncate">{item.prod_name}</p>
-                <p className="text-gray-500">{item.colour}</p>
-              </div>
-            ))}
+          {/* Column B */}
+          <div className="space-y-4">
+            <SummaryCard summary={result.b_summary} />
+            <div className="grid grid-cols-2 gap-3">
+              {bRecs.slice(0, 6).map((item) => (
+                <div
+                  key={item.article_idx}
+                  className={`rounded-lg border p-3 text-xs ${
+                    aIds.has(item.article_id)
+                      ? 'border-green-300 bg-green-50'
+                      : 'border-gray-100 bg-white'
+                  }`}
+                >
+                  <p className="font-medium text-gray-800 truncate">{item.prod_name}</p>
+                  <p className="text-gray-500">{item.colour}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
@@ -330,7 +323,7 @@ export default function Shoppers() {
               <div>
                 <p className="font-bold text-gray-900">{profile.nickname}</p>
                 <p className="text-sm text-gray-500">
-                  {profile.age_range} · {profile.channel === 'online' ? 'Online shopper' : 'In-store shopper'} · {profile.purchase_count} purchases
+                  {profile.age_range} · {profile.channel === 'online' ? 'Online shopper' : 'In-store shopper'} · {ownSummaryQuery.data?.purchase_count ?? profile.purchase_count} purchases
                 </p>
               </div>
             </div>

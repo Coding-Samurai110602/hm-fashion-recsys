@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 import polars as pl
 from fastapi import APIRouter, Depends, Query
@@ -40,7 +39,7 @@ class CatalogBrowseItem(BaseModel):
     product_group: str
     colour: str
     image_url: str
-    popularity_rank: Optional[int] = None
+    popularity_rank: int | None = None
 
 
 class CatalogBrowseResponse(BaseModel):
@@ -82,7 +81,7 @@ def _build_trending_df(bundle) -> pl.DataFrame | None:
 
 
 @router.get(
-    "/catalog/trending",
+    "/trending",
     response_model=list[TrendingItem],
     summary="Top trending articles by last-week popularity",
 )
@@ -112,14 +111,14 @@ async def trending(
 
 
 @router.get(
-    "/catalog/browse",
+    "/browse",
     response_model=CatalogBrowseResponse,
     summary="Browse and filter the article catalog",
 )
 async def browse(
-    product_group: Optional[str] = Query(None, description="Filter by product_type_name"),
-    colour: Optional[str] = Query(None, description="Filter by colour_group_name"),
-    q: Optional[str] = Query(None, description="Search prod_name (case-insensitive contains)"),
+    product_group: str | None = Query(None, description="Filter by product_type_name"),
+    colour: str | None = Query(None, description="Filter by colour_group_name"),
+    q: str | None = Query(None, description="Search prod_name (case-insensitive contains)"),
     page: int = Query(1, ge=1),
     page_size: int = Query(_DEFAULT_PAGE_SIZE, ge=1, le=_MAX_PAGE_SIZE),
     bundle=Depends(get_bundle),
@@ -130,17 +129,15 @@ async def browse(
     df = bundle.article_meta
 
     # Filters
-    if product_group:
-        if "product_type_name" in df.columns:
-            df = df.filter(
-                pl.col("product_type_name").str.to_lowercase()
-                == product_group.lower()
-            )
-    if colour:
-        if "colour_group_name" in df.columns:
-            df = df.filter(
-                pl.col("colour_group_name").str.to_lowercase() == colour.lower()
-            )
+    if product_group and "product_type_name" in df.columns:
+        df = df.filter(
+            pl.col("product_type_name").str.to_lowercase()
+            == product_group.lower()
+        )
+    if colour and "colour_group_name" in df.columns:
+        df = df.filter(
+            pl.col("colour_group_name").str.to_lowercase() == colour.lower()
+        )
     if q:
         q_lower = q.lower()
         if "prod_name" in df.columns:
@@ -183,7 +180,7 @@ async def browse(
 
 
 @router.get(
-    "/catalog/filters",
+    "/filters",
     response_model=CatalogFilters,
     summary="Distinct product groups and colours for filter UI",
 )

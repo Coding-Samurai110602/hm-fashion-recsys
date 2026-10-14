@@ -1247,13 +1247,13 @@
         }
       }
     },
-    "/catalog/trending": {
+    "/api/v1/catalog/trending": {
       "get": {
         "tags": [
           "catalog"
         ],
         "summary": "Top trending articles by last-week popularity",
-        "operationId": "trending_catalog_trending_get",
+        "operationId": "trending_api_v1_catalog_trending_get",
         "parameters": [
           {
             "name": "k",
@@ -1278,7 +1278,7 @@
                   "items": {
                     "$ref": "#/components/schemas/TrendingItem"
                   },
-                  "title": "Response Trending Catalog Trending Get"
+                  "title": "Response Trending Api V1 Catalog Trending Get"
                 }
               }
             }
@@ -1296,13 +1296,13 @@
         }
       }
     },
-    "/catalog/browse": {
+    "/api/v1/catalog/browse": {
       "get": {
         "tags": [
           "catalog"
         ],
         "summary": "Browse and filter the article catalog",
-        "operationId": "browse_catalog_browse_get",
+        "operationId": "browse_api_v1_catalog_browse_get",
         "parameters": [
           {
             "name": "product_group",
@@ -1406,13 +1406,13 @@
         }
       }
     },
-    "/catalog/filters": {
+    "/api/v1/catalog/filters": {
       "get": {
         "tags": [
           "catalog"
         ],
         "summary": "Distinct product groups and colours for filter UI",
-        "operationId": "filters_catalog_filters_get",
+        "operationId": "filters_api_v1_catalog_filters_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -1427,13 +1427,13 @@
         }
       }
     },
-    "/demo/shoppers": {
+    "/api/v1/demo/shoppers": {
       "get": {
         "tags": [
           "demo"
         ],
         "summary": "Diverse demo customer profiles for showcasing recommendations",
-        "operationId": "demo_shoppers_demo_shoppers_get",
+        "operationId": "demo_shoppers_api_v1_demo_shoppers_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -1444,7 +1444,7 @@
                     "$ref": "#/components/schemas/DemoShopper"
                   },
                   "type": "array",
-                  "title": "Response Demo Shoppers Demo Shoppers Get"
+                  "title": "Response Demo Shoppers Api V1 Demo Shoppers Get"
                 }
               }
             }

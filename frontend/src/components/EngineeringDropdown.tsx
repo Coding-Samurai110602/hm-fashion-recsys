@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react'
-import { NavLink } from 'react-router'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { NavLink, useLocation } from 'react-router'
 
 const ENG_ITEMS = [
   { label: 'Model Lab', to: '/engineering/lab' },
@@ -10,6 +10,13 @@ const ENG_ITEMS = [
 export function EngineeringDropdown() {
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const itemRefs = useRef<(HTMLAnchorElement | null)[]>([])
+  const { pathname } = useLocation()
+
+  // Close when route changes (after navigation completes, not during click)
+  useEffect(() => {
+    setOpen(false)
+  }, [pathname])
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
@@ -23,9 +30,27 @@ export function EngineeringDropdown() {
     return () => document.removeEventListener('mousedown', onClickOutside)
   }, [open])
 
-  function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === 'Escape') setOpen(false)
-  }
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setOpen(false)
+      return
+    }
+    if (!open) return
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      const focused = document.activeElement
+      const idx = itemRefs.current.findIndex((el) => el === focused)
+      const next = idx < ENG_ITEMS.length - 1 ? idx + 1 : 0
+      itemRefs.current[next]?.focus()
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      const focused = document.activeElement
+      const idx = itemRefs.current.findIndex((el) => el === focused)
+      const prev = idx > 0 ? idx - 1 : ENG_ITEMS.length - 1
+      itemRefs.current[prev]?.focus()
+    }
+  }, [open])
 
   const isEngRoute =
     typeof window !== 'undefined' &&
@@ -65,12 +90,12 @@ export function EngineeringDropdown() {
           className="absolute right-0 top-full z-50 mt-1 w-44 rounded-xl border border-gray-200 bg-white py-1 shadow-lg"
           aria-label="Engineering sub-pages"
         >
-          {ENG_ITEMS.map((item) => (
+          {ENG_ITEMS.map((item, i) => (
             <NavLink
               key={item.to}
               to={item.to}
               role="menuitem"
-              onClick={() => setOpen(false)}
+              ref={(el) => { itemRefs.current[i] = el }}
               className={({ isActive }) =>
                 `block px-4 py-2 text-sm transition-colors ${
                   isActive

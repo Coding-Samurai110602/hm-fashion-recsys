@@ -1,5 +1,5 @@
-import { Suspense, lazy, useState } from 'react'
-import { BrowserRouter, Routes, Route, NavLink } from 'react-router'
+import { Suspense, lazy, useState, useEffect } from 'react'
+import { BrowserRouter, Routes, Route, NavLink, useLocation } from 'react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { LoadingSpinner } from './components/LoadingSpinner'
 import { ErrorBoundary } from './components/ErrorBoundary'
@@ -34,6 +34,13 @@ const NAV_LINKS = [
   { to: '/how-it-works', label: 'How It Works' },
   { to: '/trends', label: 'Store Trends' },
   { to: '/shoppers', label: 'Shoppers' },
+]
+
+const MOBILE_NAV_LINKS = [
+  ...NAV_LINKS,
+  { to: '/engineering/lab', label: 'Model Lab' },
+  { to: '/engineering/simulator', label: 'A/B Simulator' },
+  { to: '/engineering/system', label: 'System' },
 ]
 
 function PageFallback() {
@@ -111,6 +118,14 @@ function HeaderCart() {
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const { pathname } = useLocation()
+
+  // Close mobile menu on navigation
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [pathname])
+
   return (
     <div className="min-h-screen bg-[#f9fafb]">
       {/* Top nav */}
@@ -125,8 +140,8 @@ function Shell({ children }: { children: React.ReactNode }) {
               Fashion RecSys
             </span>
 
-            {/* Nav links */}
-            <div className="flex flex-1 gap-1 overflow-x-auto">
+            {/* Desktop nav links — hidden on small screens */}
+            <div className="hidden sm:flex flex-1 gap-1 overflow-x-auto">
               {NAV_LINKS.map((link) => (
                 <NavLink
                   key={link.to}
@@ -148,13 +163,62 @@ function Shell({ children }: { children: React.ReactNode }) {
               <EngineeringDropdown />
             </div>
 
-            {/* Right side: profile + cart */}
+            {/* Spacer on mobile */}
+            <div className="flex-1 sm:hidden" />
+
+            {/* Right side: profile + cart + hamburger */}
             <div className="flex flex-shrink-0 items-center gap-2">
               <HeaderProfile />
               <HeaderCart />
+
+              {/* Hamburger — only on small screens */}
+              <button
+                className="flex sm:hidden rounded-lg p-2 text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                onClick={() => setMobileOpen((v) => !v)}
+                aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={mobileOpen}
+                aria-controls="mobile-nav"
+              >
+                {mobileOpen ? (
+                  <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                )}
+              </button>
             </div>
           </div>
         </div>
+
+        {/* Mobile nav panel */}
+        {mobileOpen && (
+          <div
+            id="mobile-nav"
+            className="sm:hidden border-t border-gray-200 bg-white px-4 pb-4 pt-2"
+          >
+            <nav className="flex flex-col gap-1" aria-label="Mobile navigation">
+              {MOBILE_NAV_LINKS.map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  end={'end' in link ? link.end : undefined}
+                  className={({ isActive }) =>
+                    `rounded-md px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                      isActive
+                        ? 'bg-indigo-50 text-indigo-700'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`
+                  }
+                >
+                  {link.label}
+                </NavLink>
+              ))}
+            </nav>
+          </div>
+        )}
       </nav>
 
       {/* Main content */}

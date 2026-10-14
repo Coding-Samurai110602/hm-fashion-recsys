@@ -57,6 +57,17 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     }
   }, [profile])
 
+  // On mount: verify the stored profile still exists on the server.
+  // If it returns 404, clear it so the user isn't stuck with a stale profile.
+  useEffect(() => {
+    if (profile) {
+      fetch(`/api/v1/profiles/${profile.id}`)
+        .then((r) => { if (!r.ok) clearProfile() })
+        .catch(() => {}) // network error — don't clear, may be offline
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // only on mount
+
   return (
     <ProfileContext.Provider value={{ profile, setProfile, clearProfile }}>
       {children}

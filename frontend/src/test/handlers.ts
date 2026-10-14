@@ -49,6 +49,14 @@ const PROFILE_RECS = Array.from({ length: 12 }, (_, i) => ({
   cold_start: false,
 }))
 
+// Wrapped profile recs response (ProfileRecsResponse shape)
+const PROFILE_RECS_RESPONSE = {
+  profile_id: PROFILE_ID,
+  cold_start: false,
+  items: PROFILE_RECS,
+  latency_ms: 42.5,
+}
+
 // Synthetic demo shoppers
 const DEMO_SHOPPERS = Array.from({ length: 5 }, (_, i) => ({
   customer_id: `demo-customer-${i + 1}`,
@@ -264,16 +272,17 @@ export const handlers = [
   ),
 
   http.post(`/api/v1/profiles/${PROFILE_ID}/checkout`, () =>
-    HttpResponse.json({ purchase_count: 3 }),
+    HttpResponse.json({ purchase_count: 3, new_count: 3 }),
   ),
 
+  // Profile recommendations — returns WRAPPED ProfileRecsResponse shape
   http.get(`/api/v1/profiles/${PROFILE_ID}/recommendations`, () =>
-    HttpResponse.json(PROFILE_RECS),
+    HttpResponse.json(PROFILE_RECS_RESPONSE),
   ),
 
   http.get(`/api/v1/profiles/${PROFILE_ID}/summary`, () =>
     HttpResponse.json({
-      id: PROFILE_ID,
+      profile_id: PROFILE_ID,
       nickname: 'TestUser',
       age_range: '25-34',
       channel: 'online',
@@ -283,13 +292,13 @@ export const handlers = [
     }),
   ),
 
-  // ── Catalog endpoints ────────────────────────────────────────────────────
+  // ── Catalog endpoints (moved to /api/v1/catalog/*) ──────────────────────
 
-  http.get('/catalog/trending', () =>
+  http.get('/api/v1/catalog/trending', () =>
     HttpResponse.json(TRENDING_ITEMS.slice(0, 8)),
   ),
 
-  http.get('/catalog/browse', () =>
+  http.get('/api/v1/catalog/browse', () =>
     HttpResponse.json({
       items: CATALOG_ITEMS,
       total: 48,
@@ -298,16 +307,16 @@ export const handlers = [
     }),
   ),
 
-  http.get('/catalog/filters', () =>
+  http.get('/api/v1/catalog/filters', () =>
     HttpResponse.json({
       product_groups: ['Trousers', 'Sweater', 'Blouse', 'Shoes', 'Bag', 'Dress', 'Jacket'],
       colours: ['Black', 'White', 'Blue', 'Green', 'Pink', 'Red', 'Grey', 'Brown'],
     }),
   ),
 
-  // ── Demo shoppers ────────────────────────────────────────────────────────
+  // ── Demo shoppers (moved to /api/v1/demo/*) ──────────────────────────────
 
-  http.get('/demo/shoppers', () =>
+  http.get('/api/v1/demo/shoppers', () =>
     HttpResponse.json(DEMO_SHOPPERS),
   ),
 
@@ -317,12 +326,12 @@ export const handlers = [
     HttpResponse.json(TRENDS_RESPONSE),
   ),
 
-  // ── Compare ─────────────────────────────────────────────────────────────
+  // ── Compare (correct URL: /api/v1/compare, not /api/v1/profiles/compare) ─
 
-  http.get('/api/v1/profiles/compare', () =>
+  http.get('/api/v1/compare', () =>
     HttpResponse.json({
       a_summary: {
-        id: PROFILE_ID,
+        profile_id: PROFILE_ID,
         nickname: 'TestUser',
         age_range: '25-34',
         channel: 'online',
@@ -331,7 +340,7 @@ export const handlers = [
         top_colour: 'Black',
       },
       b_summary: {
-        id: 'prof-test-002',
+        profile_id: 'prof-test-002',
         nickname: 'OtherUser',
         age_range: '35-44',
         channel: 'store',

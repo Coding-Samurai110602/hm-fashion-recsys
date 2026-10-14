@@ -68,8 +68,10 @@ describe('ForYou page', () => {
   it('shows cold start message when purchase_count is 0', async () => {
     server.use(
       http.get(`/api/v1/profiles/${PROFILE_ID}/recommendations`, () =>
-        HttpResponse.json(
-          Array.from({ length: 8 }, (_, i) => ({
+        HttpResponse.json({
+          profile_id: PROFILE_ID,
+          cold_start: true,
+          items: Array.from({ length: 8 }, (_, i) => ({
             article_idx: 3000 + i,
             article_id: `030000${String(3000 + i).padStart(4, '0')}`,
             prod_name: `Pick ${i + 1}`,
@@ -82,7 +84,8 @@ describe('ForYou page', () => {
             latency_ms: 42,
             cold_start: true,
           })),
-        ),
+          latency_ms: 42,
+        }),
       ),
     )
 

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import os
-import tempfile
 
 import pytest
 
@@ -25,7 +24,7 @@ def _isolate_db(tmp_path):
     if hasattr(db_mod._thread_local, "conn") and db_mod._thread_local.conn:
         try:
             db_mod._thread_local.conn.close()
-        except Exception:
+        except Exception:  # noqa: BLE001,S110
             pass
     db_mod._thread_local.conn = None
     yield
@@ -33,7 +32,7 @@ def _isolate_db(tmp_path):
     if hasattr(db_mod._thread_local, "conn") and db_mod._thread_local.conn:
         try:
             db_mod._thread_local.conn.close()
-        except Exception:
+        except Exception:  # noqa: BLE001,S110
             pass
     db_mod._thread_local.conn = None
     if old is not None:
@@ -58,7 +57,7 @@ def _create(client, **kwargs) -> dict:
 
 def _first_article_id(client) -> str:
     """Get a valid article_id from the catalog."""
-    r = client.get("/catalog/trending?k=1")
+    r = client.get("/api/v1/catalog/trending?k=1")
     assert r.status_code == 200
     items = r.json()
     assert len(items) >= 1, "No trending items in catalog"
@@ -172,12 +171,12 @@ class TestCheckout:
         assert r.status_code == 200
         data = r.json()
         assert data["new_count"] == 1
-        assert data["purchase_count"] == 0  # previous count
+        assert data["purchase_count"] == 1  # now returns new total (not old count)
 
     def test_checkout_max_50_limit(self, synth_client):
         profile = _create(synth_client)
         # Get some article IDs from catalog
-        r = synth_client.get("/catalog/trending?k=50")
+        r = synth_client.get("/api/v1/catalog/trending?k=50")
         items = r.json()
         article_ids = [item["article_id"] for item in items]
 

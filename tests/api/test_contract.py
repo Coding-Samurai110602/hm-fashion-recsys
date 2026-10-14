@@ -39,7 +39,16 @@ def _get_live_schema() -> dict:
     from fastapi import FastAPI
 
     from src.api.config import get_settings as gs
-    from src.api.routers import articles, catalog, customers, demo, experiment, insights, ops, profiles
+    from src.api.routers import (
+        articles,
+        catalog,
+        customers,
+        demo,
+        experiment,
+        insights,
+        ops,
+        profiles,
+    )
 
     settings = gs()
     app = FastAPI(title="H&M Fashion Recommendation API", version=settings.API_VERSION)
@@ -50,8 +59,8 @@ def _get_live_schema() -> dict:
     app.include_router(insights.router, prefix=prefix)
     app.include_router(experiment.router, prefix=prefix)
     app.include_router(profiles.router, prefix=prefix)
-    app.include_router(catalog.router)
-    app.include_router(demo.router)
+    app.include_router(catalog.router, prefix=f"{prefix}/catalog")
+    app.include_router(demo.router, prefix=f"{prefix}/demo")
     return app.openapi()
 
 
@@ -191,8 +200,9 @@ class TestOpenAPIContract:
 
         New paths in S7P2A redesign: /api/v1/profiles (GET/POST), /api/v1/profiles/{id}
         (GET/DELETE), /api/v1/profiles/{id}/checkout, /api/v1/profiles/{id}/recommendations,
-        /api/v1/profiles/{id}/summary, /api/v1/compare, /catalog/trending, /catalog/browse,
-        /catalog/filters, /demo/shoppers, /api/v1/insights/trends.
+        /api/v1/profiles/{id}/summary, /api/v1/compare, /api/v1/catalog/trending,
+        /api/v1/catalog/browse, /api/v1/catalog/filters, /api/v1/demo/shoppers,
+        /api/v1/insights/trends.
         """
         live = _get_live_schema()
         n_paths = len(live.get("paths", {}))

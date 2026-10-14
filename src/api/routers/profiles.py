@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import logging
+import math
 import time
 from datetime import date as date_type
-from typing import Optional
 
 import polars as pl
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -92,7 +92,7 @@ class ProfileRecItem(BaseModel):
     product_group: str
     colour: str
     image_url: str
-    score: Optional[float]
+    score: float | None
     reasons: list[str]
     source: str
     latency_ms: float
@@ -113,7 +113,7 @@ class ProfileSummary(BaseModel):
     channel: str
     purchase_count: int
     top_product_groups: list[str]
-    top_colour: Optional[str]
+    top_colour: str | None
 
 
 class CompareResult(BaseModel):
@@ -312,9 +312,7 @@ def _try_resolve_as_bundle_customer(entity_id: str, bundle) -> ProfileSummary | 
     age = row.get("age")
 
     # Derive age_range from age
-    if age is None or (isinstance(age, float) and age != age):
-        age_range = "<25"
-    elif age < 25:
+    if age is None or (isinstance(age, float) and math.isnan(age)) or age < 25:
         age_range = "<25"
     elif age < 35:
         age_range = "25-34"
@@ -455,7 +453,7 @@ async def checkout(
     body: CheckoutRequest,
     bundle=Depends(get_bundle),
 ):
-    profile = _get_profile_or_404(profile_id)
+    _get_profile_or_404(profile_id)
 
     # Resolve article_ids → article_idx
     article_idxs = []
@@ -481,7 +479,7 @@ async def checkout(
         raise HTTPException(status_code=404, detail=str(exc))
 
     return CheckoutResponse(
-        purchase_count=profile["purchase_count"],
+        purchase_count=new_count,  # return the new total (not the old count)
         new_count=new_count,
     )
 

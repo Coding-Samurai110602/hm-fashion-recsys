@@ -23,9 +23,8 @@ const IGNORE_PATTERNS = [
   /width\(0\).*height\(0\)/i,
   /Content Security Policy/i,
   /net::ERR_BLOCKED_BY_CLIENT/i,
-  /Failed to load resource.*articles.*image/i,
-  // Generic image/favicon 404s are expected (no product images bundled)
-  /Failed to load resource.*status of 404/i,
+  // Only image 404s — not generic 404s
+  /Failed to load resource.*articles.*\/image/i,
 ]
 
 /** Pre-set localStorage to prevent tour/modal from blocking interactions */
@@ -106,7 +105,8 @@ for (const route of ALL_ROUTES) {
       fullPage: false,
     })
 
-    // No blank page
+    // Page must have meaningful content (nav + some text)
+    await expect(page.locator('nav')).toBeVisible()
     const bodyText = await page.locator('body').innerText()
     expect(bodyText.trim().length, `${route.name}: page appears blank`).toBeGreaterThan(20)
 
@@ -164,7 +164,7 @@ test('all nav links are reachable', async ({ page }) => {
   expect(errors).toHaveLength(0)
 })
 
-// ── Engineering dropdown works ────────────────────────────────────────────────
+// ── Engineering dropdown works (real click navigation) ───────────────────────
 
 test('engineering dropdown opens and navigates to Model Lab', async ({ page }) => {
   const errors: string[] = []
@@ -186,15 +186,79 @@ test('engineering dropdown opens and navigates to Model Lab', async ({ page }) =
   await expect(menu.getByText('A/B Simulator')).toBeVisible()
   await expect(menu.getByText('System')).toBeVisible()
 
-  // Navigate to the route directly (React Router NavLink requires a full page click
-  // that Playwright can replicate via goto; the dropdown shows items = accessibility ✓)
-  await page.goto('/engineering/lab')
-  await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {})
-
-  const bodyText = await page.locator('body').innerText()
-  expect(bodyText).toContain('Model Lab')
+  // Real click through dropdown (not goto) — this validates bug (f) fix
+  await menu.getByText('Model Lab').click()
+  await page.waitForURL('**/engineering/lab', { timeout: 5000 })
+  await expect(page.locator('body')).toContainText('Model Lab')
 
   expect(errors).toHaveLength(0)
+})
+
+test('engineering dropdown navigates to A/B Simulator', async ({ page }) => {
+  await setTourAndProfileSeen(page)
+  await page.goto('/')
+  await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {})
+  await page.getByRole('button', { name: /engineering/i }).click()
+  const menu = page.locator('[role="menu"]')
+  await expect(menu).toBeVisible({ timeout: 3000 })
+  await menu.getByText('A/B Simulator').click()
+  await page.waitForURL('**/engineering/simulator', { timeout: 5000 })
+  await expect(page.locator('body')).toContainText('A/B Simulator')
+})
+
+test('engineering dropdown navigates to System', async ({ page }) => {
+  await setTourAndProfileSeen(page)
+  await page.goto('/')
+  await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {})
+  await page.getByRole('button', { name: /engineering/i }).click()
+  const menu = page.locator('[role="menu"]')
+  await expect(menu).toBeVisible({ timeout: 3000 })
+  await menu.getByText('System').click()
+  await page.waitForURL('**/engineering/system', { timeout: 5000 })
+  await expect(page.locator('body')).toContainText('System')
+})
+
+// ── Mobile menu test ──────────────────────────────────────────────────────────
+
+test('mobile menu reaches every page', async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } })
+  const page = await context.newPage()
+  await page.addInitScript(() => {
+    localStorage.setItem('fashion_demo_tour_seen', 'true')
+    localStorage.setItem(
+      'fashion_demo_profile',
+      JSON.stringify({
+        id: 'smoke-test-id',
+        nickname: 'Tester',
+        age_range: '25-34',
+        channel: 'online',
+        purchase_count: 0,
+      }),
+    )
+  })
+
+  await page.goto('/')
+  await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {})
+
+  // Open hamburger menu
+  await page.getByRole('button', { name: /open menu/i }).click()
+
+  // Verify all nav items are visible in mobile panel
+  await expect(page.getByRole('link', { name: 'Shop' }).first()).toBeVisible()
+  await expect(page.getByRole('link', { name: 'For You' }).first()).toBeVisible()
+  await expect(page.getByRole('link', { name: 'How It Works' }).first()).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Store Trends' }).first()).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Shoppers' }).first()).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Model Lab' }).first()).toBeVisible()
+  await expect(page.getByRole('link', { name: 'A/B Simulator' }).first()).toBeVisible()
+  await expect(page.getByRole('link', { name: 'System' }).first()).toBeVisible()
+
+  // Navigate to Model Lab from mobile menu
+  await page.getByRole('link', { name: 'Model Lab' }).first().click()
+  await page.waitForURL('**/engineering/lab', { timeout: 5000 })
+  await expect(page.locator('body')).toContainText('Model Lab')
+
+  await context.close()
 })
 
 // ── Full journey e2e test ─────────────────────────────────────────────────────
@@ -242,10 +306,8 @@ test('full shopper journey', async ({ page }) => {
   await expect(page.getByRole('dialog', { name: /shopping cart/i })).toBeVisible({ timeout: 5000 })
   await page.getByRole('button', { name: /checkout/i }).click()
 
-  // 6. Redirected to /for-you after checkout
-  await page.waitForURL('**/for-you', { timeout: 10000 }).catch(async () => {
-    await page.goto('/for-you')
-  })
+  // 6. Redirected to /for-you after checkout (app redirect — no fallback goto)
+  await page.waitForURL('**/for-you', { timeout: 10000 })
   await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {})
 
   // 7. Open Why drawer on first recommendation (optional — may be in loading state)
@@ -275,18 +337,16 @@ test('full shopper journey', async ({ page }) => {
   await page.getByRole('link', { name: 'Store Trends' }).click()
   await page.waitForURL('**/trends', { timeout: 8000 }).catch(() => {})
   await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {})
-  // Trends heading
   const bodyTrends = await page.locator('body').innerText()
   expect(bodyTrends.length).toBeGreaterThan(20)
 
-  // 11. Engineering dropdown shows Model Lab link; then navigate directly
+  // 11. Engineering dropdown — real click (not goto) to Model Lab
   await page.getByRole('button', { name: /engineering/i }).click()
   const engMenu = page.locator('[role="menu"]')
   await expect(engMenu).toBeVisible({ timeout: 3000 })
   await expect(engMenu.getByText('Model Lab')).toBeVisible()
-  // Navigate via goto (React Router NavLink needs real browser click for SPA navigation)
-  await page.goto('/engineering/lab')
-  await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {})
+  await engMenu.getByText('Model Lab').click()
+  await page.waitForURL('**/engineering/lab', { timeout: 5000 })
   const bodyLab = await page.locator('body').innerText()
   expect(bodyLab).toContain('Model Lab')
 

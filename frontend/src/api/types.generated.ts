@@ -499,7 +499,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/catalog/trending": {
+    "/api/v1/catalog/trending": {
         parameters: {
             query?: never;
             header?: never;
@@ -507,7 +507,7 @@ export interface paths {
             cookie?: never;
         };
         /** Top trending articles by last-week popularity */
-        get: operations["trending_catalog_trending_get"];
+        get: operations["trending_api_v1_catalog_trending_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -516,7 +516,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/catalog/browse": {
+    "/api/v1/catalog/browse": {
         parameters: {
             query?: never;
             header?: never;
@@ -524,7 +524,7 @@ export interface paths {
             cookie?: never;
         };
         /** Browse and filter the article catalog */
-        get: operations["browse_catalog_browse_get"];
+        get: operations["browse_api_v1_catalog_browse_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -533,7 +533,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/catalog/filters": {
+    "/api/v1/catalog/filters": {
         parameters: {
             query?: never;
             header?: never;
@@ -541,7 +541,7 @@ export interface paths {
             cookie?: never;
         };
         /** Distinct product groups and colours for filter UI */
-        get: operations["filters_catalog_filters_get"];
+        get: operations["filters_api_v1_catalog_filters_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -550,7 +550,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/demo/shoppers": {
+    "/api/v1/demo/shoppers": {
         parameters: {
             query?: never;
             header?: never;
@@ -558,7 +558,7 @@ export interface paths {
             cookie?: never;
         };
         /** Diverse demo customer profiles for showcasing recommendations */
-        get: operations["demo_shoppers_demo_shoppers_get"];
+        get: operations["demo_shoppers_api_v1_demo_shoppers_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1883,7 +1883,7 @@ export interface operations {
             };
         };
     };
-    trending_catalog_trending_get: {
+    trending_api_v1_catalog_trending_get: {
         parameters: {
             query?: {
                 k?: number;
@@ -1914,7 +1914,7 @@ export interface operations {
             };
         };
     };
-    browse_catalog_browse_get: {
+    browse_api_v1_catalog_browse_get: {
         parameters: {
             query?: {
                 /** @description Filter by product_type_name */
@@ -1952,7 +1952,7 @@ export interface operations {
             };
         };
     };
-    filters_catalog_filters_get: {
+    filters_api_v1_catalog_filters_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -1972,7 +1972,7 @@ export interface operations {
             };
         };
     };
-    demo_shoppers_demo_shoppers_get: {
+    demo_shoppers_api_v1_demo_shoppers_get: {
         parameters: {
             query?: never;
             header?: never;
