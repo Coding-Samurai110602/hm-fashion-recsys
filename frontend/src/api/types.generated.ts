@@ -344,6 +344,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/insights/trends": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Trending articles, by-age segments, and popularity decay */
+        get: operations["trends_api_v1_insights_trends_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/experiment/power": {
         parameters: {
             query?: never;
@@ -378,6 +395,178 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/profiles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List profiles with pagination */
+        get: operations["list_profiles_api_v1_profiles_get"];
+        put?: never;
+        /** Create a new shopping profile */
+        post: operations["create_profile_api_v1_profiles_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/profiles/{profile_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a profile by ID */
+        get: operations["get_profile_api_v1_profiles__profile_id__get"];
+        put?: never;
+        post?: never;
+        /** Delete a profile */
+        delete: operations["delete_profile_api_v1_profiles__profile_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/profiles/{profile_id}/checkout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record article purchases on a profile */
+        post: operations["checkout_api_v1_profiles__profile_id__checkout_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/profiles/{profile_id}/recommendations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Personalized recommendations for a profile */
+        get: operations["profile_recommendations_api_v1_profiles__profile_id__recommendations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/profiles/{profile_id}/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Preference summary for a profile */
+        get: operations["profile_summary_api_v1_profiles__profile_id__summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/compare": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Compare two profiles or customers side-by-side */
+        get: operations["compare_api_v1_compare_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/catalog/trending": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Top trending articles by last-week popularity */
+        get: operations["trending_catalog_trending_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/catalog/browse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Browse and filter the article catalog */
+        get: operations["browse_catalog_browse_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/catalog/filters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Distinct product groups and colours for filter UI */
+        get: operations["filters_catalog_filters_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/demo/shoppers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Diverse demo customer profiles for showcasing recommendations */
+        get: operations["demo_shoppers_demo_shoppers_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -396,6 +585,75 @@ export interface components {
             colour: string;
             /** Department */
             department: string;
+        };
+        /** CatalogBrowseItem */
+        CatalogBrowseItem: {
+            /** Article Idx */
+            article_idx: number;
+            /** Article Id */
+            article_id: string;
+            /** Prod Name */
+            prod_name: string;
+            /** Product Group */
+            product_group: string;
+            /** Colour */
+            colour: string;
+            /** Image Url */
+            image_url: string;
+            /** Popularity Rank */
+            popularity_rank?: number | null;
+        };
+        /** CatalogBrowseResponse */
+        CatalogBrowseResponse: {
+            /** Items */
+            items: components["schemas"]["CatalogBrowseItem"][];
+            /** Total */
+            total: number;
+            /** Page */
+            page: number;
+            /** Page Size */
+            page_size: number;
+        };
+        /** CatalogFilters */
+        CatalogFilters: {
+            /** Product Groups */
+            product_groups: string[];
+            /** Colours */
+            colours: string[];
+        };
+        /** CheckoutRequest */
+        CheckoutRequest: {
+            /** Article Ids */
+            article_ids: string[];
+        };
+        /** CheckoutResponse */
+        CheckoutResponse: {
+            /** Purchase Count */
+            purchase_count: number;
+            /** New Count */
+            new_count: number;
+        };
+        /** CompareResult */
+        CompareResult: {
+            a_summary: components["schemas"]["ProfileSummary"];
+            b_summary: components["schemas"]["ProfileSummary"];
+            /** A Recommendations */
+            a_recommendations: components["schemas"]["ProfileRecItem"][];
+            /** B Recommendations */
+            b_recommendations: components["schemas"]["ProfileRecItem"][];
+            /** Overlap */
+            overlap: string[];
+            /** Overlap Count */
+            overlap_count: number;
+        };
+        /** CreateProfileRequest */
+        CreateProfileRequest: {
+            /** Nickname */
+            nickname: string;
+            /** Age Range */
+            age_range: string;
+            /** Channel */
+            channel: string;
         };
         /** CustomHistoryItem */
         CustomHistoryItem: {
@@ -430,6 +688,25 @@ export interface components {
             n_purchases_last_4w: number;
             /** Recent History */
             recent_history: components["schemas"]["ArticleMeta"][];
+        };
+        /** DemoShopper */
+        DemoShopper: {
+            /** Customer Id */
+            customer_id: string;
+            /** Customer Idx */
+            customer_idx: number;
+            /** Age Range */
+            age_range: string;
+            /** Channel */
+            channel: string;
+            /** Purchase Count */
+            purchase_count: number;
+            /** Top Product Groups */
+            top_product_groups: string[];
+            /** Top Colour */
+            top_colour: string | null;
+            /** Summary */
+            summary: string;
         };
         /** ExplainResult */
         ExplainResult: {
@@ -517,6 +794,81 @@ export interface components {
             /** Cohen H */
             cohen_h: number;
         };
+        /** Profile */
+        Profile: {
+            /** Id */
+            id: string;
+            /** Nickname */
+            nickname: string;
+            /** Age Range */
+            age_range: string;
+            /** Channel */
+            channel: string;
+            /** Created At */
+            created_at: string;
+            /** Purchase Count */
+            purchase_count: number;
+        };
+        /** ProfileList */
+        ProfileList: {
+            /** Profiles */
+            profiles: components["schemas"]["Profile"][];
+            /** Total */
+            total: number;
+        };
+        /** ProfileRecItem */
+        ProfileRecItem: {
+            /** Article Idx */
+            article_idx: number;
+            /** Article Id */
+            article_id: string;
+            /** Prod Name */
+            prod_name: string;
+            /** Product Group */
+            product_group: string;
+            /** Colour */
+            colour: string;
+            /** Image Url */
+            image_url: string;
+            /** Score */
+            score: number | null;
+            /** Reasons */
+            reasons: string[];
+            /** Source */
+            source: string;
+            /** Latency Ms */
+            latency_ms: number;
+            /** Cold Start */
+            cold_start: boolean;
+        };
+        /** ProfileRecsResponse */
+        ProfileRecsResponse: {
+            /** Profile Id */
+            profile_id: string;
+            /** Cold Start */
+            cold_start: boolean;
+            /** Items */
+            items: components["schemas"]["ProfileRecItem"][];
+            /** Latency Ms */
+            latency_ms: number;
+        };
+        /** ProfileSummary */
+        ProfileSummary: {
+            /** Profile Id */
+            profile_id: string;
+            /** Nickname */
+            nickname: string;
+            /** Age Range */
+            age_range: string;
+            /** Channel */
+            channel: string;
+            /** Purchase Count */
+            purchase_count: number;
+            /** Top Product Groups */
+            top_product_groups: string[];
+            /** Top Colour */
+            top_colour: string | null;
+        };
         /** ReadyResponse */
         ReadyResponse: {
             /** Ready */
@@ -600,6 +952,23 @@ export interface components {
             peeking_power?: number | null;
             /** Data Source */
             data_source?: string | null;
+        };
+        /** TrendingItem */
+        TrendingItem: {
+            /** Article Idx */
+            article_idx: number;
+            /** Article Id */
+            article_id: string;
+            /** Prod Name */
+            prod_name: string;
+            /** Product Group */
+            product_group: string;
+            /** Colour */
+            colour: string;
+            /** Image Url */
+            image_url: string;
+            /** Popularity Rank */
+            popularity_rank: number;
         };
         /** ValidationError */
         ValidationError: {
@@ -1170,6 +1539,26 @@ export interface operations {
             };
         };
     };
+    trends_api_v1_insights_trends_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
     power_api_v1_experiment_power_post: {
         parameters: {
             query?: never;
@@ -1232,6 +1621,373 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_profiles_api_v1_profiles_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_profile_api_v1_profiles_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateProfileRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Profile"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_profile_api_v1_profiles__profile_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                profile_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Profile"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_profile_api_v1_profiles__profile_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                profile_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    checkout_api_v1_profiles__profile_id__checkout_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                profile_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckoutRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckoutResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    profile_recommendations_api_v1_profiles__profile_id__recommendations_get: {
+        parameters: {
+            query?: {
+                include_reasons?: boolean;
+            };
+            header?: never;
+            path: {
+                profile_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileRecsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    profile_summary_api_v1_profiles__profile_id__summary_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                profile_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileSummary"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    compare_api_v1_compare_get: {
+        parameters: {
+            query: {
+                /** @description Profile UUID or customer_id hex */
+                a: string;
+                /** @description Profile UUID or customer_id hex */
+                b: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompareResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    trending_catalog_trending_get: {
+        parameters: {
+            query?: {
+                k?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrendingItem"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    browse_catalog_browse_get: {
+        parameters: {
+            query?: {
+                /** @description Filter by product_type_name */
+                product_group?: string | null;
+                /** @description Filter by colour_group_name */
+                colour?: string | null;
+                /** @description Search prod_name (case-insensitive contains) */
+                q?: string | null;
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogBrowseResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    filters_catalog_filters_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogFilters"];
+                };
+            };
+        };
+    };
+    demo_shoppers_demo_shoppers_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DemoShopper"][];
                 };
             };
         };

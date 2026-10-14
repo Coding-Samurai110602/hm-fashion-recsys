@@ -39,7 +39,7 @@ def _get_live_schema() -> dict:
     from fastapi import FastAPI
 
     from src.api.config import get_settings as gs
-    from src.api.routers import articles, customers, experiment, insights, ops
+    from src.api.routers import articles, catalog, customers, demo, experiment, insights, ops, profiles
 
     settings = gs()
     app = FastAPI(title="H&M Fashion Recommendation API", version=settings.API_VERSION)
@@ -49,6 +49,9 @@ def _get_live_schema() -> dict:
     app.include_router(articles.router, prefix=prefix)
     app.include_router(insights.router, prefix=prefix)
     app.include_router(experiment.router, prefix=prefix)
+    app.include_router(profiles.router, prefix=prefix)
+    app.include_router(catalog.router)
+    app.include_router(demo.router)
     return app.openapi()
 
 
@@ -184,16 +187,17 @@ class TestOpenAPIContract:
         )
 
     def test_path_count(self):
-        """22 paths in the OpenAPI schema (4 ops + 18 versioned).
+        """33 paths in the OpenAPI schema (4 ops + 11 versioned original + 18 new in S7P2A).
 
-        Session notes said 25 — that counted handler functions, not URL paths.
-        The 3 auto-generated FastAPI paths (/docs, /redoc, /openapi.json) are excluded
-        from custom router registration and do not appear in this count.
+        New paths in S7P2A redesign: /api/v1/profiles (GET/POST), /api/v1/profiles/{id}
+        (GET/DELETE), /api/v1/profiles/{id}/checkout, /api/v1/profiles/{id}/recommendations,
+        /api/v1/profiles/{id}/summary, /api/v1/compare, /catalog/trending, /catalog/browse,
+        /catalog/filters, /demo/shoppers, /api/v1/insights/trends.
         """
         live = _get_live_schema()
         n_paths = len(live.get("paths", {}))
-        assert n_paths == 22, (
-            f"Expected 22 paths, got {n_paths}: {sorted(live.get('paths', {}).keys())}"
+        assert n_paths == 33, (
+            f"Expected 33 paths, got {n_paths}: {sorted(live.get('paths', {}).keys())}"
         )
 
     def test_all_paths_have_summaries(self):

@@ -23,7 +23,7 @@ describe('ABSimulator page', () => {
     render(<ABSimulator />, { wrapper })
     expect(screen.getByText(/power calculator/i)).toBeTruthy()
     expect(screen.getByText(/simulation runner/i)).toBeTruthy()
-    expect(screen.getByText(/offline week-104/i)).toBeTruthy()
+    expect(screen.getByText(/offline holdout/i)).toBeTruthy()
   })
 
   it('renders power result on success', async () => {

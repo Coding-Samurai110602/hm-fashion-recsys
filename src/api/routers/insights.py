@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
+from src.api.deps import get_bundle
 from src.api.services import insights as svc
 
 router = APIRouter(tags=["insights"])
@@ -32,3 +33,8 @@ async def ablations():
 @router.get("/insights/importance", summary="SHAP importance vs gain importance")
 async def importance():
     return svc.get_importance()
+
+
+@router.get("/insights/trends", summary="Trending articles, by-age segments, and popularity decay")
+async def trends(bundle=Depends(get_bundle)):
+    return svc.get_trends(bundle)

@@ -109,10 +109,12 @@ class BundleRecommender:
         self,
         history_rows: list[dict],
         k: int = 12,
+        age_bucket: str | None = None,
     ) -> list[dict[str, Any]]:
         """Recommend for a synthetic customer with hand-built history.
 
         history_rows: list of dicts with keys: article_idx, t_dat (YYYY-MM-DD), price (opt), sales_channel_id (opt)
+        age_bucket: when provided, overrides the segment-popular bucket used during scoring.
         """
         from datetime import date as date_type
 
@@ -153,7 +155,9 @@ class BundleRecommender:
             },
         )
         df_feat, scores, sources_arr = self._score_customer(
-            synthetic_idx, custom_history=hist_df
+            synthetic_idx,
+            custom_history=hist_df,
+            custom_age_bucket=age_bucket,
         )
 
         if df_feat is None:
@@ -363,10 +367,18 @@ class BundleRecommender:
         self,
         customer_idx: int,
         custom_history: pl.DataFrame | None = None,
+        custom_age_bucket: str | None = None,
     ) -> tuple[pl.DataFrame | None, np.ndarray | None, np.ndarray | None]:
         """Build feature table and score for one customer from bundle state.
 
         Uses the cached state (built once in __init__). No raw transaction scans.
+
+        Parameters
+        ----------
+        custom_age_bucket : str or None
+            When provided alongside custom_history, use this age bucket for
+            segment-popular candidate generation instead of looking up from
+            state.age_buckets.
         """
         from src.features.build import _compute_features_inner
 
@@ -387,20 +399,50 @@ class BundleRecommender:
                 how="vertical",
             )
             history_lf = combined.lazy()
+
+            # If a custom age bucket is provided, inject a synthetic row so that
+            # _compute_features_inner uses it for segment-popular candidates.
+            if custom_age_bucket is not None and state.all_cust_buckets is not None:
+                synthetic_bucket_row = pl.DataFrame(
+                    {
+                        "customer_idx": pl.Series([customer_idx], dtype=pl.Int32),
+                        "age_bucket": pl.Series([custom_age_bucket]),
+                    }
+                )
+                # Replace or append the entry for this synthetic customer_idx
+                existing_buckets = state.all_cust_buckets.filter(
+                    pl.col("customer_idx") != customer_idx
+                )
+                state_all_cust_buckets_override = pl.concat(
+                    [existing_buckets, synthetic_bucket_row], how="vertical"
+                )
+                # Temporarily patch state for this call
+                original_buckets = state.all_cust_buckets
+                state.all_cust_buckets = state_all_cust_buckets_override
+            else:
+                original_buckets = None
+                state_all_cust_buckets_override = None
         else:
             history_lf = state.history_df.lazy()
+            original_buckets = None
+            state_all_cust_buckets_override = None
 
-        df_feat = _compute_features_inner(
-            history_lf=history_lf,
-            ground_truth={customer_idx: set()},
-            eval_customers=[int(customer_idx)],
-            articles_df=state.articles_lf,
-            customers_df=state.customers_df.lazy(),
-            fold_week=self._as_of_week,
-            neg_sample_rate=1.0,
-            seed=42,
-            _state=state,
-        )
+        try:
+            df_feat = _compute_features_inner(
+                history_lf=history_lf,
+                ground_truth={customer_idx: set()},
+                eval_customers=[int(customer_idx)],
+                articles_df=state.articles_lf,
+                customers_df=state.customers_df.lazy(),
+                fold_week=self._as_of_week,
+                neg_sample_rate=1.0,
+                seed=42,
+                _state=state,
+            )
+        finally:
+            # Restore original age_buckets if we patched it
+            if original_buckets is not None:
+                state.all_cust_buckets = original_buckets
 
         if df_feat is None or df_feat.is_empty():
             return None, None, None
@@ -436,6 +478,35 @@ class BundleRecommender:
                     "score": float(row.get("score", 0.0)),
                     "sources": ["popularity_last_week"],
                     "top_3_reasons": [],
+                }
+            )
+        return results
+
+    def _popularity_fallback_with_meta(self, k: int = 12) -> list[dict]:
+        """Return top-k from last-week popularity with extended article metadata.
+
+        Similar to _popularity_fallback but includes product_group and colour
+        fields required by the profiles endpoint.
+        """
+        b = self._b
+        if b.pop_last_week is None:
+            return []
+        results = []
+        for row in b.pop_last_week.head(k).iter_rows(named=True):
+            art_idx = int(row["article_idx"])
+            meta = self._get_article_meta(art_idx)
+            results.append(
+                {
+                    "article_idx": meta["article_idx"],
+                    "article_id": meta["article_id"],
+                    "prod_name": meta["prod_name"],
+                    "product_group": meta["product_type"],
+                    "colour": meta["colour"],
+                    "score": float(row.get("score", 0.0)),
+                    "source_rank": int(row.get("source_rank", 0)),
+                    "sources": ["popularity_last_week"],
+                    "top_3_reasons": [],
+                    "source": "trending",
                 }
             )
         return results

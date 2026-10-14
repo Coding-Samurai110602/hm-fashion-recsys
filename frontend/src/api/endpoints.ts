@@ -20,6 +20,16 @@ import type {
   CustomRecommendRequest,
   HealthResponse,
   ReadyResponse,
+  Profile,
+  ProfileSummary,
+  ProfileRecommendation,
+  CatalogArticle,
+  CatalogBrowseResponse,
+  CatalogFilters,
+  DemoShopper,
+  TrendingItem,
+  TrendsResponse,
+  CompareResult,
 } from './types'
 
 // Ops
@@ -97,3 +107,78 @@ export const calcPower = (body: PowerRequest) =>
 
 export const runSimulation = (body: SimulateRequest) =>
   post<SimulateResult>('/api/v1/experiment/simulate', body)
+
+// ── Profiles (new) ───────────────────────────────────────────────────────────
+
+export const createProfile = (data: {
+  nickname: string
+  age_range: string
+  channel: string
+}) => post<Profile>('/api/v1/profiles', data)
+
+export const getProfile = (id: string) =>
+  get<Profile>(`/api/v1/profiles/${id}`)
+
+export const listProfiles = (limit = 20) =>
+  get<{ profiles: Profile[]; total: number }>(`/api/v1/profiles?limit=${limit}`)
+
+export const deleteProfile = (id: string) =>
+  get<void>(`/api/v1/profiles/${id}/delete`)
+
+export const checkout = (profileId: string, articleIds: string[]) =>
+  post<{ purchase_count: number }>(`/api/v1/profiles/${profileId}/checkout`, {
+    article_ids: articleIds,
+  })
+
+export const getProfileRecommendations = (
+  profileId: string,
+  includeReasons = true,
+) =>
+  get<ProfileRecommendation[]>(
+    `/api/v1/profiles/${profileId}/recommendations?include_reasons=${includeReasons}`,
+  )
+
+export const getProfileSummary = (profileId: string) =>
+  get<ProfileSummary>(`/api/v1/profiles/${profileId}/summary`)
+
+// ── Catalog (new) ────────────────────────────────────────────────────────────
+
+export const getTrending = (k = 20) =>
+  get<TrendingItem[]>(`/catalog/trending?k=${k}`)
+
+export const browseCatalog = (params: {
+  product_group?: string
+  colour?: string
+  q?: string
+  page?: number
+  page_size?: number
+}) => {
+  const qs = new URLSearchParams()
+  if (params.product_group) qs.set('product_group', params.product_group)
+  if (params.colour) qs.set('colour', params.colour)
+  if (params.q) qs.set('q', params.q)
+  if (params.page != null) qs.set('page', String(params.page))
+  if (params.page_size != null) qs.set('page_size', String(params.page_size))
+  return get<CatalogBrowseResponse>(`/catalog/browse?${qs.toString()}`)
+}
+
+export const getCatalogFilters = () =>
+  get<CatalogFilters>('/catalog/filters')
+
+// ── Demo (new) ───────────────────────────────────────────────────────────────
+
+export const getDemoShoppers = () =>
+  get<DemoShopper[]>('/demo/shoppers')
+
+// ── Trends (new) ─────────────────────────────────────────────────────────────
+
+export const getTrends = () =>
+  get<TrendsResponse>('/api/v1/insights/trends')
+
+// ── Compare (new) ────────────────────────────────────────────────────────────
+
+export const compare = (a: string, b: string) =>
+  get<CompareResult>(`/api/v1/profiles/compare?a=${a}&b=${b}`)
+
+// ── Catalog article re-export ─────────────────────────────────────────────────
+export type { CatalogArticle }

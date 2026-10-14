@@ -135,6 +135,136 @@ def get_ablations() -> list:
     return result
 
 
+def get_trends(bundle) -> dict:
+    """Compute live trend data from bundle state — no calendar dates in response."""
+    import polars as pl
+
+    # ── trending_now: top 20 from pop_last_week × article_meta ─────────────
+    trending_now = []
+    if bundle.pop_last_week is not None and bundle.article_meta is not None:
+        joined = bundle.pop_last_week.join(bundle.article_meta, on="article_idx", how="inner")
+        if "source_rank" in joined.columns:
+            joined = joined.sort("source_rank")
+        for row in joined.head(20).iter_rows(named=True):
+            art_id = str(row.get("article_id", ""))
+            trending_now.append(
+                {
+                    "article_idx": int(row.get("article_idx", 0)),
+                    "article_id": art_id,
+                    "prod_name": str(row.get("prod_name", "")),
+                    "product_group": str(row.get("product_type_name", "")),
+                    "colour": str(row.get("colour_group_name", "")),
+                    "image_url": f"/api/v1/articles/{art_id}/image",
+                    "sales_last_week": int(row.get("source_rank", 0)),
+                    "trend_ratio": float(row.get("score", 0.0)),
+                }
+            )
+
+    # ── trending_by_age: top 10 per age bucket from seg_pop × article_meta ─
+    trending_by_age: dict[str, list[dict]] = {}
+    if bundle.seg_pop_by_bucket and bundle.article_meta is not None:
+        for bucket, seg_df in bundle.seg_pop_by_bucket.items():
+            if bucket == "missing":
+                continue
+            joined = seg_df.join(bundle.article_meta, on="article_idx", how="inner")
+            if "source_rank" in joined.columns:
+                joined = joined.sort("source_rank")
+            bucket_items = []
+            for row in joined.head(10).iter_rows(named=True):
+                art_id = str(row.get("article_id", ""))
+                bucket_items.append(
+                    {
+                        "article_idx": int(row.get("article_idx", 0)),
+                        "article_id": art_id,
+                        "prod_name": str(row.get("prod_name", "")),
+                        "product_group": str(row.get("product_type_name", "")),
+                        "colour": str(row.get("colour_group_name", "")),
+                        "image_url": f"/api/v1/articles/{art_id}/image",
+                        "score": float(row.get("score", 0.0)),
+                    }
+                )
+            trending_by_age[bucket] = bucket_items
+
+    # ── top_product_groups: weighted by sales_last_week (pop score) ─────────
+    top_product_groups: list[dict] = []
+    if bundle.pop_last_week is not None and bundle.article_meta is not None:
+        joined = bundle.pop_last_week.join(bundle.article_meta, on="article_idx", how="inner")
+        if "product_type_name" in joined.columns and "score" in joined.columns:
+            group_agg = (
+                joined.group_by("product_type_name")
+                .agg(
+                    pl.col("score").sum().alias("total_score"),
+                    pl.len().alias("count"),
+                )
+                .sort("total_score", descending=True)
+            )
+            total_score = float(group_agg["total_score"].sum()) or 1.0
+            for row in group_agg.head(10).iter_rows(named=True):
+                top_product_groups.append(
+                    {
+                        "product_group": str(row["product_type_name"]),
+                        "share": round(float(row["total_score"]) / total_score, 4),
+                        "count": int(row["count"]),
+                    }
+                )
+
+    # ── popularity_decay: age buckets from article_feats ────────────────────
+    # Buckets: <14 days, 14-60 days, 60-180 days, 180+ days
+    decay_labels = [
+        ("Just launched", 14),
+        ("Recently launched", 60),
+        ("Established", 180),
+        ("Mature", None),
+    ]
+    popularity_decay: list[dict] = []
+
+    if (
+        bundle.article_feats is not None
+        and "a_days_since_first_sale" in bundle.article_feats.columns
+        and "a_sales_1w" in bundle.article_feats.columns
+    ):
+        feats = bundle.article_feats.select(["a_days_since_first_sale", "a_sales_1w"]).drop_nulls()
+        total_sales = float(feats["a_sales_1w"].sum()) or 1.0
+
+        prev_max = 0
+        for label, age_max in decay_labels:
+            if age_max is not None:
+                bucket_df = feats.filter(
+                    (pl.col("a_days_since_first_sale") >= prev_max)
+                    & (pl.col("a_days_since_first_sale") < age_max)
+                )
+            else:
+                bucket_df = feats.filter(pl.col("a_days_since_first_sale") >= prev_max)
+
+            bucket_sales = float(bucket_df["a_sales_1w"].sum())
+            popularity_decay.append(
+                {
+                    "age_label": label,
+                    "age_days_max": age_max,
+                    "share": round(bucket_sales / total_sales, 4),
+                }
+            )
+            if age_max is not None:
+                prev_max = age_max
+    else:
+        # Fallback: equal shares
+        for label, age_max in decay_labels:
+            popularity_decay.append(
+                {
+                    "age_label": label,
+                    "age_days_max": age_max,
+                    "share": 0.25,
+                }
+            )
+
+    return {
+        "trending_now": trending_now,
+        "trending_by_age": trending_by_age,
+        "top_product_groups": top_product_groups,
+        "popularity_decay": popularity_decay,
+    }
+
+
 def get_importance() -> list:
     raw = _get("shap_summary", "explain/shap_summary.json")
     shap_rows: list = raw.get("top10_shap_all_candidates", [])

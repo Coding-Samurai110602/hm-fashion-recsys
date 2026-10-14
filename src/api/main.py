@@ -13,7 +13,7 @@ from src.api.config import get_settings
 from src.api.deps import load_bundle_at_startup
 from src.api.errors import http_exception_handler, validation_exception_handler
 from src.api.middleware import RequestMiddleware
-from src.api.routers import articles, customers, experiment, insights, ops
+from src.api.routers import articles, catalog, customers, demo, experiment, insights, ops, profiles
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s"
@@ -66,6 +66,9 @@ def create_app() -> FastAPI:
     app.include_router(articles.router, prefix=prefix)
     app.include_router(insights.router, prefix=prefix)
     app.include_router(experiment.router, prefix=prefix)
+    app.include_router(profiles.router, prefix=prefix)  # /api/v1/profiles + /api/v1/compare
+    app.include_router(catalog.router)  # no prefix: /catalog/...
+    app.include_router(demo.router)  # no prefix: /demo/...
 
     return app
 

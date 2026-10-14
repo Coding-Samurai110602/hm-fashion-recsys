@@ -95,13 +95,12 @@ export default function ABSimulator() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">A/B Simulator</h1>
         <p className="mt-1 text-gray-500">
-          Power calculation and offline permutation simulation using week-104
-          customer data.
+          Power calculation and offline permutation simulation using holdout customer data.
         </p>
       </div>
 
       <div className="rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
-        These simulations use offline week-104 customer data replayed as a
+        These simulations use offline holdout customer data replayed as a
         permutation test — online traffic, engagement effects, and novelty are
         not modelled.
       </div>

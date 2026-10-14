@@ -88,3 +88,117 @@ export interface VersionResponse {
   model_map12_holdout: number
   n_features: number
 }
+
+// ── Profile endpoints ────────────────────────────────────────────────────────
+
+export interface Profile {
+  id: string
+  nickname: string
+  age_range: string
+  channel: string
+  purchase_count: number
+  created_at: string
+}
+
+export interface ProfileSummary {
+  id: string
+  nickname: string
+  age_range: string
+  channel: string
+  purchase_count: number
+  top_product_groups: string[]
+  top_colour: string | null
+}
+
+export interface ProfileRecommendation {
+  article_idx: number
+  article_id: string
+  prod_name: string
+  product_group: string
+  colour: string
+  image_url: string
+  score: number
+  reasons: string[]
+  source: string
+  latency_ms: number
+  cold_start: boolean
+}
+
+// ── Catalog endpoints ────────────────────────────────────────────────────────
+
+export interface CatalogArticle {
+  article_idx: number
+  article_id: string
+  prod_name: string
+  product_group: string
+  colour: string
+  image_url: string
+  popularity_rank: number | null
+}
+
+export interface CatalogBrowseResponse {
+  items: CatalogArticle[]
+  total: number
+  page: number
+  page_size: number
+}
+
+export interface CatalogFilters {
+  product_groups: string[]
+  colours: string[]
+}
+
+// ── Demo shoppers ────────────────────────────────────────────────────────────
+
+export interface DemoShopper {
+  customer_id: string
+  customer_idx: number
+  age_range: string
+  channel: string
+  purchase_count: number
+  top_product_groups: string[]
+  top_colour: string | null
+  summary: string
+}
+
+// ── Trends ───────────────────────────────────────────────────────────────────
+
+export interface TrendingItem {
+  article_idx: number
+  article_id: string
+  prod_name: string
+  product_group: string
+  colour: string
+  image_url: string
+  popularity_rank: number
+}
+
+export interface ProductGroupShare {
+  product_group: string
+  share: number
+  count: number
+}
+
+export interface DecayBin {
+  age_label: string
+  age_days_max: number | null
+  share: number
+}
+
+export interface TrendsResponse {
+  trending_now: TrendingItem[]
+  trending_by_age: Record<string, TrendingItem[]>
+  top_product_groups: ProductGroupShare[]
+  popularity_decay: DecayBin[]
+}
+
+// ── Compare ──────────────────────────────────────────────────────────────────
+
+export interface CompareResult {
+  a_summary: ProfileSummary
+  b_summary: ProfileSummary
+  a_recommendations: ProfileRecommendation[]
+  b_recommendations: ProfileRecommendation[]
+  overlap: string[]
+  overlap_count: number
+}

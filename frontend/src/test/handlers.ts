@@ -10,6 +10,81 @@ import powerResultFixture from './fixtures/power_result.json'
 import simulateResultFixture from './fixtures/simulate_result.json'
 
 const CUSTOMER_ID = 'a73eaaa3b5e5c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2'
+const PROFILE_ID = 'prof-test-001'
+
+// Synthetic trending items
+const TRENDING_ITEMS = Array.from({ length: 20 }, (_, i) => ({
+  article_idx: 1000 + i,
+  article_id: `010000${String(1000 + i).padStart(4, '0')}`,
+  prod_name: `Trending Item ${i + 1}`,
+  product_group: ['Trousers', 'Sweater', 'Blouse', 'Shoes', 'Bag'][i % 5] ?? 'Trousers',
+  colour: ['Black', 'White', 'Blue', 'Green', 'Pink'][i % 5] ?? 'Black',
+  image_url: '',
+  popularity_rank: i + 1,
+}))
+
+// Synthetic catalog items
+const CATALOG_ITEMS = Array.from({ length: 24 }, (_, i) => ({
+  article_idx: 2000 + i,
+  article_id: `020000${String(2000 + i).padStart(4, '0')}`,
+  prod_name: `Product ${i + 1}`,
+  product_group: ['Trousers', 'Sweater', 'Blouse', 'Shoes', 'Bag'][i % 5] ?? 'Trousers',
+  colour: ['Black', 'White', 'Blue', 'Green', 'Pink'][i % 5] ?? 'Black',
+  image_url: '',
+  popularity_rank: i + 1,
+}))
+
+// Synthetic profile recommendations
+const PROFILE_RECS = Array.from({ length: 12 }, (_, i) => ({
+  article_idx: 3000 + i,
+  article_id: `030000${String(3000 + i).padStart(4, '0')}`,
+  prod_name: `Pick ${i + 1}`,
+  product_group: ['Trousers', 'Sweater', 'Blouse'][i % 3] ?? 'Trousers',
+  colour: ['Black', 'White', 'Blue'][i % 3] ?? 'Black',
+  image_url: '',
+  score: 0.95 - i * 0.05,
+  reasons: i === 0 ? ['Popular with shoppers your age', 'Trending now'] : ['Trending now'],
+  source: i < 3 ? 'repurchase' : 'trending',
+  latency_ms: 42.5,
+  cold_start: false,
+}))
+
+// Synthetic demo shoppers
+const DEMO_SHOPPERS = Array.from({ length: 5 }, (_, i) => ({
+  customer_id: `demo-customer-${i + 1}`,
+  customer_idx: 100 + i,
+  age_range: ['<25', '25-34', '35-44', '45-54', '55+'][i] ?? '<25',
+  channel: i % 2 === 0 ? 'online' : 'store',
+  purchase_count: 10 + i * 5,
+  top_product_groups: ['Trousers', 'Sweater'],
+  top_colour: 'Black',
+  summary: `Shopper ${i + 1}`,
+}))
+
+// Synthetic trends
+const TRENDS_RESPONSE = {
+  trending_now: TRENDING_ITEMS,
+  trending_by_age: {
+    '<25': TRENDING_ITEMS.slice(0, 10),
+    '25-34': TRENDING_ITEMS.slice(2, 12),
+    '35-44': TRENDING_ITEMS.slice(4, 14),
+    '45-54': TRENDING_ITEMS.slice(6, 16),
+    '55+': TRENDING_ITEMS.slice(8, 18),
+  },
+  top_product_groups: [
+    { product_group: 'Trousers', share: 0.22, count: 4200 },
+    { product_group: 'Sweater', share: 0.18, count: 3400 },
+    { product_group: 'Blouse', share: 0.15, count: 2900 },
+    { product_group: 'Shoes', share: 0.12, count: 2300 },
+    { product_group: 'Bag', share: 0.09, count: 1700 },
+  ],
+  popularity_decay: [
+    { age_label: 'Just launched', age_days_max: 7, share: 0.38 },
+    { age_label: 'Recently launched', age_days_max: 30, share: 0.29 },
+    { age_label: 'Established', age_days_max: 90, share: 0.22 },
+    { age_label: 'Mature', age_days_max: null, share: 0.11 },
+  ],
+}
 
 export const handlers = [
   // Ops
@@ -146,6 +221,129 @@ export const handlers = [
   ),
   http.post('/api/v1/experiment/simulate', () =>
     HttpResponse.json(simulateResultFixture),
+  ),
+
+  // ── New profile endpoints ────────────────────────────────────────────────
+
+  http.post('/api/v1/profiles', () =>
+    HttpResponse.json({
+      id: PROFILE_ID,
+      nickname: 'TestUser',
+      age_range: '25-34',
+      channel: 'online',
+      purchase_count: 0,
+      created_at: new Date().toISOString(),
+    }),
+  ),
+
+  http.get('/api/v1/profiles', () =>
+    HttpResponse.json({
+      profiles: [
+        {
+          id: PROFILE_ID,
+          nickname: 'TestUser',
+          age_range: '25-34',
+          channel: 'online',
+          purchase_count: 3,
+          created_at: new Date().toISOString(),
+        },
+      ],
+      total: 1,
+    }),
+  ),
+
+  http.get(`/api/v1/profiles/${PROFILE_ID}`, () =>
+    HttpResponse.json({
+      id: PROFILE_ID,
+      nickname: 'TestUser',
+      age_range: '25-34',
+      channel: 'online',
+      purchase_count: 3,
+      created_at: new Date().toISOString(),
+    }),
+  ),
+
+  http.post(`/api/v1/profiles/${PROFILE_ID}/checkout`, () =>
+    HttpResponse.json({ purchase_count: 3 }),
+  ),
+
+  http.get(`/api/v1/profiles/${PROFILE_ID}/recommendations`, () =>
+    HttpResponse.json(PROFILE_RECS),
+  ),
+
+  http.get(`/api/v1/profiles/${PROFILE_ID}/summary`, () =>
+    HttpResponse.json({
+      id: PROFILE_ID,
+      nickname: 'TestUser',
+      age_range: '25-34',
+      channel: 'online',
+      purchase_count: 3,
+      top_product_groups: ['Trousers', 'Sweater'],
+      top_colour: 'Black',
+    }),
+  ),
+
+  // ── Catalog endpoints ────────────────────────────────────────────────────
+
+  http.get('/catalog/trending', () =>
+    HttpResponse.json(TRENDING_ITEMS.slice(0, 8)),
+  ),
+
+  http.get('/catalog/browse', () =>
+    HttpResponse.json({
+      items: CATALOG_ITEMS,
+      total: 48,
+      page: 1,
+      page_size: 24,
+    }),
+  ),
+
+  http.get('/catalog/filters', () =>
+    HttpResponse.json({
+      product_groups: ['Trousers', 'Sweater', 'Blouse', 'Shoes', 'Bag', 'Dress', 'Jacket'],
+      colours: ['Black', 'White', 'Blue', 'Green', 'Pink', 'Red', 'Grey', 'Brown'],
+    }),
+  ),
+
+  // ── Demo shoppers ────────────────────────────────────────────────────────
+
+  http.get('/demo/shoppers', () =>
+    HttpResponse.json(DEMO_SHOPPERS),
+  ),
+
+  // ── Trends ──────────────────────────────────────────────────────────────
+
+  http.get('/api/v1/insights/trends', () =>
+    HttpResponse.json(TRENDS_RESPONSE),
+  ),
+
+  // ── Compare ─────────────────────────────────────────────────────────────
+
+  http.get('/api/v1/profiles/compare', () =>
+    HttpResponse.json({
+      a_summary: {
+        id: PROFILE_ID,
+        nickname: 'TestUser',
+        age_range: '25-34',
+        channel: 'online',
+        purchase_count: 3,
+        top_product_groups: ['Trousers'],
+        top_colour: 'Black',
+      },
+      b_summary: {
+        id: 'prof-test-002',
+        nickname: 'OtherUser',
+        age_range: '35-44',
+        channel: 'store',
+        purchase_count: 7,
+        top_product_groups: ['Sweater'],
+        top_colour: 'White',
+      },
+      a_recommendations: PROFILE_RECS,
+      b_recommendations: PROFILE_RECS.slice(3),
+      overlap: [PROFILE_RECS[3]?.article_id ?? ''],
+      overlap_count: 1,
+    }),
   ),
 ]
 

@@ -775,6 +775,25 @@
         }
       }
     },
+    "/api/v1/insights/trends": {
+      "get": {
+        "tags": [
+          "insights"
+        ],
+        "summary": "Trending articles, by-age segments, and popularity decay",
+        "operationId": "trends_api_v1_insights_trends_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/experiment/power": {
       "post": {
         "tags": [
@@ -856,6 +875,582 @@
           }
         }
       }
+    },
+    "/api/v1/profiles": {
+      "post": {
+        "tags": [
+          "profiles"
+        ],
+        "summary": "Create a new shopping profile",
+        "operationId": "create_profile_api_v1_profiles_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProfileRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Profile"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "profiles"
+        ],
+        "summary": "List profiles with pagination",
+        "operationId": "list_profiles_api_v1_profiles_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileList"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/profiles/{profile_id}": {
+      "get": {
+        "tags": [
+          "profiles"
+        ],
+        "summary": "Get a profile by ID",
+        "operationId": "get_profile_api_v1_profiles__profile_id__get",
+        "parameters": [
+          {
+            "name": "profile_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Profile Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Profile"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "profiles"
+        ],
+        "summary": "Delete a profile",
+        "operationId": "delete_profile_api_v1_profiles__profile_id__delete",
+        "parameters": [
+          {
+            "name": "profile_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Profile Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/profiles/{profile_id}/checkout": {
+      "post": {
+        "tags": [
+          "profiles"
+        ],
+        "summary": "Record article purchases on a profile",
+        "operationId": "checkout_api_v1_profiles__profile_id__checkout_post",
+        "parameters": [
+          {
+            "name": "profile_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Profile Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckoutRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/profiles/{profile_id}/recommendations": {
+      "get": {
+        "tags": [
+          "profiles"
+        ],
+        "summary": "Personalized recommendations for a profile",
+        "operationId": "profile_recommendations_api_v1_profiles__profile_id__recommendations_get",
+        "parameters": [
+          {
+            "name": "profile_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Profile Id"
+            }
+          },
+          {
+            "name": "include_reasons",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Include Reasons"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileRecsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/profiles/{profile_id}/summary": {
+      "get": {
+        "tags": [
+          "profiles"
+        ],
+        "summary": "Preference summary for a profile",
+        "operationId": "profile_summary_api_v1_profiles__profile_id__summary_get",
+        "parameters": [
+          {
+            "name": "profile_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Profile Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileSummary"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/compare": {
+      "get": {
+        "tags": [
+          "profiles"
+        ],
+        "summary": "Compare two profiles or customers side-by-side",
+        "operationId": "compare_api_v1_compare_get",
+        "parameters": [
+          {
+            "name": "a",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Profile UUID or customer_id hex",
+              "title": "A"
+            },
+            "description": "Profile UUID or customer_id hex"
+          },
+          {
+            "name": "b",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Profile UUID or customer_id hex",
+              "title": "B"
+            },
+            "description": "Profile UUID or customer_id hex"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompareResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/trending": {
+      "get": {
+        "tags": [
+          "catalog"
+        ],
+        "summary": "Top trending articles by last-week popularity",
+        "operationId": "trending_catalog_trending_get",
+        "parameters": [
+          {
+            "name": "k",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 20,
+              "title": "K"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TrendingItem"
+                  },
+                  "title": "Response Trending Catalog Trending Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/browse": {
+      "get": {
+        "tags": [
+          "catalog"
+        ],
+        "summary": "Browse and filter the article catalog",
+        "operationId": "browse_catalog_browse_get",
+        "parameters": [
+          {
+            "name": "product_group",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by product_type_name",
+              "title": "Product Group"
+            },
+            "description": "Filter by product_type_name"
+          },
+          {
+            "name": "colour",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by colour_group_name",
+              "title": "Colour"
+            },
+            "description": "Filter by colour_group_name"
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Search prod_name (case-insensitive contains)",
+              "title": "Q"
+            },
+            "description": "Search prod_name (case-insensitive contains)"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 24,
+              "title": "Page Size"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogBrowseResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/filters": {
+      "get": {
+        "tags": [
+          "catalog"
+        ],
+        "summary": "Distinct product groups and colours for filter UI",
+        "operationId": "filters_catalog_filters_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogFilters"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/demo/shoppers": {
+      "get": {
+        "tags": [
+          "demo"
+        ],
+        "summary": "Diverse demo customer profiles for showcasing recommendations",
+        "operationId": "demo_shoppers_demo_shoppers_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DemoShopper"
+                  },
+                  "type": "array",
+                  "title": "Response Demo Shoppers Demo Shoppers Get"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -897,6 +1492,215 @@
           "department"
         ],
         "title": "ArticleMeta"
+      },
+      "CatalogBrowseItem": {
+        "properties": {
+          "article_idx": {
+            "type": "integer",
+            "title": "Article Idx"
+          },
+          "article_id": {
+            "type": "string",
+            "title": "Article Id"
+          },
+          "prod_name": {
+            "type": "string",
+            "title": "Prod Name"
+          },
+          "product_group": {
+            "type": "string",
+            "title": "Product Group"
+          },
+          "colour": {
+            "type": "string",
+            "title": "Colour"
+          },
+          "image_url": {
+            "type": "string",
+            "title": "Image Url"
+          },
+          "popularity_rank": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Popularity Rank"
+          }
+        },
+        "type": "object",
+        "required": [
+          "article_idx",
+          "article_id",
+          "prod_name",
+          "product_group",
+          "colour",
+          "image_url"
+        ],
+        "title": "CatalogBrowseItem"
+      },
+      "CatalogBrowseResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogBrowseItem"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "page_size"
+        ],
+        "title": "CatalogBrowseResponse"
+      },
+      "CatalogFilters": {
+        "properties": {
+          "product_groups": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Product Groups"
+          },
+          "colours": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Colours"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_groups",
+          "colours"
+        ],
+        "title": "CatalogFilters"
+      },
+      "CheckoutRequest": {
+        "properties": {
+          "article_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Article Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "article_ids"
+        ],
+        "title": "CheckoutRequest"
+      },
+      "CheckoutResponse": {
+        "properties": {
+          "purchase_count": {
+            "type": "integer",
+            "title": "Purchase Count"
+          },
+          "new_count": {
+            "type": "integer",
+            "title": "New Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "purchase_count",
+          "new_count"
+        ],
+        "title": "CheckoutResponse"
+      },
+      "CompareResult": {
+        "properties": {
+          "a_summary": {
+            "$ref": "#/components/schemas/ProfileSummary"
+          },
+          "b_summary": {
+            "$ref": "#/components/schemas/ProfileSummary"
+          },
+          "a_recommendations": {
+            "items": {
+              "$ref": "#/components/schemas/ProfileRecItem"
+            },
+            "type": "array",
+            "title": "A Recommendations"
+          },
+          "b_recommendations": {
+            "items": {
+              "$ref": "#/components/schemas/ProfileRecItem"
+            },
+            "type": "array",
+            "title": "B Recommendations"
+          },
+          "overlap": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Overlap"
+          },
+          "overlap_count": {
+            "type": "integer",
+            "title": "Overlap Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "a_summary",
+          "b_summary",
+          "a_recommendations",
+          "b_recommendations",
+          "overlap",
+          "overlap_count"
+        ],
+        "title": "CompareResult"
+      },
+      "CreateProfileRequest": {
+        "properties": {
+          "nickname": {
+            "type": "string",
+            "maxLength": 30,
+            "minLength": 1,
+            "title": "Nickname"
+          },
+          "age_range": {
+            "type": "string",
+            "title": "Age Range"
+          },
+          "channel": {
+            "type": "string",
+            "title": "Channel"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nickname",
+          "age_range",
+          "channel"
+        ],
+        "title": "CreateProfileRequest"
       },
       "CustomHistoryItem": {
         "properties": {
@@ -996,6 +1800,64 @@
           "recent_history"
         ],
         "title": "CustomerProfile"
+      },
+      "DemoShopper": {
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id"
+          },
+          "customer_idx": {
+            "type": "integer",
+            "title": "Customer Idx"
+          },
+          "age_range": {
+            "type": "string",
+            "title": "Age Range"
+          },
+          "channel": {
+            "type": "string",
+            "title": "Channel"
+          },
+          "purchase_count": {
+            "type": "integer",
+            "title": "Purchase Count"
+          },
+          "top_product_groups": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Top Product Groups"
+          },
+          "top_colour": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top Colour"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id",
+          "customer_idx",
+          "age_range",
+          "channel",
+          "purchase_count",
+          "top_product_groups",
+          "top_colour",
+          "summary"
+        ],
+        "title": "DemoShopper"
       },
       "ExplainResult": {
         "properties": {
@@ -1222,6 +2084,222 @@
         ],
         "title": "PowerResult"
       },
+      "Profile": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "nickname": {
+            "type": "string",
+            "title": "Nickname"
+          },
+          "age_range": {
+            "type": "string",
+            "title": "Age Range"
+          },
+          "channel": {
+            "type": "string",
+            "title": "Channel"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "purchase_count": {
+            "type": "integer",
+            "title": "Purchase Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nickname",
+          "age_range",
+          "channel",
+          "created_at",
+          "purchase_count"
+        ],
+        "title": "Profile"
+      },
+      "ProfileList": {
+        "properties": {
+          "profiles": {
+            "items": {
+              "$ref": "#/components/schemas/Profile"
+            },
+            "type": "array",
+            "title": "Profiles"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "profiles",
+          "total"
+        ],
+        "title": "ProfileList"
+      },
+      "ProfileRecItem": {
+        "properties": {
+          "article_idx": {
+            "type": "integer",
+            "title": "Article Idx"
+          },
+          "article_id": {
+            "type": "string",
+            "title": "Article Id"
+          },
+          "prod_name": {
+            "type": "string",
+            "title": "Prod Name"
+          },
+          "product_group": {
+            "type": "string",
+            "title": "Product Group"
+          },
+          "colour": {
+            "type": "string",
+            "title": "Colour"
+          },
+          "image_url": {
+            "type": "string",
+            "title": "Image Url"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "latency_ms": {
+            "type": "number",
+            "title": "Latency Ms"
+          },
+          "cold_start": {
+            "type": "boolean",
+            "title": "Cold Start"
+          }
+        },
+        "type": "object",
+        "required": [
+          "article_idx",
+          "article_id",
+          "prod_name",
+          "product_group",
+          "colour",
+          "image_url",
+          "score",
+          "reasons",
+          "source",
+          "latency_ms",
+          "cold_start"
+        ],
+        "title": "ProfileRecItem"
+      },
+      "ProfileRecsResponse": {
+        "properties": {
+          "profile_id": {
+            "type": "string",
+            "title": "Profile Id"
+          },
+          "cold_start": {
+            "type": "boolean",
+            "title": "Cold Start"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ProfileRecItem"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "latency_ms": {
+            "type": "number",
+            "title": "Latency Ms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "profile_id",
+          "cold_start",
+          "items",
+          "latency_ms"
+        ],
+        "title": "ProfileRecsResponse"
+      },
+      "ProfileSummary": {
+        "properties": {
+          "profile_id": {
+            "type": "string",
+            "title": "Profile Id"
+          },
+          "nickname": {
+            "type": "string",
+            "title": "Nickname"
+          },
+          "age_range": {
+            "type": "string",
+            "title": "Age Range"
+          },
+          "channel": {
+            "type": "string",
+            "title": "Channel"
+          },
+          "purchase_count": {
+            "type": "integer",
+            "title": "Purchase Count"
+          },
+          "top_product_groups": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Top Product Groups"
+          },
+          "top_colour": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top Colour"
+          }
+        },
+        "type": "object",
+        "required": [
+          "profile_id",
+          "nickname",
+          "age_range",
+          "channel",
+          "purchase_count",
+          "top_product_groups",
+          "top_colour"
+        ],
+        "title": "ProfileSummary"
+      },
       "ReadyResponse": {
         "properties": {
           "ready": {
@@ -1438,6 +2516,49 @@
           "empirical_power"
         ],
         "title": "SimulateResult"
+      },
+      "TrendingItem": {
+        "properties": {
+          "article_idx": {
+            "type": "integer",
+            "title": "Article Idx"
+          },
+          "article_id": {
+            "type": "string",
+            "title": "Article Id"
+          },
+          "prod_name": {
+            "type": "string",
+            "title": "Prod Name"
+          },
+          "product_group": {
+            "type": "string",
+            "title": "Product Group"
+          },
+          "colour": {
+            "type": "string",
+            "title": "Colour"
+          },
+          "image_url": {
+            "type": "string",
+            "title": "Image Url"
+          },
+          "popularity_rank": {
+            "type": "integer",
+            "title": "Popularity Rank"
+          }
+        },
+        "type": "object",
+        "required": [
+          "article_idx",
+          "article_id",
+          "prod_name",
+          "product_group",
+          "colour",
+          "image_url",
+          "popularity_rank"
+        ],
+        "title": "TrendingItem"
       },
       "ValidationError": {
         "properties": {

@@ -68,7 +68,7 @@ export default function ModelLab() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Model Lab</h1>
         <p className="mt-1 text-gray-500">
-          Feature ablations, SHAP importance, and segment analysis.
+          Feature ablations, SHAP importance, and segment analysis from the holdout period.
         </p>
       </div>
 
@@ -255,7 +255,7 @@ export default function ModelLab() {
       {/* Segment results */}
       <section>
         <h2 className="mb-4 text-base font-semibold text-gray-800">
-          Segment Analysis (Fold 103, Holm-adjusted)
+          Segment Analysis (Validation Period, Holm-adjusted)
         </h2>
         {segmentsQuery.isLoading && (
           <LoadingSpinner label="Loading segment data..." />
