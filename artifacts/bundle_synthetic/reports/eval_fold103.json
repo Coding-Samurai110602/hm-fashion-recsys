@@ -6,5 +6,10 @@
   },
   "heuristic": {
     "map@12": 0.02468
+  },
+  "bootstrap_ranker_vs_heuristic": {
+    "ci_lo": 0.009,
+    "ci_hi": 0.011,
+    "ci_excludes_zero": true
   }
 }

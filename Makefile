@@ -36,9 +36,10 @@ bundle:
 	caffeinate -i PYTHONPATH=. $(PYTHON) -u scripts/export_bundle.py
 
 # Start the API locally with uvicorn (dev mode, real bundle)
+# --reload-dir src prevents node_modules changes from restarting the API process
 api:
 	BUNDLE_PATH=artifacts/bundle_week104 PYTHONPATH=. \
-		$(PYTHON) -m uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
+		$(PYTHON) -m uvicorn src.api.main:app --reload --reload-dir src --host 0.0.0.0 --port 8000
 
 docker-build:
 	docker build -t hm-recsys-api:latest .

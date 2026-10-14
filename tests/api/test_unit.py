@@ -187,10 +187,10 @@ class TestInsightsService:
         # holdout_week is always set (defaults to 104 if file missing)
         assert "holdout_week" in result
 
-    def test_get_importance_has_all_keys(self):
+    def test_get_importance_returns_list(self):
+        """get_importance() now returns ImportanceEntry[] (list), not a dict."""
         from src.api.services.insights import _load_json_disk, get_importance
 
         _load_json_disk.cache_clear()
         result = get_importance()
-        assert "top10_gain_importance" in result
-        assert "top10_shap_all_candidates" in result
+        assert isinstance(result, list)

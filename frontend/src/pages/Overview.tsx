@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { fetchInsightsSummary, fetchWeeklyLift } from '../api/endpoints'
 import { ErrorState } from '../components/ErrorState'
 import { LoadingSpinner } from '../components/LoadingSpinner'
+import { fmtNum, fmtPct } from '../utils/fmt'
 import {
   BarChart,
   Bar,
@@ -118,24 +119,24 @@ export default function Overview() {
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <MetricCard
             label="Holdout MAP@12 (Ranker)"
-            value={s.holdout_map12_ranker.toFixed(4)}
+            value={fmtNum(s.holdout_map12_ranker)}
             sub="Week 104 holdout"
             highlight
           />
           <MetricCard
             label="Holdout MAP@12 (Heuristic)"
-            value={s.holdout_map12_heuristic.toFixed(4)}
+            value={fmtNum(s.holdout_map12_heuristic)}
             sub="Baseline"
           />
           <MetricCard
             label="Lift vs Heuristic"
-            value={`+${s.holdout_lift_pct.toFixed(1)}%`}
+            value={fmtPct(s.holdout_lift_pct)}
             sub="Holdout"
             highlight
           />
           <MetricCard
             label="Bootstrap 95% CI (Fold 103)"
-            value={`[+${s.fold103_ci_lo.toFixed(4)}, +${s.fold103_ci_hi.toFixed(4)}]`}
+            value={`[${fmtNum(s.fold103_ci_lo)}, ${fmtNum(s.fold103_ci_hi)}]`}
             sub="CI excludes zero"
           />
         </div>

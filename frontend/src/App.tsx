@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route, NavLink } from 'react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { LoadingSpinner } from './components/LoadingSpinner'
+import { ErrorBoundary } from './components/ErrorBoundary'
 
 // Route-level code splitting
 const Overview = lazy(() => import('./pages/Overview'))
@@ -83,25 +84,27 @@ function Shell({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Shell>
-          <Suspense fallback={<PageFallback />}>
-            <Routes>
-              <Route path="/" element={<Overview />} />
-              <Route path="/customers" element={<CustomerExplorer />} />
-              <Route
-                path="/customers/:customerId/funnel"
-                element={<CandidateFunnel />}
-              />
-              <Route path="/custom" element={<CustomCustomer />} />
-              <Route path="/lab" element={<ModelLab />} />
-              <Route path="/simulator" element={<ABSimulator />} />
-              <Route path="/about" element={<About />} />
-            </Routes>
-          </Suspense>
-        </Shell>
-      </BrowserRouter>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <Shell>
+            <Suspense fallback={<PageFallback />}>
+              <Routes>
+                <Route path="/" element={<ErrorBoundary><Overview /></ErrorBoundary>} />
+                <Route path="/customers" element={<ErrorBoundary><CustomerExplorer /></ErrorBoundary>} />
+                <Route
+                  path="/customers/:customerId/funnel"
+                  element={<ErrorBoundary><CandidateFunnel /></ErrorBoundary>}
+                />
+                <Route path="/custom" element={<ErrorBoundary><CustomCustomer /></ErrorBoundary>} />
+                <Route path="/lab" element={<ErrorBoundary><ModelLab /></ErrorBoundary>} />
+                <Route path="/simulator" element={<ErrorBoundary><ABSimulator /></ErrorBoundary>} />
+                <Route path="/about" element={<ErrorBoundary><About /></ErrorBoundary>} />
+              </Routes>
+            </Suspense>
+          </Shell>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </ErrorBoundary>
   )
 }
