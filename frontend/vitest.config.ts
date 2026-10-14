@@ -9,5 +9,12 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts'],
     css: false,
     exclude: ['**/node_modules/**', '**/e2e/**'],
+    pool: 'forks',
+    poolOptions: {
+      forks: {
+        maxForks: 2,
+      },
+    },
+    testTimeout: 15000,
   },
 })

@@ -85,8 +85,9 @@ describe('CustomCustomer page', () => {
     })
     fireEvent.click(screen.getByText(/get recommendations/i))
     await waitFor(() => {
-      // Fixture returns Liliana Dress
-      expect(screen.getByText(/Liliana Dress/i)).toBeTruthy()
+      // Synthetic fixture returns "Article X" product names
+      const items = screen.getAllByText(/Article \d+/i)
+      expect(items.length).toBeGreaterThan(0)
     }, { timeout: 3000 })
   })
 

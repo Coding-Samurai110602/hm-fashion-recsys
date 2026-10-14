@@ -80,7 +80,7 @@ await record('importance', () => fetchJson('/api/v1/insights/importance'))
 await record('power_result', () =>
   postJson('/api/v1/experiment/power', {
     baseline_rate: 0.086,
-    mde: 0.05,
+    relative_lift: 0.1,
     alpha: 0.05,
     power: 0.8,
   }),
@@ -89,9 +89,9 @@ await record('power_result', () =>
 // Simulate result — small synthetic A/A test
 await record('simulate_result', () =>
   postJson('/api/v1/experiment/simulate', {
-    n_per_arm: 500,
-    mode: 'aa',
-    n_sims: 100,
+    test_type: 'aa',
+    n_per_arm: 200,
+    n_sims: 50,
     seed: 42,
     peeking: false,
   }),

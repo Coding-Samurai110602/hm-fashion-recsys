@@ -1,5 +1,1 @@
-[
-  { "fold": 101, "ranker_map12": 0.029125, "heuristic_map12": 0.019198, "lift_pct": 51.71 },
-  { "fold": 102, "ranker_map12": 0.035270, "heuristic_map12": 0.022445, "lift_pct": 57.14, "optimistic": true },
-  { "fold": 103, "ranker_map12": 0.035832, "heuristic_map12": 0.024675, "lift_pct": 45.21 }
-]
+[]

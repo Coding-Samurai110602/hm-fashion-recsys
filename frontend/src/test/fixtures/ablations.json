@@ -1,6 +1,34 @@
 [
-  { "group": "candidate", "n_features": 23, "map12_delta": -0.000466, "ci_lo": -0.000756, "ci_hi": -0.000139, "ci_excludes_zero": true },
-  { "group": "customer", "n_features": 16, "map12_delta": -0.000688, "ci_lo": -0.000977, "ci_hi": -0.000380, "ci_excludes_zero": true },
-  { "group": "article", "n_features": 20, "map12_delta": -0.002372, "ci_lo": -0.002815, "ci_hi": -0.001945, "ci_excludes_zero": true },
-  { "group": "interaction", "n_features": 9, "map12_delta": -0.001886, "ci_lo": -0.002258, "ci_hi": -0.001474, "ci_excludes_zero": true }
+  {
+    "group": "candidate",
+    "n_features": 20,
+    "map12_delta": -0.0005,
+    "ci_lo": -0.0008,
+    "ci_hi": -0.0002,
+    "ci_excludes_zero": true
+  },
+  {
+    "group": "customer",
+    "n_features": 16,
+    "map12_delta": -0.0007,
+    "ci_lo": -0.001,
+    "ci_hi": -0.0004,
+    "ci_excludes_zero": true
+  },
+  {
+    "group": "article",
+    "n_features": 20,
+    "map12_delta": -0.0024,
+    "ci_lo": -0.003,
+    "ci_hi": -0.002,
+    "ci_excludes_zero": true
+  },
+  {
+    "group": "interaction",
+    "n_features": 9,
+    "map12_delta": -0.0019,
+    "ci_lo": -0.0023,
+    "ci_hi": -0.0015,
+    "ci_excludes_zero": true
+  }
 ]

@@ -1,9 +1,30 @@
 {
   "synthetic": true,
   "note": "Synthetic bundle \u2014 values are illustrative only.",
-  "top10_gain_importance": [],
-  "top10_shap_all_candidates": [],
-  "top10_contrast_shap_all_candidates": [],
+  "top10_gain_importance": [
+    "i_days_since_bought_product_code",
+    "a_sales_1w"
+  ],
+  "top10_shap_all_candidates": [
+    {
+      "feature": "a_sales_1w",
+      "mean_abs_shap": 0.31
+    },
+    {
+      "feature": "i_channel_gap",
+      "mean_abs_shap": 0.16
+    }
+  ],
+  "top10_contrast_shap_all_candidates": [
+    {
+      "feature": "a_sales_1w",
+      "mean_abs_contrast_shap": 0.28
+    },
+    {
+      "feature": "i_channel_gap",
+      "mean_abs_contrast_shap": 0.13
+    }
+  ],
   "group_shap_all_candidates": {},
   "group_contrast_shap_all_candidates": {}
 }

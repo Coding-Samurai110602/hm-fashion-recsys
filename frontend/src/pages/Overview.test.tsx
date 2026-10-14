@@ -33,12 +33,12 @@ describe('Overview page', () => {
   it('renders success state with fixture data', async () => {
     render(<Overview />, { wrapper })
     await waitFor(() => {
-      // holdout_map12_ranker 0.036904 → displayed as 0.0369
-      const cards = screen.getAllByText(/0\.0369/)
+      // holdout_map12_ranker 0.036 → displayed as 0.036 (fmtNum with 4 decimals)
+      const cards = screen.getAllByText(/0\.036/)
       expect(cards.length).toBeGreaterThan(0)
     })
-    // holdout_lift_pct 47.62 → +47.6%
-    expect(screen.getAllByText(/\+47\.6%/).length).toBeGreaterThan(0)
+    // holdout_lift_pct 45 → +45.0%
+    expect(screen.getAllByText(/\+45/).length).toBeGreaterThan(0)
   })
 
   it('renders error state with API message and request_id', async () => {

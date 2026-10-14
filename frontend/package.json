@@ -14,8 +14,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
-    "generate-types": "openapi-typescript $(cd ../.. && pwd)/docs/openapi.json -o src/api/types.generated.ts",
-    "check-types-fresh": "openapi-typescript $(cd ../.. && pwd)/docs/openapi.json -o /tmp/hm_types_tmp.ts && diff /tmp/hm_types_tmp.ts src/api/types.generated.ts",
+    "generate-types": "openapi-typescript $(cd .. && pwd)/docs/openapi.json -o src/api/types.generated.ts",
+    "check-types-fresh": "openapi-typescript $(cd .. && pwd)/docs/openapi.json -o /tmp/hm_types_tmp.ts && diff /tmp/hm_types_tmp.ts src/api/types.generated.ts",
     "record-fixtures": "node scripts/record-fixtures.mjs",
     "e2e": "playwright test",
     "e2e:headed": "playwright test --headed"

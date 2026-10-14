@@ -205,7 +205,13 @@ export default function ModelLab() {
                     Feature
                   </th>
                   <th className="px-4 py-3 text-left font-semibold text-gray-600">
-                    Mean |SHAP|
+                    Mean |SHAP| (raw)
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-600">
+                    Contrast Rank
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-600">
+                    Mean |Contrast SHAP|
                   </th>
                   <th className="px-4 py-3 text-left font-semibold text-gray-600">
                     Gain Rank
@@ -226,6 +232,14 @@ export default function ModelLab() {
                     </td>
                     <td className="px-4 py-2 font-mono text-xs text-gray-700">
                       {row.mean_abs_shap.toFixed(4)}
+                    </td>
+                    <td className="px-4 py-2 font-mono text-xs text-violet-600">
+                      {row.rank_contrast != null ? `#${row.rank_contrast}` : '—'}
+                    </td>
+                    <td className="px-4 py-2 font-mono text-xs text-violet-700">
+                      {row.mean_abs_contrast_shap != null
+                        ? row.mean_abs_contrast_shap.toFixed(4)
+                        : '—'}
                     </td>
                     <td className="px-4 py-2 text-xs text-gray-500">
                       {row.rank_gain != null ? `#${row.rank_gain}` : '—'}

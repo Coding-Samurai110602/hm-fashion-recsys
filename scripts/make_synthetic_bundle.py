@@ -370,9 +370,15 @@ def _write_synthetic_reports(out_dir: Path) -> None:
             "primary_lift_vs_heuristic_pct": 45.0,
             "primary_lift_vs_baseline_b_pct": 48.0,
             "models": {
-                "primary": {"map@12": 0.036},
-                "heuristic": {"map@12": 0.025},
-                "baseline_b": {"map@12": 0.024},
+                "primary": {
+                    "map@12": 0.036,
+                    "map@12_ci_lo": 0.034,
+                    "map@12_ci_hi": 0.038,
+                    "boot_vs_heuristic": {"ci_lo": 0.010, "ci_hi": 0.013, "ci_excludes_zero": True},
+                    "boot_vs_baseline_b": {"ci_lo": 0.011, "ci_hi": 0.014, "ci_excludes_zero": True},
+                },
+                "heuristic": {"map@12": 0.025, "map@12_ci_lo": 0.023, "map@12_ci_hi": 0.027},
+                "baseline_b": {"map@12": 0.024, "map@12_ci_lo": 0.022, "map@12_ci_hi": 0.026},
             },
         },
         "ab_test": {**placeholder, "aa_test": {"fpr_estimate": 0.05},
@@ -383,10 +389,34 @@ def _write_synthetic_reports(out_dir: Path) -> None:
         "rolling_origin": {**placeholder, "folds": []},
         "eval_fold103": {**placeholder, "ranker": {"map@12": 0.03583}, "heuristic": {"map@12": 0.02468},
                          "bootstrap_ranker_vs_heuristic": {"ci_lo": 0.009, "ci_hi": 0.011, "ci_excludes_zero": True}},
-        "ablations": {**placeholder, "ablations": [], "gain_importance_top25": []},
-        "shap_summary": {**placeholder, "top10_gain_importance": [], "top10_shap_all_candidates": [],
-                         "top10_contrast_shap_all_candidates": [], "group_shap_all_candidates": {},
-                         "group_contrast_shap_all_candidates": {}},
+        "ablations": {
+            **placeholder,
+            "ablations": [
+                {"group_dropped": "candidate", "n_features_dropped": 20,
+                 "delta_map@12": -0.0005, "bootstrap": {"ci_lo": -0.0008, "ci_hi": -0.0002, "ci_excludes_zero": True}},
+                {"group_dropped": "customer", "n_features_dropped": 16,
+                 "delta_map@12": -0.0007, "bootstrap": {"ci_lo": -0.001, "ci_hi": -0.0004, "ci_excludes_zero": True}},
+                {"group_dropped": "article", "n_features_dropped": 20,
+                 "delta_map@12": -0.0024, "bootstrap": {"ci_lo": -0.003, "ci_hi": -0.002, "ci_excludes_zero": True}},
+                {"group_dropped": "interaction", "n_features_dropped": 9,
+                 "delta_map@12": -0.0019, "bootstrap": {"ci_lo": -0.0023, "ci_hi": -0.0015, "ci_excludes_zero": True}},
+            ],
+            "gain_importance_top25": [],
+        },
+        "shap_summary": {
+            **placeholder,
+            "top10_gain_importance": ["i_days_since_bought_product_code", "a_sales_1w"],
+            "top10_shap_all_candidates": [
+                {"feature": "a_sales_1w", "mean_abs_shap": 0.31},
+                {"feature": "i_channel_gap", "mean_abs_shap": 0.16},
+            ],
+            "top10_contrast_shap_all_candidates": [
+                {"feature": "a_sales_1w", "mean_abs_contrast_shap": 0.28},
+                {"feature": "i_channel_gap", "mean_abs_contrast_shap": 0.13},
+            ],
+            "group_shap_all_candidates": {},
+            "group_contrast_shap_all_candidates": {},
+        },
     }
     for name, data in synthetic_reports.items():
         (reports_dir / f"{name}.json").write_text(json.dumps(data, indent=2))

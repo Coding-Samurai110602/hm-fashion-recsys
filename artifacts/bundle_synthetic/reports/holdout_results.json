@@ -7,13 +7,29 @@
   "primary_lift_vs_baseline_b_pct": 48.0,
   "models": {
     "primary": {
-      "map@12": 0.036
+      "map@12": 0.036,
+      "map@12_ci_lo": 0.034,
+      "map@12_ci_hi": 0.038,
+      "boot_vs_heuristic": {
+        "ci_lo": 0.01,
+        "ci_hi": 0.013,
+        "ci_excludes_zero": true
+      },
+      "boot_vs_baseline_b": {
+        "ci_lo": 0.011,
+        "ci_hi": 0.014,
+        "ci_excludes_zero": true
+      }
     },
     "heuristic": {
-      "map@12": 0.025
+      "map@12": 0.025,
+      "map@12_ci_lo": 0.023,
+      "map@12_ci_hi": 0.027
     },
     "baseline_b": {
-      "map@12": 0.024
+      "map@12": 0.024,
+      "map@12_ci_lo": 0.022,
+      "map@12_ci_hi": 0.026
     }
   }
 }

@@ -80,8 +80,8 @@ describe('CustomerExplorer page', () => {
       fireEvent.click(sampleBtn!)
     })
     await waitFor(() => {
-      // "Strindberg Boot" may appear multiple times (profile + recommendation)
-      const items = screen.getAllByText(/Strindberg Boot/i)
+      // Synthetic fixture returns "Article X" product names
+      const items = screen.getAllByText(/Article \d+/i)
       expect(items.length).toBeGreaterThan(0)
     })
   })

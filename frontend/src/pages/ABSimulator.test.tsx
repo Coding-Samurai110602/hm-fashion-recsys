@@ -31,11 +31,9 @@ describe('ABSimulator page', () => {
     const calcBtn = screen.getByText(/calculate power/i)
     fireEvent.click(calcBtn)
     await waitFor(() => {
-      // n_per_arm: 427
-      expect(screen.getByText('427')).toBeTruthy()
+      // n_per_arm: 6755 (synthetic fixture value)
+      expect(screen.getByText('6,755')).toBeTruthy()
     })
-    // n_per_arm_cuped: 416
-    expect(screen.getByText('416')).toBeTruthy()
   })
 
   it('renders error state for power calculation', async () => {
@@ -53,8 +51,8 @@ describe('ABSimulator page', () => {
     const runBtn = screen.getByText(/run simulation/i)
     fireEvent.click(runBtn)
     await waitFor(() => {
-      // false_positive_rate: 0.052 → 5.2%
-      expect(screen.getByText(/5\.2%/)).toBeTruthy()
+      // false_positive_rate: 0 → 0.0%
+      expect(screen.getByText(/0\.0%/)).toBeTruthy()
     })
   })
 

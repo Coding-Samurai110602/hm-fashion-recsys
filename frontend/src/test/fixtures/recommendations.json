@@ -1,35 +1,205 @@
 [
   {
     "rank": 1,
-    "article_idx": 42,
-    "article_id": "0108775015",
-    "prod_name": "Strindberg Boot",
-    "product_type": "Boots",
+    "article_idx": 259,
+    "article_id": "0010000259",
+    "prod_name": "Article 259",
+    "product_type": "Trousers",
     "colour": "Black",
-    "department": "Shoes",
-    "sources": ["repurchase"],
-    "reasons": ["You bought this exact item 9 days ago", "In a garment category you buy often (14%)"]
+    "department": "Swimwear",
+    "sources": [
+      "popularity_last_week",
+      "popularity_decayed"
+    ],
+    "reasons": [
+      "In a garment category you've bought from before (13% of your purchases)"
+    ]
   },
   {
     "rank": 2,
-    "article_idx": 99,
-    "article_id": "0108775016",
-    "prod_name": "Liliana Dress",
-    "product_type": "Dress",
-    "colour": "Navy",
-    "department": "Ladies Clothing",
-    "sources": ["product_code"],
-    "reasons": ["Popular this week", "Age group fit"]
+    "article_idx": 289,
+    "article_id": "0010000289",
+    "prod_name": "Article 289",
+    "product_type": "Blouse",
+    "colour": "Blue",
+    "department": "Swimwear",
+    "sources": [
+      "popularity_last_week",
+      "popularity_decayed"
+    ],
+    "reasons": [
+      "In a garment category you've bought from before (13% of your purchases)"
+    ]
   },
   {
     "rank": 3,
-    "article_idx": 101,
-    "article_id": "0108775017",
-    "prod_name": "Classic T-shirt",
-    "product_type": "T-shirt",
+    "article_idx": 201,
+    "article_id": "0010000201",
+    "prod_name": "Article 201",
+    "product_type": "Shoes",
+    "colour": "Green",
+    "department": "Jersey",
+    "sources": [
+      "repurchase",
+      "popularity_last_week",
+      "popularity_decayed"
+    ],
+    "reasons": [
+      "In a garment category you buy often (40% of your purchases)"
+    ]
+  },
+  {
+    "rank": 4,
+    "article_idx": 176,
+    "article_id": "0010000176",
+    "prod_name": "Article 176",
+    "product_type": "Sweater",
     "colour": "White",
-    "department": "Jersey Basic",
-    "sources": ["popularity_last_week"],
-    "reasons": ["Trending item"]
+    "department": "Jersey",
+    "sources": [
+      "repurchase",
+      "popularity_last_week",
+      "popularity_decayed"
+    ],
+    "reasons": [
+      "In a garment category you buy often (40% of your purchases)"
+    ]
+  },
+  {
+    "rank": 5,
+    "article_idx": 152,
+    "article_id": "0010000152",
+    "prod_name": "Article 152",
+    "product_type": "Shoes",
+    "colour": "Green",
+    "department": "Knitwear",
+    "sources": [
+      "repurchase",
+      "popularity_last_week",
+      "popularity_decayed",
+      "segment_popular"
+    ],
+    "reasons": [
+      "In a garment category you buy often (27% of your purchases)"
+    ]
+  },
+  {
+    "rank": 6,
+    "article_idx": 231,
+    "article_id": "0010000231",
+    "prod_name": "Article 231",
+    "product_type": "Trousers",
+    "colour": "Black",
+    "department": "Jersey",
+    "sources": [
+      "repurchase",
+      "popularity_last_week",
+      "popularity_decayed"
+    ],
+    "reasons": [
+      "In a garment category you buy often (40% of your purchases)"
+    ]
+  },
+  {
+    "rank": 7,
+    "article_idx": 230,
+    "article_id": "0010000230",
+    "prod_name": "Article 230",
+    "product_type": "Bag",
+    "colour": "Pink",
+    "department": "Jeans",
+    "sources": [
+      "repurchase",
+      "popularity_last_week",
+      "popularity_decayed"
+    ],
+    "reasons": [
+      "In a garment category you've bought from before (20% of your purchases)"
+    ]
+  },
+  {
+    "rank": 8,
+    "article_idx": 27,
+    "article_id": "0010000027",
+    "prod_name": "Article 27",
+    "product_type": "Bag",
+    "colour": "Pink",
+    "department": "Knitwear",
+    "sources": [
+      "repurchase",
+      "popularity_last_week",
+      "popularity_decayed"
+    ],
+    "reasons": [
+      "In a garment category you buy often (27% of your purchases)"
+    ]
+  },
+  {
+    "rank": 9,
+    "article_idx": 184,
+    "article_id": "0010000184",
+    "prod_name": "Article 184",
+    "product_type": "Blouse",
+    "colour": "Blue",
+    "department": "Swimwear",
+    "sources": [
+      "repurchase",
+      "popularity_last_week",
+      "popularity_decayed"
+    ],
+    "reasons": [
+      "In a garment category you've bought from before (13% of your purchases)"
+    ]
+  },
+  {
+    "rank": 10,
+    "article_idx": 187,
+    "article_id": "0010000187",
+    "prod_name": "Article 187",
+    "product_type": "Shoes",
+    "colour": "Green",
+    "department": "Knitwear",
+    "sources": [
+      "repurchase",
+      "popularity_last_week",
+      "popularity_decayed"
+    ],
+    "reasons": [
+      "In a garment category you buy often (27% of your purchases)"
+    ]
+  },
+  {
+    "rank": 11,
+    "article_idx": 240,
+    "article_id": "0010000240",
+    "prod_name": "Article 240",
+    "product_type": "Blouse",
+    "colour": "Blue",
+    "department": "Jeans",
+    "sources": [
+      "repurchase",
+      "popularity_last_week",
+      "popularity_decayed"
+    ],
+    "reasons": [
+      "In a garment category you've bought from before (20% of your purchases)"
+    ]
+  },
+  {
+    "rank": 12,
+    "article_idx": 15,
+    "article_id": "0010000015",
+    "prod_name": "Article 15",
+    "product_type": "Sweater",
+    "colour": "White",
+    "department": "Jeans",
+    "sources": [
+      "repurchase",
+      "popularity_last_week",
+      "popularity_decayed"
+    ],
+    "reasons": [
+      "In a garment category you've bought from before (20% of your purchases)"
+    ]
   }
 ]

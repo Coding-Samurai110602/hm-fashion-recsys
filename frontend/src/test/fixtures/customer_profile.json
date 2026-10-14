@@ -1,17 +1,89 @@
 {
-  "customer_idx": 896118,
-  "customer_id": "a73eaaa3b5e5c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2",
-  "age_bucket": "45-54",
-  "n_purchases_all_time": 45,
-  "n_purchases_last_4w": 3,
+  "customer_idx": 0,
+  "customer_id": "390c8c7d7247342cd8100f2f6f770d65d670e58e0351d8ae8e4f6eac342fc231",
+  "age_bucket": "55+",
+  "n_purchases_all_time": 15,
+  "n_purchases_last_4w": 0,
   "recent_history": [
     {
-      "article_idx": 42,
-      "article_id": "0108775015",
-      "prod_name": "Strindberg Boot",
-      "product_type": "Boots",
+      "article_idx": 231,
+      "article_id": "0010000231",
+      "prod_name": "Article 231",
+      "product_type": "Trousers",
       "colour": "Black",
-      "department": "Shoes"
+      "department": "Jersey"
+    },
+    {
+      "article_idx": 201,
+      "article_id": "0010000201",
+      "prod_name": "Article 201",
+      "product_type": "Shoes",
+      "colour": "Green",
+      "department": "Jersey"
+    },
+    {
+      "article_idx": 72,
+      "article_id": "0010000072",
+      "prod_name": "Article 72",
+      "product_type": "Blouse",
+      "colour": "Blue",
+      "department": "Knitwear"
+    },
+    {
+      "article_idx": 184,
+      "article_id": "0010000184",
+      "prod_name": "Article 184",
+      "product_type": "Blouse",
+      "colour": "Blue",
+      "department": "Swimwear"
+    },
+    {
+      "article_idx": 27,
+      "article_id": "0010000027",
+      "prod_name": "Article 27",
+      "product_type": "Bag",
+      "colour": "Pink",
+      "department": "Knitwear"
+    },
+    {
+      "article_idx": 29,
+      "article_id": "0010000029",
+      "prod_name": "Article 29",
+      "product_type": "Sweater",
+      "colour": "White",
+      "department": "Swimwear"
+    },
+    {
+      "article_idx": 176,
+      "article_id": "0010000176",
+      "prod_name": "Article 176",
+      "product_type": "Sweater",
+      "colour": "White",
+      "department": "Jersey"
+    },
+    {
+      "article_idx": 15,
+      "article_id": "0010000015",
+      "prod_name": "Article 15",
+      "product_type": "Sweater",
+      "colour": "White",
+      "department": "Jeans"
+    },
+    {
+      "article_idx": 230,
+      "article_id": "0010000230",
+      "prod_name": "Article 230",
+      "product_type": "Bag",
+      "colour": "Pink",
+      "department": "Jeans"
+    },
+    {
+      "article_idx": 281,
+      "article_id": "0010000281",
+      "prod_name": "Article 281",
+      "product_type": "Sweater",
+      "colour": "White",
+      "department": "Jersey"
     }
   ]
 }

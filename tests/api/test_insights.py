@@ -11,6 +11,12 @@ _SUMMARY_REQUIRED = {
     "holdout_map12_ranker",
     "holdout_map12_heuristic",
     "holdout_lift_pct",
+    "holdout_ci_lo",
+    "holdout_ci_hi",
+    "holdout_map12_baseline_b",
+    "holdout_lift_vs_baseline_b_pct",
+    "holdout_baseline_b_ci_lo",
+    "holdout_baseline_b_ci_hi",
     "fold103_ranker_map12",
     "fold103_heuristic_map12",
     "fold103_ci_lo",
@@ -91,11 +97,22 @@ class TestInsightsImportance:
         """When entries exist they have the required ImportanceEntry fields."""
         r = synth_client.get("/api/v1/insights/importance")
         data = r.json()
+        assert isinstance(data, list), f"Expected list, got {type(data).__name__}"
         for entry in data:
-            assert "rank_shap" in entry
-            assert "feature" in entry
-            assert "mean_abs_shap" in entry
-            assert "rank_gain" in entry
+            assert isinstance(entry, dict), f"Expected dict entry, got {type(entry).__name__}"
+            assert "rank_shap" in entry, f"Missing rank_shap in {entry}"
+            assert "feature" in entry, f"Missing feature in {entry}"
+            assert "mean_abs_shap" in entry, f"Missing mean_abs_shap in {entry}"
+            assert "rank_contrast" in entry, f"Missing rank_contrast in {entry}"
+            assert "mean_abs_contrast_shap" in entry, f"Missing mean_abs_contrast_shap in {entry}"
+            assert "rank_gain" in entry, f"Missing rank_gain in {entry}"
+
+    def test_importance_no_null_shap_on_synthetic(self, synth_client):
+        """Synthetic bundle must have at least 1 importance entry with non-null mean_abs_shap."""
+        r = synth_client.get("/api/v1/insights/importance")
+        data = r.json()
+        assert len(data) >= 1, "Expected at least 1 importance entry on synthetic bundle"
+        assert data[0]["mean_abs_shap"] is not None
 
 
 @pytest.mark.integration_real
@@ -117,3 +134,20 @@ class TestInsightsSummaryReal:
         data = r.json()
         assert abs(data["fold103_ci_lo"] - 0.010563) < 1e-5
         assert abs(data["fold103_ci_hi"] - 0.011758) < 1e-5
+
+    def test_summary_real_holdout_ci_excludes_zero(self, real_client):
+        """Holdout bootstrap CI vs heuristic must exclude zero."""
+        r = real_client.get("/api/v1/insights/summary")
+        data = r.json()
+        assert data["holdout_ci_lo"] is not None
+        assert data["holdout_ci_hi"] is not None
+        assert data["holdout_ci_lo"] > 0, "Holdout CI lo must be > 0"
+
+    def test_summary_real_holdout_baseline_b(self, real_client):
+        """Holdout baseline B map@12 and lift vs baseline B must be present."""
+        r = real_client.get("/api/v1/insights/summary")
+        data = r.json()
+        assert abs(data["holdout_map12_baseline_b"] - 0.024457) < 1e-4
+        assert abs(data["holdout_lift_vs_baseline_b_pct"] - 50.89) < 0.1
+        assert data["holdout_baseline_b_ci_lo"] is not None
+        assert data["holdout_baseline_b_ci_lo"] > 0

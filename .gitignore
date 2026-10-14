@@ -53,3 +53,6 @@ frontend/node_modules/
 frontend/dist/
 data/images/
 .claude/
+docs/screenshots/.last-run.json
+frontend/test-results/
+frontend/playwright-report/

@@ -40,13 +40,23 @@ def get_summary() -> dict:
     holdout = _get("holdout_results", "evaluation/holdout_results.json")
     eval103 = _get("eval_fold103", "ranker/eval_fold103.json")
     ci = eval103.get("bootstrap_ranker_vs_heuristic", {})
+    primary = holdout.get("models", {}).get("primary", {})
+    heuristic = holdout.get("models", {}).get("heuristic", {})
+    baseline_b = holdout.get("models", {}).get("baseline_b", {})
+    boot_vs_h = primary.get("boot_vs_heuristic", {})
+    boot_vs_b = primary.get("boot_vs_baseline_b", {})
     return {
         "holdout_week": holdout.get("holdout_week", 104),
         "n_eval_customers": holdout.get("n_eval_customers", 0),
-        "holdout_map12_ranker": holdout.get("models", {}).get("primary", {}).get("map@12"),
-        "holdout_map12_heuristic": holdout.get("models", {}).get("heuristic", {}).get("map@12"),
+        "holdout_map12_ranker": primary.get("map@12"),
+        "holdout_map12_heuristic": heuristic.get("map@12"),
         "holdout_lift_pct": holdout.get("primary_lift_vs_heuristic_pct"),
-        "primary_lift_vs_baseline_b_pct": holdout.get("primary_lift_vs_baseline_b_pct"),
+        "holdout_ci_lo": boot_vs_h.get("ci_lo"),
+        "holdout_ci_hi": boot_vs_h.get("ci_hi"),
+        "holdout_map12_baseline_b": baseline_b.get("map@12"),
+        "holdout_lift_vs_baseline_b_pct": holdout.get("primary_lift_vs_baseline_b_pct"),
+        "holdout_baseline_b_ci_lo": boot_vs_b.get("ci_lo"),
+        "holdout_baseline_b_ci_hi": boot_vs_b.get("ci_hi"),
         "fold103_ranker_map12": eval103.get("ranker", {}).get("map@12"),
         "fold103_heuristic_map12": eval103.get("heuristic", {}).get("map@12"),
         "fold103_ci_lo": ci.get("ci_lo"),
@@ -128,8 +138,11 @@ def get_ablations() -> list:
 def get_importance() -> list:
     raw = _get("shap_summary", "explain/shap_summary.json")
     shap_rows: list = raw.get("top10_shap_all_candidates", [])
+    contrast_rows: list = raw.get("top10_contrast_shap_all_candidates", [])
     gain_list: list = raw.get("top10_gain_importance", [])
     gain_rank = {feat: i + 1 for i, feat in enumerate(gain_list)}
+    contrast_rank = {row.get("feature", ""): i + 1 for i, row in enumerate(contrast_rows)}
+    contrast_shap = {row.get("feature", ""): row.get("mean_abs_contrast_shap") for row in contrast_rows}
     result = []
     for i, row in enumerate(shap_rows):
         feat = row.get("feature", "")
@@ -138,6 +151,8 @@ def get_importance() -> list:
                 "rank_shap": i + 1,
                 "feature": feat,
                 "mean_abs_shap": row.get("mean_abs_shap"),
+                "rank_contrast": contrast_rank.get(feat),
+                "mean_abs_contrast_shap": contrast_shap.get(feat),
                 "rank_gain": gain_rank.get(feat),
             }
         )

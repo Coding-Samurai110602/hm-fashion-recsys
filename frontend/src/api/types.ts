@@ -30,6 +30,12 @@ export interface InsightsSummary {
   holdout_map12_ranker: number
   holdout_map12_heuristic: number
   holdout_lift_pct: number
+  holdout_ci_lo: number | null
+  holdout_ci_hi: number | null
+  holdout_map12_baseline_b: number | null
+  holdout_lift_vs_baseline_b_pct: number | null
+  holdout_baseline_b_ci_lo: number | null
+  holdout_baseline_b_ci_hi: number | null
   fold103_ci_lo: number
   fold103_ci_hi: number
   fold103_ranker_map12: number
@@ -57,6 +63,8 @@ export interface ImportanceEntry {
   rank_shap: number
   feature: string
   mean_abs_shap: number
+  rank_contrast: number | null
+  mean_abs_contrast_shap: number | null
   rank_gain: number | null
 }
 

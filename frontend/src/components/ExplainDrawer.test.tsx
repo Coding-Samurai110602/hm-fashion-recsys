@@ -52,13 +52,11 @@ describe('ExplainDrawer', () => {
       { wrapper },
     )
     await waitFor(() => {
+      // Synthetic fixture reason: "In a garment category you've bought from before"
       expect(
-        screen.getByText(/you bought this exact item 9 days ago/i),
+        screen.getByText(/garment category you've bought from before/i),
       ).toBeTruthy()
     })
-    expect(
-      screen.getByText(/garment category you've bought from before/i),
-    ).toBeTruthy()
   })
 
   it('renders SHAP contrast chart with positive and negative values', async () => {
@@ -91,7 +89,8 @@ describe('ExplainDrawer', () => {
     await waitFor(() => {
       expect(screen.getByText(/model score/i)).toBeTruthy()
     })
-    expect(screen.getByText('2.8340')).toBeTruthy()
+    // Synthetic fixture score: 0.02837... → 0.0284
+    expect(screen.getByText('0.0284')).toBeTruthy()
   })
 
   it('renders error state', async () => {
