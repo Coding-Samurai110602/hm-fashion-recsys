@@ -35,6 +35,9 @@ async def importance():
     return svc.get_importance()
 
 
-@router.get("/insights/trends", summary="Trending articles, by-age segments, and popularity decay")
+@router.get(
+    "/insights/trends",
+    summary="Trending articles, by-age segments, and popularity decay",
+)
 async def trends(bundle=Depends(get_bundle)):
     return svc.get_trends(bundle)

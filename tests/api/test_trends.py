@@ -12,7 +12,9 @@ _EXPECTED_AGE_BUCKETS = {"<25", "25-34", "35-44", "45-54", "55+"}
 _DECAY_LABELS = {"Just launched", "Recently launched", "Established", "Mature"}
 
 # Regex for detecting calendar dates or year numbers in response values
-_DATE_PATTERN = re.compile(r"\b(19|20)\d{2}\b|\b\d{4}-\d{2}-\d{2}\b|\bweek\s+\d+\b", re.IGNORECASE)
+_DATE_PATTERN = re.compile(
+    r"\b(19|20)\d{2}\b|\b\d{4}-\d{2}-\d{2}\b|\bweek\s+\d+\b", re.IGNORECASE
+)
 
 
 class TestTrendsStructure:
@@ -42,7 +44,14 @@ class TestTrendsStructure:
     def test_trends_trending_now_item_schema(self, synth_client):
         r = synth_client.get("/api/v1/insights/trends")
         data = r.json()
-        required = {"article_idx", "article_id", "prod_name", "product_group", "colour", "image_url"}
+        required = {
+            "article_idx",
+            "article_id",
+            "prod_name",
+            "product_group",
+            "colour",
+            "image_url",
+        }
         for item in data["trending_now"]:
             for field in required:
                 assert field in item, f"Missing {field!r} in trending_now item"
@@ -92,7 +101,9 @@ class TestTrendsStructure:
         decay = data["popularity_decay"]
         assert len(decay) == 4, f"Expected 4 decay buckets, got {len(decay)}"
         total_share = sum(item["share"] for item in decay)
-        assert abs(total_share - 1.0) < 0.01, f"Shares sum to {total_share}, expected ~1.0"
+        assert abs(total_share - 1.0) < 0.01, (
+            f"Shares sum to {total_share}, expected ~1.0"
+        )
 
     def test_trends_decay_labels(self, synth_client):
         r = synth_client.get("/api/v1/insights/trends")

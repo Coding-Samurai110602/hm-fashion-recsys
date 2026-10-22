@@ -80,8 +80,12 @@ def create_app() -> FastAPI:
     app.include_router(articles.router, prefix=prefix)
     app.include_router(insights.router, prefix=prefix)
     app.include_router(experiment.router, prefix=prefix)
-    app.include_router(profiles.router, prefix=prefix)  # /api/v1/profiles + /api/v1/compare
-    app.include_router(catalog.router, prefix=f"{prefix}/catalog")  # /api/v1/catalog/...
+    app.include_router(
+        profiles.router, prefix=prefix
+    )  # /api/v1/profiles + /api/v1/compare
+    app.include_router(
+        catalog.router, prefix=f"{prefix}/catalog"
+    )  # /api/v1/catalog/...
     app.include_router(demo.router, prefix=f"{prefix}/demo")  # /api/v1/demo/...
 
     return app

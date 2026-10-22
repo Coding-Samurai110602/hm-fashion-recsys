@@ -11,7 +11,7 @@ import os
 import sqlite3
 import threading
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
@@ -73,6 +73,7 @@ CREATE INDEX IF NOT EXISTS idx_purchases_profile_id ON profile_purchases(profile
 # Connection management
 # ---------------------------------------------------------------------------
 
+
 def get_connection() -> sqlite3.Connection:
     """Return a thread-local SQLite connection; create tables on first use."""
     if not hasattr(_thread_local, "conn") or _thread_local.conn is None:
@@ -94,8 +95,9 @@ def get_connection() -> sqlite3.Connection:
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 def _validate_profile_input(nickname: str, age_range: str, channel: str) -> str:
@@ -124,6 +126,7 @@ def _row_to_profile(row: sqlite3.Row, purchase_count: int = 0) -> dict:
 # ---------------------------------------------------------------------------
 # CRUD
 # ---------------------------------------------------------------------------
+
 
 def create_profile(nickname: str, age_range: str, channel: str) -> dict:
     """Validate inputs, insert a new profile, and return the full profile dict."""
@@ -200,7 +203,9 @@ def add_purchases(
     Raises LookupError if profile not found.
     """
     if len(article_idx_list) != len(article_id_list):
-        raise ValueError("article_idx_list and article_id_list must have the same length")
+        raise ValueError(
+            "article_idx_list and article_id_list must have the same length"
+        )
 
     conn = get_connection()
     row = conn.execute("SELECT id FROM profiles WHERE id = ?", (profile_id,)).fetchone()

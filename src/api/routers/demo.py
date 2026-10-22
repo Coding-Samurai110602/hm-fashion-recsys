@@ -39,6 +39,7 @@ class DemoShopper(BaseModel):
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _age_to_range(age: float | None) -> str:
     if age is None or (isinstance(age, float) and math.isnan(age)):
         return "25-34"
@@ -77,9 +78,8 @@ def _compute_demo_shoppers(bundle) -> list[DemoShopper]:
     article_meta = bundle.article_meta
 
     # Count purchases per customer
-    purchase_counts = (
-        history.group_by("customer_idx")
-        .agg(pl.len().alias("purchase_count"))
+    purchase_counts = history.group_by("customer_idx").agg(
+        pl.len().alias("purchase_count")
     )
 
     # Join with customer info
@@ -93,7 +93,9 @@ def _compute_demo_shoppers(bundle) -> list[DemoShopper]:
 
     if len(eligible) == 0:
         # Fallback: take any customers
-        eligible = purchase_counts.sort("purchase_count", descending=True).head(n_target)
+        eligible = purchase_counts.sort("purchase_count", descending=True).head(
+            n_target
+        )
 
     # Join with customers table for age + customer_id
     merged = eligible.join(customers, on="customer_idx", how="inner")
@@ -104,7 +106,9 @@ def _compute_demo_shoppers(bundle) -> list[DemoShopper]:
 
     if "age" in merged.columns:
         merged = merged.with_columns(
-            pl.col("age").map_elements(bucket_fn, return_dtype=pl.Utf8).alias("age_range_col")
+            pl.col("age")
+            .map_elements(bucket_fn, return_dtype=pl.Utf8)
+            .alias("age_range_col")
         )
 
         # Pick diverse selection: sample from each age bucket

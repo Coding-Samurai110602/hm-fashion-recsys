@@ -118,7 +118,9 @@ async def trending(
 async def browse(
     product_group: str | None = Query(None, description="Filter by product_type_name"),
     colour: str | None = Query(None, description="Filter by colour_group_name"),
-    q: str | None = Query(None, description="Search prod_name (case-insensitive contains)"),
+    q: str | None = Query(
+        None, description="Search prod_name (case-insensitive contains)"
+    ),
     page: int = Query(1, ge=1),
     page_size: int = Query(_DEFAULT_PAGE_SIZE, ge=1, le=_MAX_PAGE_SIZE),
     bundle=Depends(get_bundle),
@@ -131,19 +133,14 @@ async def browse(
     # Filters
     if product_group and "product_type_name" in df.columns:
         df = df.filter(
-            pl.col("product_type_name").str.to_lowercase()
-            == product_group.lower()
+            pl.col("product_type_name").str.to_lowercase() == product_group.lower()
         )
     if colour and "colour_group_name" in df.columns:
-        df = df.filter(
-            pl.col("colour_group_name").str.to_lowercase() == colour.lower()
-        )
+        df = df.filter(pl.col("colour_group_name").str.to_lowercase() == colour.lower())
     if q:
         q_lower = q.lower()
         if "prod_name" in df.columns:
-            df = df.filter(
-                pl.col("prod_name").str.to_lowercase().str.contains(q_lower)
-            )
+            df = df.filter(pl.col("prod_name").str.to_lowercase().str.contains(q_lower))
 
     # Join with pop_last_week for sorting
     if bundle.pop_last_week is not None:
@@ -176,7 +173,9 @@ async def browse(
             )
         )
 
-    return CatalogBrowseResponse(items=items, total=total, page=page, page_size=page_size)
+    return CatalogBrowseResponse(
+        items=items, total=total, page=page, page_size=page_size
+    )
 
 
 @router.get(
@@ -193,9 +192,7 @@ async def filters(bundle=Depends(get_bundle)):
     colours: list[str] = []
 
     if "product_type_name" in df.columns:
-        product_groups = sorted(
-            df["product_type_name"].drop_nulls().unique().to_list()
-        )
+        product_groups = sorted(df["product_type_name"].drop_nulls().unique().to_list())
     if "colour_group_name" in df.columns:
         colours = sorted(df["colour_group_name"].drop_nulls().unique().to_list())
 

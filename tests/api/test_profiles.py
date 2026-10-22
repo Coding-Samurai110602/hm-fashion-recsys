@@ -21,6 +21,7 @@ def _isolate_db(tmp_path):
     os.environ["SQLITE_DB_PATH"] = str(db_file)
     # Reset thread-local connection so get_connection() sees the new path
     from src.api import db as db_mod
+
     if hasattr(db_mod._thread_local, "conn") and db_mod._thread_local.conn:
         try:
             db_mod._thread_local.conn.close()

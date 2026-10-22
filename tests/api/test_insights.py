@@ -99,19 +99,25 @@ class TestInsightsImportance:
         data = r.json()
         assert isinstance(data, list), f"Expected list, got {type(data).__name__}"
         for entry in data:
-            assert isinstance(entry, dict), f"Expected dict entry, got {type(entry).__name__}"
+            assert isinstance(entry, dict), (
+                f"Expected dict entry, got {type(entry).__name__}"
+            )
             assert "rank_shap" in entry, f"Missing rank_shap in {entry}"
             assert "feature" in entry, f"Missing feature in {entry}"
             assert "mean_abs_shap" in entry, f"Missing mean_abs_shap in {entry}"
             assert "rank_contrast" in entry, f"Missing rank_contrast in {entry}"
-            assert "mean_abs_contrast_shap" in entry, f"Missing mean_abs_contrast_shap in {entry}"
+            assert "mean_abs_contrast_shap" in entry, (
+                f"Missing mean_abs_contrast_shap in {entry}"
+            )
             assert "rank_gain" in entry, f"Missing rank_gain in {entry}"
 
     def test_importance_no_null_shap_on_synthetic(self, synth_client):
         """Synthetic bundle must have at least 1 importance entry with non-null mean_abs_shap."""
         r = synth_client.get("/api/v1/insights/importance")
         data = r.json()
-        assert len(data) >= 1, "Expected at least 1 importance entry on synthetic bundle"
+        assert len(data) >= 1, (
+            "Expected at least 1 importance entry on synthetic bundle"
+        )
         assert data[0]["mean_abs_shap"] is not None
 
 

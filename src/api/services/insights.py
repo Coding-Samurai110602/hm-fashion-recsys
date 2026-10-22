@@ -142,7 +142,9 @@ def get_trends(bundle) -> dict:
     # ── trending_now: top 20 from pop_last_week × article_meta ─────────────
     trending_now = []
     if bundle.pop_last_week is not None and bundle.article_meta is not None:
-        joined = bundle.pop_last_week.join(bundle.article_meta, on="article_idx", how="inner")
+        joined = bundle.pop_last_week.join(
+            bundle.article_meta, on="article_idx", how="inner"
+        )
         if "source_rank" in joined.columns:
             joined = joined.sort("source_rank")
         for row in joined.head(20).iter_rows(named=True):
@@ -188,7 +190,9 @@ def get_trends(bundle) -> dict:
     # ── top_product_groups: weighted by sales_last_week (pop score) ─────────
     top_product_groups: list[dict] = []
     if bundle.pop_last_week is not None and bundle.article_meta is not None:
-        joined = bundle.pop_last_week.join(bundle.article_meta, on="article_idx", how="inner")
+        joined = bundle.pop_last_week.join(
+            bundle.article_meta, on="article_idx", how="inner"
+        )
         if "product_type_name" in joined.columns and "score" in joined.columns:
             group_agg = (
                 joined.group_by("product_type_name")
@@ -223,7 +227,9 @@ def get_trends(bundle) -> dict:
         and "a_days_since_first_sale" in bundle.article_feats.columns
         and "a_sales_1w" in bundle.article_feats.columns
     ):
-        feats = bundle.article_feats.select(["a_days_since_first_sale", "a_sales_1w"]).drop_nulls()
+        feats = bundle.article_feats.select(
+            ["a_days_since_first_sale", "a_sales_1w"]
+        ).drop_nulls()
         total_sales = float(feats["a_sales_1w"].sum()) or 1.0
 
         prev_max = 0
@@ -271,8 +277,13 @@ def get_importance() -> list:
     contrast_rows: list = raw.get("top10_contrast_shap_all_candidates", [])
     gain_list: list = raw.get("top10_gain_importance", [])
     gain_rank = {feat: i + 1 for i, feat in enumerate(gain_list)}
-    contrast_rank = {row.get("feature", ""): i + 1 for i, row in enumerate(contrast_rows)}
-    contrast_shap = {row.get("feature", ""): row.get("mean_abs_contrast_shap") for row in contrast_rows}
+    contrast_rank = {
+        row.get("feature", ""): i + 1 for i, row in enumerate(contrast_rows)
+    }
+    contrast_shap = {
+        row.get("feature", ""): row.get("mean_abs_contrast_shap")
+        for row in contrast_rows
+    }
     result = []
     for i, row in enumerate(shap_rows):
         feat = row.get("feature", "")

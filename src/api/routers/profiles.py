@@ -129,6 +129,7 @@ class CompareResult(BaseModel):
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _get_profile_or_404(profile_id: str) -> dict:
     profile = db.get_profile(profile_id)
     if profile is None:
@@ -153,10 +154,20 @@ def _image_url(article_id: str) -> str:
 def _get_article_meta_by_idx(article_idx: int, bundle) -> dict:
     """Return prod_name, product_group, colour from bundle.article_meta."""
     if bundle.article_meta is None:
-        return {"prod_name": "", "product_group": "", "colour": "", "article_id": str(article_idx)}
+        return {
+            "prod_name": "",
+            "product_group": "",
+            "colour": "",
+            "article_id": str(article_idx),
+        }
     rows = bundle.article_meta.filter(pl.col("article_idx") == article_idx)
     if len(rows) == 0:
-        return {"prod_name": "", "product_group": "", "colour": "", "article_id": str(article_idx)}
+        return {
+            "prod_name": "",
+            "product_group": "",
+            "colour": "",
+            "article_id": str(article_idx),
+        }
     r = rows.row(0, named=True)
     return {
         "prod_name": str(r.get("prod_name", "")),
@@ -247,7 +258,9 @@ def _build_summary(profile: dict, purchases: list[dict], bundle) -> ProfileSumma
     )
 
 
-def _get_recs_for_profile(profile: dict, purchases: list[dict], bundle, recommender) -> tuple[list[ProfileRecItem], bool, float]:
+def _get_recs_for_profile(
+    profile: dict, purchases: list[dict], bundle, recommender
+) -> tuple[list[ProfileRecItem], bool, float]:
     """Return (items, cold_start, latency_ms)."""
     t0 = time.perf_counter()
     cold_start = len(purchases) == 0
@@ -292,9 +305,7 @@ def _get_recs_for_profile(profile: dict, purchases: list[dict], bundle, recommen
             for p in purchases
         ]
 
-        raw = recommender.recommend_custom(
-            history_rows, k=12, age_bucket=age_bucket
-        )
+        raw = recommender.recommend_custom(history_rows, k=12, age_bucket=age_bucket)
         latency_ms = (time.perf_counter() - t0) * 1000
         items = _build_rec_items(raw, bundle, cold_start=False, latency_ms=latency_ms)
         return items, False, latency_ms
@@ -328,7 +339,11 @@ def _try_resolve_as_bundle_customer(entity_id: str, bundle) -> ProfileSummary | 
     if bundle.customer_history is not None:
         hist = bundle.customer_history.filter(pl.col("customer_idx") == cidx)
         if len(hist) > 0 and "sales_channel_id" in hist.columns:
-            ch_counts = hist.group_by("sales_channel_id").agg(pl.len().alias("cnt")).sort("cnt", descending=True)
+            ch_counts = (
+                hist.group_by("sales_channel_id")
+                .agg(pl.len().alias("cnt"))
+                .sort("cnt", descending=True)
+            )
             dominant_ch = ch_counts["sales_channel_id"][0]
             channel = "store" if int(dominant_ch) == 1 else "online"
 
@@ -362,10 +377,14 @@ def _resolve_entity_summary(entity_id: str, bundle) -> ProfileSummary:
     if summary is not None:
         return summary
 
-    raise HTTPException(status_code=404, detail=f"Entity {entity_id!r} not found as profile or customer")
+    raise HTTPException(
+        status_code=404, detail=f"Entity {entity_id!r} not found as profile or customer"
+    )
 
 
-def _resolve_entity_recs(entity_id: str, bundle, recommender) -> tuple[list[ProfileRecItem], bool, float]:
+def _resolve_entity_recs(
+    entity_id: str, bundle, recommender
+) -> tuple[list[ProfileRecItem], bool, float]:
     """Resolve entity_id as profile UUID or bundle customer_id and return recs."""
     profile = db.get_profile(entity_id)
     if profile is not None:
@@ -381,7 +400,9 @@ def _resolve_entity_recs(entity_id: str, bundle, recommender) -> tuple[list[Prof
             t0 = time.perf_counter()
             raw = recommender.recommend(cidx, k=12, compute_reasons=False)
             latency_ms = (time.perf_counter() - t0) * 1000
-            items = _build_rec_items(raw, bundle, cold_start=False, latency_ms=latency_ms)
+            items = _build_rec_items(
+                raw, bundle, cold_start=False, latency_ms=latency_ms
+            )
             return items, False, latency_ms
 
     raise HTTPException(status_code=404, detail=f"Entity {entity_id!r} not found")
@@ -390,6 +411,7 @@ def _resolve_entity_recs(entity_id: str, bundle, recommender) -> tuple[list[Prof
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
+
 
 @router.post(
     "/profiles",
@@ -468,7 +490,8 @@ async def checkout(
 
     if not article_idxs:
         raise HTTPException(
-            status_code=422, detail="None of the provided article_ids were found in the bundle"
+            status_code=422,
+            detail="None of the provided article_ids were found in the bundle",
         )
 
     try:
@@ -498,7 +521,9 @@ async def profile_recommendations(
     profile = _get_profile_or_404(profile_id)
     purchases = db.get_purchases(profile_id)
 
-    items, cold_start, latency_ms = _get_recs_for_profile(profile, purchases, bundle, recommender)
+    items, cold_start, latency_ms = _get_recs_for_profile(
+        profile, purchases, bundle, recommender
+    )
 
     return ProfileRecsResponse(
         profile_id=profile_id,
