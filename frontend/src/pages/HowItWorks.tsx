@@ -333,6 +333,13 @@ export default function HowItWorks() {
           ))}
         </dl>
       </section>
+
+      {/* Engineering link */}
+      <div className="rounded-xl border border-indigo-100 bg-indigo-50 p-4 text-sm text-indigo-700">
+        <Link to="/engineering" className="font-medium hover:underline">
+          Want the technical details? See the Engineering pages →
+        </Link>
+      </div>
     </div>
   )
 }

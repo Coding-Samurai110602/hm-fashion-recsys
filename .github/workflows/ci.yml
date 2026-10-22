@@ -21,10 +21,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: lint-${{ hashFiles('requirements-api.txt') }}
+          key: lint-${{ hashFiles('requirements-dev.txt') }}
 
-      - name: Install ruff and mypy
-        run: pip install ruff mypy
+      - name: Install dev tooling (pinned)
+        run: pip install -r requirements-dev.txt
 
       - name: ruff lint
         run: ruff check src/api/ tests/api/ src/serving/
@@ -50,12 +50,12 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: api-${{ hashFiles('requirements-api.txt', 'requirements.txt') }}
+          key: api-${{ hashFiles('requirements-api.txt', 'requirements-dev.txt') }}
 
       - name: Install dependencies
         run: |
           pip install -r requirements-api.txt
-          pip install pytest>=8.0.0 statsmodels==0.14.4
+          pip install -r requirements-dev.txt
 
       - name: Build synthetic bundle
         run: PYTHONPATH=. python scripts/make_synthetic_bundle.py

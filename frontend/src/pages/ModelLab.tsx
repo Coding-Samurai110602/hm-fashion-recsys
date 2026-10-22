@@ -1,3 +1,4 @@
+import { Link } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
 import { fetchAblations, fetchImportance, fetchSegments } from '../api/endpoints'
 import { ErrorState } from '../components/ErrorState'
@@ -66,6 +67,7 @@ export default function ModelLab() {
   return (
     <div className="space-y-8">
       <div>
+        <Link to="/engineering" className="text-sm text-indigo-600 hover:underline">← Engineering</Link>
         <h1 className="text-2xl font-bold text-gray-900">Model Lab</h1>
         <p className="mt-1 text-gray-500">
           Feature ablations, SHAP importance, and segment analysis from the holdout period.

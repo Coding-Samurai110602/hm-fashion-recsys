@@ -7,7 +7,6 @@ import { ProfileProvider, useProfile } from './contexts/ProfileContext'
 import { CartProvider, useCart } from './contexts/CartContext'
 import { ProfileModal } from './components/ProfileModal'
 import { CartDrawer } from './components/CartDrawer'
-import { EngineeringDropdown } from './components/EngineeringDropdown'
 
 // Route-level code splitting
 const Shop = lazy(() => import('./pages/Shop'))
@@ -15,6 +14,7 @@ const ForYou = lazy(() => import('./pages/ForYou'))
 const HowItWorks = lazy(() => import('./pages/HowItWorks'))
 const StoreTrends = lazy(() => import('./pages/StoreTrends'))
 const Shoppers = lazy(() => import('./pages/Shoppers'))
+const Engineering = lazy(() => import('./pages/Engineering'))
 const ModelLab = lazy(() => import('./pages/ModelLab'))
 const ABSimulator = lazy(() => import('./pages/ABSimulator'))
 const System = lazy(() => import('./pages/System'))
@@ -34,13 +34,11 @@ const NAV_LINKS = [
   { to: '/how-it-works', label: 'How It Works' },
   { to: '/trends', label: 'Store Trends' },
   { to: '/shoppers', label: 'Shoppers' },
+  { to: '/engineering', label: 'Engineering' },
 ]
 
 const MOBILE_NAV_LINKS = [
   ...NAV_LINKS,
-  { to: '/engineering/lab', label: 'Model Lab' },
-  { to: '/engineering/simulator', label: 'A/B Simulator' },
-  { to: '/engineering/system', label: 'System' },
 ]
 
 function PageFallback() {
@@ -146,7 +144,7 @@ function Shell({ children }: { children: React.ReactNode }) {
                 <NavLink
                   key={link.to}
                   to={link.to}
-                  end={link.end}
+                  end={'end' in link ? link.end : undefined}
                   className={({ isActive }) =>
                     `flex-shrink-0 rounded-md px-3 py-1.5 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
                       isActive
@@ -158,9 +156,6 @@ function Shell({ children }: { children: React.ReactNode }) {
                   {link.label}
                 </NavLink>
               ))}
-
-              {/* Engineering dropdown */}
-              <EngineeringDropdown />
             </div>
 
             {/* Spacer on mobile */}
@@ -244,6 +239,7 @@ export default function App() {
                     <Route path="/how-it-works" element={<ErrorBoundary><HowItWorks /></ErrorBoundary>} />
                     <Route path="/trends" element={<ErrorBoundary><StoreTrends /></ErrorBoundary>} />
                     <Route path="/shoppers" element={<ErrorBoundary><Shoppers /></ErrorBoundary>} />
+                    <Route path="/engineering" element={<ErrorBoundary><Engineering /></ErrorBoundary>} />
                     <Route path="/engineering/lab" element={<ErrorBoundary><ModelLab /></ErrorBoundary>} />
                     <Route path="/engineering/simulator" element={<ErrorBoundary><ABSimulator /></ErrorBoundary>} />
                     <Route path="/engineering/system" element={<ErrorBoundary><System /></ErrorBoundary>} />

@@ -106,7 +106,7 @@ export function ProfileModal({ open, canDismiss = true, onClose }: Props) {
           Create your profile
         </h2>
         <p className="mt-1 text-sm text-gray-500">
-          The system uses your age range and shopping channel, just like real stores do.
+          Your age range is one of the signals the model can use; for new shoppers with few purchases, what's popular right now matters most.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-5" noValidate>
