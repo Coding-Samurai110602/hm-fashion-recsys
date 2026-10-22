@@ -153,15 +153,19 @@ class TestPowerService:
         from src.api.services.experiment import compute_power
         from src.evaluation.power import required_n_per_arm
 
+        baseline_rate = 0.085
+        relative_lift = 0.10
         result = compute_power(
-            baseline_rate=0.085,
-            relative_lift=0.10,
+            baseline_rate=baseline_rate,
+            relative_lift=relative_lift,
             alpha=0.05,
             power=0.80,
             weekly_traffic=None,
             cuped_variance_reduction=0.0,
         )
-        expected_n = required_n_per_arm(0.085, 0.10)
+        # Service derives p_treat = baseline * (1 + lift)
+        p_treat = baseline_rate * (1.0 + relative_lift)
+        expected_n = required_n_per_arm(baseline_rate, p_treat)
         assert result["n_per_arm"] == expected_n
 
     def test_compute_power_cuped_reduces_n(self):

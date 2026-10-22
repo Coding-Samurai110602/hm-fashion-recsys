@@ -82,4 +82,55 @@ describe('ABSimulator page', () => {
     fireEvent.click(checkbox)
     expect((checkbox as HTMLInputElement).checked).toBe(true)
   })
+
+  it('lift slider label shows percentage and default is +10%', () => {
+    render(<ABSimulator />, { wrapper })
+    // Default relativeLift = 0.1 → label shows "+10%"
+    expect(screen.getByText(/\+10%/)).toBeTruthy()
+  })
+
+  it('calcPower sends relative_lift as fraction (0.1), not multiplier', async () => {
+    const capturedBodies: unknown[] = []
+    server.use(
+      http.post('/api/v1/experiment/power', async ({ request }) => {
+        capturedBodies.push(await request.json())
+        return HttpResponse.json({
+          n_per_arm: 6755,
+          n_total: 13510,
+          n_per_arm_statsmodels: 6747,
+          n_per_arm_cuped: null,
+          weeks_needed: null,
+          cohen_h: 0.03,
+        })
+      }),
+    )
+    render(<ABSimulator />, { wrapper })
+    fireEvent.click(screen.getByText(/calculate power/i))
+    await waitFor(() => expect(capturedBodies.length).toBe(1))
+    const body = capturedBodies[0] as { relative_lift: number }
+    expect(body.relative_lift).toBe(0.1)
+    expect(body.relative_lift).toBeLessThanOrEqual(1.0)
+  })
+
+  it('renders total n in power result', async () => {
+    render(<ABSimulator />, { wrapper })
+    fireEvent.click(screen.getByText(/calculate power/i))
+    await waitFor(() => {
+      // n_total: 13510 from fixture
+      expect(screen.getByText('13,510')).toBeTruthy()
+    })
+  })
+
+  it('inline validation error shows code and request_id when API returns 422', async () => {
+    server.use(errorHandlers.power)
+    render(<ABSimulator />, { wrapper })
+    fireEvent.click(screen.getByText(/calculate power/i))
+    await waitFor(() => {
+      expect(screen.getByText(/invalid parameters/i)).toBeTruthy()
+    })
+    // ErrorState renders code and request_id
+    expect(screen.getByText(/req-422/)).toBeTruthy()
+    // No generic "Internal Server Error" shown
+    expect(screen.queryByText(/internal server error/i)).toBeNull()
+  })
 })

@@ -46,8 +46,9 @@ function SliderInput({
 
 export default function ABSimulator() {
   // Power calculator state
+  // relativeLift is a fraction: 0.10 = +10% lift. The UI shows it as "+10%".
   const [baselineRate, setBaselineRate] = useState(0.0857)
-  const [relativeLift, setRelativeLift] = useState(1.1)
+  const [relativeLift, setRelativeLift] = useState(0.1)
   const [alpha, setAlpha] = useState(0.05)
   const [power, setPower] = useState(0.8)
   const [weeklyTraffic, setWeeklyTraffic] = useState<string>('')
@@ -123,10 +124,10 @@ export default function ABSimulator() {
             onChange={setBaselineRate}
           />
           <SliderInput
-            label="Relative lift"
+            label={`Relative lift (+${(relativeLift * 100).toFixed(0)}%)`}
             value={relativeLift}
-            min={1.01}
-            max={2.0}
+            min={0.01}
+            max={1.0}
             step={0.01}
             onChange={setRelativeLift}
           />
@@ -193,8 +194,14 @@ export default function ABSimulator() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">n per arm (CUPED)</p>
+                  <p className="text-xs text-gray-500">Total n (50/50 split)</p>
                   <p className="text-xl font-bold text-indigo-700">
+                    {powerResult.n_total.toLocaleString()}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">n per arm (CUPED)</p>
+                  <p className="font-mono text-gray-800">
                     {powerResult.n_per_arm_cuped?.toLocaleString() ?? '—'}
                   </p>
                 </div>
@@ -204,8 +211,8 @@ export default function ABSimulator() {
                     {powerResult.cohen_h.toFixed(4)}
                   </p>
                 </div>
-                <div>
-                  <p className="text-xs text-gray-500">Weeks needed</p>
+                <div className="col-span-2">
+                  <p className="text-xs text-gray-500">Weeks needed (50/50 split)</p>
                   <p className="font-mono text-gray-800">
                     {powerResult.weeks_needed?.toFixed(2) ?? '—'}
                   </p>

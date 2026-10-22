@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import logging
+
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+
+logger = logging.getLogger("api")
 
 
 class ErrorDetail(BaseModel):
@@ -34,4 +38,13 @@ async def validation_exception_handler(request: Request, exc) -> JSONResponse:
     return JSONResponse(
         status_code=422,
         content=make_error("VALIDATION_ERROR", str(exc), request_id),
+    )
+
+
+async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    request_id = getattr(request.state, "request_id", "")
+    logger.error("Unhandled exception on %s %s: %s", request.method, request.url.path, exc)
+    return JSONResponse(
+        status_code=500,
+        content=make_error("INTERNAL_ERROR", "An unexpected error occurred.", request_id),
     )

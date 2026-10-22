@@ -11,7 +11,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.config import get_settings
 from src.api.deps import load_bundle_at_startup
-from src.api.errors import http_exception_handler, validation_exception_handler
+from src.api.errors import (
+    http_exception_handler,
+    unhandled_exception_handler,
+    validation_exception_handler,
+)
 from src.api.middleware import RequestMiddleware
 from src.api.routers import (
     articles,
@@ -69,9 +73,10 @@ def create_app() -> FastAPI:
     )
     app.add_middleware(RequestMiddleware)
 
-    # Exception handlers
+    # Exception handlers — order matters: most-specific first
     app.add_exception_handler(HTTPException, http_exception_handler)
     app.add_exception_handler(RequestValidationError, validation_exception_handler)
+    app.add_exception_handler(Exception, unhandled_exception_handler)
 
     # Routers
     prefix = f"/api/{settings.API_VERSION}"

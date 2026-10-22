@@ -785,6 +785,8 @@ export interface components {
         PowerResult: {
             /** N Per Arm */
             n_per_arm: number;
+            /** N Total */
+            n_total: number;
             /** N Per Arm Statsmodels */
             n_per_arm_statsmodels: number;
             /** N Per Arm Cuped */

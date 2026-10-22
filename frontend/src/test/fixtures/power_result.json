@@ -1,5 +1,6 @@
 {
   "n_per_arm": 6755,
+  "n_total": 13510,
   "n_per_arm_statsmodels": 6747,
   "n_per_arm_cuped": null,
   "weeks_needed": null,

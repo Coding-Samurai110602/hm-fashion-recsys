@@ -1993,12 +1993,13 @@
           },
           "relative_lift": {
             "type": "number",
+            "maximum": 2.0,
             "exclusiveMinimum": 0.0,
             "title": "Relative Lift"
           },
           "alpha": {
             "type": "number",
-            "exclusiveMaximum": 1.0,
+            "exclusiveMaximum": 0.5,
             "exclusiveMinimum": 0.0,
             "title": "Alpha",
             "default": 0.05
@@ -2006,7 +2007,7 @@
           "power": {
             "type": "number",
             "exclusiveMaximum": 1.0,
-            "exclusiveMinimum": 0.0,
+            "minimum": 0.5,
             "title": "Power",
             "default": 0.8
           },
@@ -2043,6 +2044,10 @@
             "type": "integer",
             "title": "N Per Arm"
           },
+          "n_total": {
+            "type": "integer",
+            "title": "N Total"
+          },
           "n_per_arm_statsmodels": {
             "type": "integer",
             "title": "N Per Arm Statsmodels"
@@ -2077,6 +2082,7 @@
         "type": "object",
         "required": [
           "n_per_arm",
+          "n_total",
           "n_per_arm_statsmodels",
           "n_per_arm_cuped",
           "weeks_needed",

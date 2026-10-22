@@ -8,6 +8,7 @@ import math
 from concurrent.futures import ThreadPoolExecutor
 
 import numpy as np
+from fastapi import HTTPException
 
 logger = logging.getLogger("api")
 
@@ -31,13 +32,26 @@ def compute_power(
 ) -> dict:
     from src.evaluation.power import required_n_per_arm, weeks_needed
 
-    n = required_n_per_arm(baseline_rate, relative_lift, alpha=alpha, power=power)
+    # relative_lift is a fraction: 0.10 = +10%. Derive treatment rate.
+    p_treat = baseline_rate * (1.0 + relative_lift)
+    if p_treat >= 1.0:
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                f"treatment_rate = {p_treat:.4f} ≥ 1 "
+                f"(baseline_rate={baseline_rate}, relative_lift={relative_lift}). "
+                "Reduce baseline_rate or relative_lift so that "
+                "baseline_rate * (1 + relative_lift) < 1."
+            ),
+        )
+
+    n = required_n_per_arm(baseline_rate, p_treat, alpha=alpha, power=power)
     n_sm = n
     try:
         from src.evaluation.power import statsmodels_n_per_arm
 
         result_sm = statsmodels_n_per_arm(
-            baseline_rate, relative_lift, alpha=alpha, power=power
+            baseline_rate, p_treat, alpha=alpha, power=power
         )
         if isinstance(result_sm, dict):
             n_sm = int(result_sm.get("statsmodels_n_per_arm", n))
@@ -50,19 +64,19 @@ def compute_power(
 
     n_cuped = None
     if cuped_variance_reduction > 0:
-        effective_n = math.ceil(n * (1 - cuped_variance_reduction))
-        n_cuped = effective_n
+        n_cuped = math.ceil(n * (1 - cuped_variance_reduction))
 
     weeks = None
     if weekly_traffic and weekly_traffic > 0:
-        weeks = weeks_needed(n, weekly_traffic)
+        # weekly_traffic is total visitors; assume 50/50 split → per arm = total / 2
+        weekly_per_arm = weekly_traffic / 2.0
+        weeks = weeks_needed(n, weekly_per_arm)
 
-    treatment_rate = baseline_rate * (1 + relative_lift)
-    p1, p2 = baseline_rate, treatment_rate
-    h = 2 * (math.asin(math.sqrt(p2)) - math.asin(math.sqrt(p1)))
+    h = 2.0 * (math.asin(math.sqrt(p_treat)) - math.asin(math.sqrt(baseline_rate)))
 
     return {
         "n_per_arm": n,
+        "n_total": n * 2,
         "n_per_arm_statsmodels": n_sm,
         "n_per_arm_cuped": n_cuped,
         "weeks_needed": weeks,

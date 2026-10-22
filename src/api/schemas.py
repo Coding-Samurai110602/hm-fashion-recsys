@@ -109,15 +109,16 @@ class CustomRecommendRequest(BaseModel):
 
 class PowerRequest(BaseModel):
     baseline_rate: float = Field(..., gt=0, lt=1)
-    relative_lift: float = Field(..., gt=0)
-    alpha: float = Field(0.05, gt=0, lt=1)
-    power: float = Field(0.80, gt=0, lt=1)
+    relative_lift: float = Field(..., gt=0, le=2)
+    alpha: float = Field(0.05, gt=0, lt=0.5)
+    power: float = Field(0.80, ge=0.5, lt=1)
     weekly_traffic: int | None = Field(None, gt=0)
     cuped_variance_reduction: float = Field(0.0, ge=0, lt=1)
 
 
 class PowerResult(BaseModel):
     n_per_arm: int
+    n_total: int
     n_per_arm_statsmodels: int
     n_per_arm_cuped: int | None
     weeks_needed: float | None
