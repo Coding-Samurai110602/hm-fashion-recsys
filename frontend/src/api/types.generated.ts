@@ -873,6 +873,8 @@ export interface components {
         ReadyResponse: {
             /** Ready */
             ready: boolean;
+            /** Db Path */
+            db_path?: string | null;
         };
         /** RecommendedItemNoReasons */
         RecommendedItemNoReasons: {

@@ -24,7 +24,9 @@ export default defineConfig({
   workers: process.env['CI'] ? 1 : undefined,
   reporter: [['list'], ['html', { outputFolder: 'playwright-report', open: 'never' }]],
   use: {
-    baseURL: 'http://localhost:5173',
+    // Override with BASE_URL env var when running against the containerised stack
+    // (e.g. BASE_URL=http://localhost:8080 npm run e2e)
+    baseURL: process.env['BASE_URL'] ?? 'http://localhost:5173',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
@@ -44,5 +46,7 @@ export default defineConfig({
       },
     },
   ],
-  outputDir: '../docs/screenshots',
+  // outputDir is for Playwright failure artifacts (traces, failure screenshots).
+  // Explicit page.screenshot() calls use docs/screenshots/ — keep separate.
+  outputDir: 'playwright-output',
 })

@@ -22,8 +22,10 @@ async def health():
 
 @router.get("/ready", response_model=ReadyResponse, summary="Readiness probe")
 async def ready():
+    from src.api.db import get_db_path
+
     state = get_bundle_state()
-    return {"ready": state["ready"]}
+    return {"ready": state["ready"], "db_path": str(get_db_path())}
 
 
 @router.get(

@@ -5,20 +5,23 @@ services:
       dockerfile: Dockerfile
     image: hm-recsys-api:latest
     ports:
-      - "8000:8000"
+      - "8000:8000"   # Direct API access for debugging; frontend reaches it via the nginx proxy
     environment:
       BUNDLE_PATH: /bundle
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://localhost:3000}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
       CACHE_SIZE: ${CACHE_SIZE:-512}
       MAX_CUSTOM_HISTORY: ${MAX_CUSTOM_HISTORY:-200}
+      SQLITE_DB_PATH: /data/profiles.db
     volumes:
-      # Mount the real bundle read-only; create a directory and set BUNDLE_PATH if using
-      # a custom location. For the synthetic bundle (CI/dev), omit this volume.
+      # Bundle (read-only). For the synthetic bundle set BUNDLE_DIR=./artifacts/bundle_synthetic.
+      # Memory note: the real bundle RSS is ~5.7 GB — ensure the host has ≥ 8 GB free.
       - type: bind
         source: ${BUNDLE_DIR:-./artifacts/bundle_week104}
         target: /bundle
         read_only: true
+      # Profiles database (read-write). Named volume survives restarts.
+      - profiles_data:/data
     healthcheck:
       test: ["CMD", "python", "-c",
              "import urllib.request; urllib.request.urlopen('http://localhost:8000/ready')"]
@@ -26,5 +29,35 @@ services:
       timeout: 10s
       start_period: 120s
       retries: 3
-    # Memory note: the serving bundle RSS is ~5.7 GB. Ensure the host has ≥ 8 GB free.
     restart: unless-stopped
+    networks:
+      - app
+
+  web:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    image: hm-recsys-web:latest
+    ports:
+      - "8080:8080"   # Main user-facing port — open http://localhost:8080
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO /dev/null http://localhost:8080/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - app
+
+volumes:
+  profiles_data:
+    # Persists user-created profiles across container restarts.
+    # docker compose down -v to wipe.
+
+networks:
+  app:
+    driver: bridge

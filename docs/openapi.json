@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "H&M Fashion Recommendation API",
-    "description": "Production-grade API for personalized fashion recommendations. Serves LightGBM LambdaRank scores with SHAP-derived reason codes, NDCG/MAP@12 evaluation results, and A/B experiment utilities.\n\n**Single-worker deployment**: the bundle RSS is ~5.7 GB; multiple workers would each load a full copy. Use a load balancer + single uvicorn worker.",
+    "description": "Personalized fashion recommendations via LightGBM LambdaRank.",
     "version": "v1"
   },
   "paths": {
@@ -2305,6 +2305,17 @@
           "ready": {
             "type": "boolean",
             "title": "Ready"
+          },
+          "db_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Db Path"
           }
         },
         "type": "object",

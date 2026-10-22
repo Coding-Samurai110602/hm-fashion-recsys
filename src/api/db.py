@@ -28,11 +28,16 @@ _thread_local = threading.local()
 
 
 def get_db_path() -> Path:
-    """Read SQLITE_DB_PATH env var; fall back to <project_root>/data/profiles.db."""
+    """Return the absolute profiles DB path.
+
+    Priority: SQLITE_DB_PATH env var (resolved to absolute) → project_root/data/profiles.db.
+    Using .resolve() ensures relative paths in the env var are interpreted from cwd,
+    not from this file's location, matching user expectations.
+    """
     env_val = os.environ.get("SQLITE_DB_PATH", "")
     if env_val:
-        return Path(env_val)
-    return _PROJECT_ROOT / "data" / "profiles.db"
+        return Path(env_val).resolve()
+    return (_PROJECT_ROOT / "data" / "profiles.db").resolve()
 
 
 # ---------------------------------------------------------------------------

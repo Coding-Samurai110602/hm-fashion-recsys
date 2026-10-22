@@ -18,7 +18,9 @@ docker compose up
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `BUNDLE_PATH` | `artifacts/bundle_week104` | Path to the serving bundle directory |
-| `CORS_ORIGINS` | `http://localhost:5173,http://localhost:3000` | Comma-separated allowed origins |
+| `BUNDLE_DIR` | `./artifacts/bundle_week104` | docker compose source for the bundle bind-mount |
+| `SQLITE_DB_PATH` | `<project_root>/data/profiles.db` | Absolute path to the profiles SQLite database; resolves to `/data/profiles.db` in docker compose |
+| `CORS_ORIGINS` | `http://localhost:5173,http://localhost:3000` | Comma-separated allowed origins (or JSON array) |
 | `LOG_LEVEL` | `INFO` | Python logging level |
 | `CACHE_SIZE` | `512` | Max cached recommendation responses (LRU) |
 | `MAX_CUSTOM_HISTORY` | `200` | Max items in `/recommendations/custom` body |
@@ -27,16 +29,16 @@ Copy `.env.example` to `.env` to override defaults.
 
 ## Endpoint overview
 
-All endpoints are versioned under `/api/v1`. Operational endpoints are at root.
+All endpoints are versioned under `/api/v1`. Operational endpoints are at root. The committed OpenAPI snapshot is at `docs/openapi.json` (33 paths total).
 
-### Ops
+### Ops (at root — not versioned)
 
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/health` | Liveness probe (always 200) |
-| GET | `/ready` | Readiness probe (503 until bundle loaded) |
+| GET | `/ready` | Readiness probe; returns `db_path` for diagnostics |
 | GET | `/version` | Git commit, bundle metadata, model MAP@12 |
-| GET | `/metrics` | Prometheus metrics + LRU cache counters |
+| GET | `/metrics` | Prometheus metrics + LRU cache counters (internal; not proxied by nginx) |
 
 ### Customers & Recommendations
 
@@ -44,20 +46,37 @@ All endpoints are versioned under `/api/v1`. Operational endpoints are at root.
 |--------|------|-------------|
 | GET | `/api/v1/customers/sample` | Sample demo customers by segment |
 | GET | `/api/v1/customers/{customer_id}` | Profile: age bucket, purchase counts, recent history |
-| GET | `/api/v1/customers/{customer_id}/recommendations` | Top-k ranked items with SHAP reason codes |
+| GET | `/api/v1/customers/{customer_id}/recommendations` | Top-k ranked items with optional SHAP reason codes |
 | GET | `/api/v1/customers/{customer_id}/baseline` | Heuristic top-k (for side-by-side comparison) |
 | GET | `/api/v1/customers/{customer_id}/actual-purchases` | Week-104 purchases (display only, clearly labelled) |
 | GET | `/api/v1/customers/{customer_id}/funnel` | Full candidate funnel: source, score, final rank |
 | GET | `/api/v1/customers/{customer_id}/explain/{article_id}` | Contrast-SHAP breakdown for one item |
-| POST | `/api/v1/recommendations/custom` | Recommendations for a hand-built history |
+| POST | `/api/v1/customers/custom` | Recommendations for a hand-built history |
+
+### User Profiles (SQLite-backed, created via UI)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/v1/profiles` | Create profile (nickname, age_range, channel) |
+| GET | `/api/v1/profiles` | List profiles (paginated, cap 500) |
+| GET | `/api/v1/profiles/{id}` | Get profile by UUID |
+| DELETE | `/api/v1/profiles/{id}` | Delete profile |
+| POST | `/api/v1/profiles/{id}/checkout` | Add purchases (max 50 per profile) |
+| GET | `/api/v1/profiles/{id}/recommendations` | 12 recs with reasons; cold-start returns trending |
+| GET | `/api/v1/profiles/{id}/summary` | Top product groups + colour + purchase count |
+| GET | `/api/v1/compare` | Compare two profiles/customers by id |
 
 ### Catalog
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/api/v1/articles/search` | Search by name / product type |
+| GET | `/api/v1/articles/search` | Full-text article search |
 | GET | `/api/v1/articles/{article_id}` | Article metadata |
 | GET | `/api/v1/articles/{article_id}/image` | Local JPEG or placeholder PNG |
+| GET | `/api/v1/catalog/trending` | Top-k articles by last-week popularity |
+| GET | `/api/v1/catalog/browse` | Paginated catalog with filters (product_group, colour, q) |
+| GET | `/api/v1/catalog/filters` | Distinct product groups and colours |
+| GET | `/api/v1/demo/shoppers` | ~40 curated diverse real shoppers (15 for synthetic bundle) |
 
 ### Insights
 
@@ -68,6 +87,7 @@ All endpoints are versioned under `/api/v1`. Operational endpoints are at root.
 | GET | `/api/v1/insights/segments` | 21-segment analysis with Holm-corrected p-values |
 | GET | `/api/v1/insights/ablations` | Feature group ablation deltas |
 | GET | `/api/v1/insights/importance` | SHAP vs gain importance comparison |
+| GET | `/api/v1/insights/trends` | Trending now, by age, product group shares, popularity decay |
 
 ### Experiment
 
@@ -75,6 +95,10 @@ All endpoints are versioned under `/api/v1`. Operational endpoints are at root.
 |--------|------|-------------|
 | POST | `/api/v1/experiment/power` | Sample size & power for an A/B test |
 | POST | `/api/v1/experiment/simulate` | Run vectorized A/B or A/A simulation |
+
+### Profiles DB path
+
+`GET /ready` returns `{"ready": true, "db_path": "/data/profiles.db"}`. This makes it easy to confirm which database file the process is using — critical when multiple processes might see different files. Set `SQLITE_DB_PATH` env var to override.
 
 ## Error format
 

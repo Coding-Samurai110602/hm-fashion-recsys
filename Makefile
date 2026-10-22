@@ -1,7 +1,8 @@
 .PHONY: install lint format test test-all synthetic-bundle bundle api \
-        docker-build docker-run compose-up ci-lint ci-test ci-docker-test \
+        docker-build docker-web-build docker-run compose-up ci-lint ci-test ci-docker-test \
         frontend-install frontend-dev frontend-build frontend-lint \
-        frontend-test frontend-check-types frontend-all
+        frontend-test frontend-check-types frontend-all \
+        e2e e2e-compose e2e-real
 
 PYTHON = .venv/bin/python
 PIP    = .venv/bin/pip
@@ -44,6 +45,10 @@ api:
 docker-build:
 	docker build -t hm-recsys-api:latest .
 
+# Build the frontend web image
+docker-web-build:
+	docker build -t hm-recsys-web:latest frontend/
+
 # Run container with the real bundle mounted read-only
 docker-run:
 	docker run --rm -p 8000:8000 \
@@ -51,12 +56,14 @@ docker-run:
 		-e BUNDLE_PATH=/bundle \
 		hm-recsys-api:latest
 
+# Bring up the full stack (api + web) — http://localhost:8080
 compose-up:
 	docker compose up
 
 ci-lint:
-	python3 -c "import yaml; yaml.safe_load(open('.github/workflows/ci.yml')); print('YAML OK')"
-	actionlint .github/workflows/ci.yml
+	python3 -c "import yaml; yaml.safe_load(open('.github/workflows/ci.yml')); print('ci.yml YAML OK')"
+	python3 -c "import yaml; yaml.safe_load(open('.github/workflows/release.yml')); print('release.yml YAML OK')"
+	actionlint .github/workflows/ci.yml .github/workflows/release.yml
 
 # Run the exact CI pytest command locally with an empty data dir so
 # requires_data tests are skipped — mirrors what GitHub Actions does.
@@ -102,3 +109,35 @@ frontend-check-types:
 	cd frontend && npm run check-types-fresh
 
 frontend-all: frontend-lint frontend-test frontend-build
+
+# Run e2e tests against the Vite dev server (requires both servers running)
+# Starts the API with a temp DB to keep profiles.db clean.
+e2e:
+	SQLITE_DB_PATH=/tmp/profiles_e2e.db BUNDLE_PATH=artifacts/bundle_synthetic PYTHONPATH=. \
+		$(PYTHON) -m uvicorn src.api.main:app --host 0.0.0.0 --port 8000 &
+	sleep 3 && cd frontend && npm run e2e; \
+	kill %1 2>/dev/null; true
+
+# Run e2e tests against the containerised stack (synthetic bundle, port 8080)
+# Use BUNDLE_DIR=./artifacts/bundle_week104 for the real bundle.
+e2e-compose:
+	BUNDLE_DIR=./artifacts/bundle_synthetic SQLITE_DB_PATH=/tmp/profiles_e2e.db \
+		docker compose up -d
+	@echo "Waiting for http://localhost:8080/ ..."; \
+	for i in $$(seq 1 40); do \
+		curl -sf http://localhost:8080/ > /dev/null 2>&1 && break; \
+		echo "  $$i/40"; sleep 5; \
+	done
+	cd frontend && BASE_URL=http://localhost:8080 npm run e2e; STATUS=$$?; \
+	docker compose down -v; exit $$STATUS
+
+# Run e2e tests against the real bundle stack (requires artifacts/bundle_week104)
+e2e-real:
+	docker compose up -d
+	@echo "Waiting for http://localhost:8080/ ..."; \
+	for i in $$(seq 1 40); do \
+		curl -sf http://localhost:8080/ > /dev/null 2>&1 && break; \
+		echo "  $$i/40"; sleep 5; \
+	done
+	cd frontend && BASE_URL=http://localhost:8080 npm run e2e; STATUS=$$?; \
+	docker compose down; exit $$STATUS

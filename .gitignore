@@ -56,3 +56,8 @@ data/images/
 docs/screenshots/.last-run.json
 frontend/test-results/
 frontend/playwright-report/
+frontend/playwright-output/
+playwright-output/
+test-results/
+frontend/test-results/
+frontend/playwright-report/

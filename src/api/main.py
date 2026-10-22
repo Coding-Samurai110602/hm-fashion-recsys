@@ -31,10 +31,15 @@ logging.basicConfig(
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    from src.api.db import get_db_path
+
+    _logger = logging.getLogger("api")
     settings = get_settings()
+    db_path = get_db_path()
+    _logger.info("Profiles DB path: %s", db_path)
     load_bundle_at_startup(settings)
     yield
-    logging.getLogger("api").info("Shutdown complete.")
+    _logger.info("Shutdown complete.")
 
 
 def create_app() -> FastAPI:
@@ -57,7 +62,7 @@ def create_app() -> FastAPI:
     # CORS
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.CORS_ORIGINS,
+        allow_origins=settings.get_cors_origins(),
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

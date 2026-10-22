@@ -109,8 +109,16 @@ class TestConfig:
         from src.api.config import Settings
 
         s = Settings(CORS_ORIGINS="http://localhost:3000,http://localhost:5173")
-        assert len(s.CORS_ORIGINS) == 2
-        assert "http://localhost:3000" in s.CORS_ORIGINS
+        origins = s.get_cors_origins()
+        assert len(origins) == 2
+        assert "http://localhost:3000" in origins
+
+    def test_cors_origins_parse_json_array(self):
+        from src.api.config import Settings
+
+        s = Settings(CORS_ORIGINS='["http://localhost:8080"]')
+        origins = s.get_cors_origins()
+        assert origins == ["http://localhost:8080"]
 
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -153,6 +153,7 @@ class HealthResponse(BaseModel):
 
 class ReadyResponse(BaseModel):
     ready: bool
+    db_path: str | None = None
 
 
 class VersionResponse(BaseModel):

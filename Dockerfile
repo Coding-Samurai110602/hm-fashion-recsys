@@ -23,6 +23,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Non-root user for security
 RUN groupadd -r appuser && useradd -r -g appuser -d /app appuser
 
+# Create the data directory owned by appuser so the named volume inherits
+# the correct permissions on first use (Docker copies dir ownership into volume).
+RUN mkdir -p /data && chown appuser:appuser /data
+
 WORKDIR /app
 
 # Copy installed packages from builder

@@ -10,6 +10,37 @@ The full project covers: (1) data engineering (CSV to Parquet), (2) exploratory 
 
 **Data note:** Raw data is not committed to this repository (Kaggle competition terms). Download instructions are below.
 
+## Try It (one command)
+
+**Prerequisites:** Docker Desktop (≥ 4.x), the exported bundle (`artifacts/bundle_week104/`), and optionally product images (`data/images/`).
+
+```bash
+# Start API + web frontend (port 8080)
+docker compose up
+
+# Then open http://localhost:8080
+```
+
+**6-step walkthrough for a non-technical viewer:**
+
+1. **Create profile** — Click "Create Profile" in the top-right corner. Enter a nickname, pick your age range, and choose online or in-store shopping preference.
+2. **Browse and shop** — Explore the catalog, filter by category or colour, and add items to your cart.
+3. **Check out** — Click the cart icon, then "Checkout". Your purchases are saved and the system personalises your recommendations.
+4. **For You** — The app redirects you to "For You" — 12 items ranked just for you, with plain-language reason chips on each card.
+5. **Why this?** — Click any "Why this?" button to open a panel explaining which signals drove that recommendation.
+6. **Shoppers / Compare** — Visit "Shoppers" to see your profile, compare with other visitors, and reveal how the model performed on real historical shoppers.
+
+**Architecture (docker compose stack):**
+
+```
+Browser → nginx:8080 → [SPA assets]
+                     → /api/* proxy → FastAPI:8000 → LightGBM ranker + SQLite profiles
+```
+
+Images: `hm-recsys-api` (~1.1 GB, includes Python/LightGBM) · `hm-recsys-web` (77 MB, nginx serving the built SPA). API RSS with real bundle: ~5.7 GB.
+
+> **Synthetic bundle** (no Kaggle data needed): `BUNDLE_DIR=./artifacts/bundle_synthetic docker compose up` — uses 300 articles and 200 synthetic customers for fast local testing.
+
 ## Dataset
 
 | File | Rows | Description |

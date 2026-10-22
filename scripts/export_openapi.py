@@ -14,17 +14,24 @@ from pathlib import Path
 
 os.environ.setdefault("BUNDLE_PATH", "artifacts/bundle_synthetic")
 
-from src.api.config import get_settings
-get_settings.cache_clear()
-from src.api.main import create_app
-
-# Build schema without loading the bundle (just routes)
 from fastapi import FastAPI
-from src.api.routers import customers, articles, insights, experiment, ops
+
 from src.api.config import get_settings as gs
+from src.api.routers import (
+    articles,
+    catalog,
+    customers,
+    demo,
+    experiment,
+    insights,
+    ops,
+    profiles,
+)
 
 settings = gs()
 prefix = f"/api/{settings.API_VERSION}"
+
+# Build a minimal FastAPI instance with only the routes — no bundle loading.
 app = FastAPI(
     title="H&M Fashion Recommendation API",
     description="Personalized fashion recommendations via LightGBM LambdaRank.",
@@ -35,6 +42,9 @@ app.include_router(customers.router, prefix=prefix)
 app.include_router(articles.router, prefix=prefix)
 app.include_router(insights.router, prefix=prefix)
 app.include_router(experiment.router, prefix=prefix)
+app.include_router(profiles.router, prefix=prefix)
+app.include_router(catalog.router, prefix=f"{prefix}/catalog")
+app.include_router(demo.router, prefix=f"{prefix}/demo")
 
 schema = app.openapi()
 out = Path("docs/openapi.json")
